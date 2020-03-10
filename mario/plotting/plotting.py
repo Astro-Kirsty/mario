@@ -127,8 +127,7 @@ def plot_proton_spectrum(spectrum, age_label=True, diff_label=True, diff_fontsiz
             label='%.f kyrs' % spectrum.snr.age.value)
 
     if diff_label:
-        ax.text(0.03, 0.93, '$\delta$ = %0.1f,   $\chi$ = %.2f'
-                % (spectrum.diff_delta, spectrum.diff_chi),
+        ax.text(0.03, 0.93, '$\delta$=' f'{spectrum.diff_delta}' ',    $\chi$=' f'{spectrum.diff_chi}',
                 horizontalalignment='left',
                 transform=ax.transAxes,
                 fontsize=diff_fontsize, color=diff_color)

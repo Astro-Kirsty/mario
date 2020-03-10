@@ -1,0 +1,17 @@
+font.size : 20
+legend.fontsize : 17
+legend.title_fontsize : 16
+axes.labelsize : 17
+axes.titlesize : 18
+xtick.labelsize : 17
+ytick.labelsize : 17
+lines.linewidth : 2
+lines.linestyle : -
+xtick.color : black
+ytick.color : black
+backend: TkAgg
+
+
+
+
+

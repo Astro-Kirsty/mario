@@ -9,7 +9,7 @@ The code, and examples are hosted at https://github.com/Astro-Kirsty/mario
 
 
 ## Installation
-The most stable version of `mario` can be easily installed from [PyPI](https://pypi.org/project/mario)
+The most stable version of `mario` can be easily installed from [PyPI]()
 with [pip](https://pip.pypa.io/en/stable) via
 
 ```
@@ -36,27 +36,47 @@ G8 = SNR(name='SNR G8.7-0.1',
             age=15 * u.kyr, distance=4.5 * u.kpc)
 
 import numpy as np
-from mario.models.ProtonSpectrum import ProtonSpectrum
+from mario.models.protonspectrum import ProtonSpectrum
 ps = ProtonSpectrum(gamma_src=hess, snr=G8, nH=160*u.cm**(-3)) 
 Ep = np.logspace(0, 6, 50) * u.GeV
 pflux = ps.proton_flux(Ep, rcloud=12*u.pc)
 
-from mario.lotting.plotting import plot_proton_spectrum, add_kcr_src, add_kcr
 import matplotlib.pyplot as plt
+from mario.plotting.plotting import proton_spectrum, add_kcr_src, add_kcr
 
-fig = plt.figure(figsize=(9, 6))
-ax = fig.add_subplot(1, 1, 1)
+fig = plt.figure(figsize=(9, 12))
+ax = fig.add_subplot(211)
 G8.age = 15*u.kyr
-ps3.proton_flux(Ep, rcloud=ps3.dist_cloud)
-fig, ax  = plot_proton_spectrum(spectrum=ps3, fig=fig, ax=ax, diff_label=False)
+ps.flux(Ep, rcloud=ps.dist_cloud)
+fig, ax  = proton_spectrum(spectrum=ps, fig=fig, ax=ax, diff_label=True, color='#00CDCD')
 
 G8.age = 28*u.kyr
-ps3.proton_flux(Ep, rcloud=ps3.dist_cloud)
-fig, ax = plot_proton_spectrum(spectrum=ps3, fig=fig, ax=ax, color='black')
+ps.flux(Ep, rcloud=ps.dist_cloud)
+fig, ax = proton_spectrum(spectrum=ps, fig=fig, ax=ax, color='black')
+ax.tick_params(axis='x', which='both', labelbottom=False)
+ax.set_xlabel('')
+ax = add_kcr(label='CR Flux at Earth', ax=ax, ls='-.', lw=2, color='magenta')
+ax = add_kcr_src(spectrum=ps, emin=60*u.GeV, emax=630*u.GeV, ax=ax, label='k (GeV)', 
+                 color='green', ls='--', lw=2)
+ax = add_kcr_src(spectrum=ps, emin=600*u.GeV, emax=8000*u.GeV, ax=ax, label='k (TeV)',
+                 color='red', ls='--', lw=2)
 
-ax = add_kcr(label='CR Flux at Earth', ax=ax)
-ax = add_kcr_src(spectrum=ps, emin=60*u.GeV, emax=630*u.GeV, ax=ax, label='k (GeV)', color='red')
-ax = add_kcr_src(spectrum=ps, emin=600*u.GeV, emax=8000*u.GeV, ax=ax, label='k (TeV)')
+ax = fig.add_subplot(212)
+G8.age = 15*u.kyr
+ps.diff_delta=0.5
+ps.flux(Ep, rcloud=ps.dist_cloud)
+fig, ax  = proton_spectrum(spectrum=ps, fig=fig, ax=ax, color='#00CDCD')
+
+G8.age = 28*u.kyr
+ps.diff_delta=0.5
+ps.flux(Ep, rcloud=ps.dist_cloud)
+fig, ax = proton_spectrum(spectrum=ps, fig=fig, ax=ax, diff_label=True, age_label=True, color='black')
+ax = add_kcr(label='CR Flux at Earth', ax=ax, ls='-.', lw=2, color='magenta')
+ax = add_kcr_src(spectrum=ps, emin=60*u.GeV, emax=630*u.GeV, ax=ax, label='k (GeV)', 
+                 color='green', ls='--', lw=2)
+ax = add_kcr_src(spectrum=ps, emin=600*u.GeV, emax=8000*u.GeV, ax=ax, label='k (TeV)',
+                 color='red', ls='--', lw=2)
+fig.subplots_adjust(hspace=0.08)
 
 ```
 

@@ -12,7 +12,7 @@ def N0_eval(x, alpha):
 @u.quantity_input(n=u.cm ** (-3))
 def calc_Bmag(n):
     """
-    Calculation of magnetic field from Crutcher 2010 relation
+    Calculation of magnetic field from Crutcher et al. 2010 relation
 
     Parameters
     ----------------------
@@ -70,6 +70,7 @@ def escape_time(tsedov, Ec, Ec_max, delta):
         Maximum injection energy of cosmic ray protons
     delta : float
         Describes the energy-dependent release of CRs
+
     Returns
     ----------------------
     float
@@ -83,13 +84,14 @@ def escape_time(tsedov, Ec, Ec_max, delta):
 class ProtonSpectrum:
     """
     A class used to determine the cosmic ray proton spectra
-    of a gamma-ray sources' given counterpart
+    of a counterpart of a gamma-ray sources
 
     """
 
     @u.quantity_input(nH=u.cm ** (-3))
     def __init__(self, gamma_src, snr, nH, diff_chi=0.01, diff_delta=0.5,
-                 tsedov=100 * u.yr, Ec=150 * u.TeV, Ec_max=500 * u.TeV, delta=0.5):
+                 tsedov=100 * u.yr, Ec=150 * u.TeV, Ec_max=500 * u.TeV, delta=0.5,
+                 Ebudget=1e50 * u.erg):
         """
         Parameters
         ----------------------
@@ -111,6 +113,8 @@ class ProtonSpectrum:
             Maximum injection energy of cosmic ray protons (default is 500 TeV)
         delta : float, optional
             Describes the energy-dependent release of CRs (default is 0.5)
+        Ebudget : float, optional
+            ZDONM
 
         Examples
         ----------------------
@@ -119,13 +123,11 @@ class ProtonSpectrum:
         """
         self.gamma_src = gamma_src
         self.snr = snr
-
         self.nH = nH
-
         self.diff_chi = diff_chi
         self.diff_delta = diff_delta
-
         self.tesc = escape_time(tsedov=tsedov, Ec=Ec, Ec_max=Ec_max, delta=delta)
+        self.Ebudget=Ebudget
 
     @u.quantity_input(cloud_coord=u.deg, d=u.pc)
     def define_cloud(self, cloud_coord):
@@ -156,7 +158,7 @@ class ProtonSpectrum:
         self.dist_cloud = (self.snr.distance * np.tan(theta_cloud)).to(u.pc)
 
     @u.quantity_input(Ep=u.GeV, rcloud=u.pc, B_mag=u.uG)
-    def proton_flux(self, Ep, rcloud, B_mag=None):
+    def flux(self, Ep, rcloud, B_mag=None):
         """
         Calculates the proton flux of your counterpart
 
@@ -178,7 +180,7 @@ class ProtonSpectrum:
         ----------------------
         >>> Ep = np.logspace(0, 6, 50)*u.GeV
         >>> rc = 12*u.pc
-        >>> ProtonSpectrum.proton_flux(Ep, rc)
+        >>> ProtonSpectrum.flux(Ep, rc)
 
         """
 
@@ -203,7 +205,7 @@ class ProtonSpectrum:
         diff_radius = 2 * np.sqrt(diff_coeff * self.snr.age * frac)
 
         # Calculation of normalisation constant, N0
-        Ebudget = (1e50 * u.erg).to(u.GeV)
+        # Ebudget = (1e50 * u.erg).to(u.GeV)
         alpha = 2
         t0 = 1 * u.yr
         R = calc_dist_CR_release_point(E51=1, n=1 * u.cm ** (-3), u1=1.4 * u.kg, tesc=t0)
@@ -211,7 +213,7 @@ class ProtonSpectrum:
         intt, err = quad(N0_eval, 1, 1e5, args=alpha)
 
         V = (4 / 3) * np.pi * R ** 3
-        N0 = ((np.pi ** (3 / 2) * R ** 3 * Ebudget / u.GeV) /
+        N0 = ((np.pi ** (3 / 2) * R ** 3 * (self.Ebudget.to(u.GeV)) / u.GeV) /
               (np.exp(- ((alpha - 1) * t0 / cool_time) - 1) * V * intt))
 
         # Calculation of proton flux

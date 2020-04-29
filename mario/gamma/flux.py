@@ -8,13 +8,12 @@ from astropy.wcs import WCS
 
 class GammaFlux:
     """
-    A class to calculate the gamma-ray flux
+    A class to calculate the predicted gamma-ray flux
 
     """
 
     @u.quantity_input(dist_cell=u.cm, nH2_cell=u.cm ** (-3), theta_pixel=u.deg)
-    def __init__(self, snr, ps, dist_cell, nH2_cell,
-                 theta_pixel):
+    def __init__(self, snr, ps, gas):
         """
         Parameters
         ----------------------
@@ -22,29 +21,22 @@ class GammaFlux:
             The class for the supernova remnant counterpart
         ps : class
             The class for the proton spectra
-        dist_cell : array
-            The distance from the centre of the counterpart to each cell
-        nH2_cell : array
-            The number density of each cell
-        theta_pixel : float
-            The size of your cells
+        gas : class
+            The class for the gas parameters
 
         Examples
         ----------------------
-        >>> dist_array = gp.calc_dist()
-            nH2_array = gp.calc_nH2()
-            theta_pixel = gp.theta_pixel
-            gf = GammaFlux(G8, ps, dist_array, nH2_array, theta_pixel)
+        >>> gs = GammaFlux(G8, ps, gp)
+        >>> Eg = np.logspace(np.log10(0.1), np.log10(30), 10)*u.TeV
+        >>> fluxes = gs.flux(Eg)
 
         """
         self.snr = snr
         self.ps = ps
+        self.gas = gas
 
-        self.dist_cell = dist_cell
-        self.nH2_cell = nH2_cell
-        self.theta_pixel = theta_pixel
-
-        self.Egs = np.linspace(0.1, 30, 10) * u.TeV
+        self.dist_cell = self.gas.dist_cell()
+        self.nH2_cell = self.gas.nH2_cell()
 
     def calc_phi_Eg(self, Ep, Eg):
         """
@@ -59,7 +51,7 @@ class GammaFlux:
         """
 
         # Calculation of proton flux
-        Jp = self.ps.proton_flux(Ep.to(u.GeV), self.dist_cell).to(u.TeV ** (-1) * u.cm ** (-3))
+        Jp = self.ps.flux(Ep.to(u.GeV), self.dist_cell).to(u.TeV ** (-1) * u.cm ** (-3))
 
         if type(Ep.value) == np.ndarray:
             Ep = Ep[:, None, None]
@@ -103,7 +95,7 @@ class GammaFlux:
 
         return phi
 
-    def calc_Gflux(self, energies):
+    def flux(self, energies):
         """
         Calculates the gamma-ray flux
 
@@ -115,7 +107,7 @@ class GammaFlux:
         Examples
         ----------------------
         >>> Eg = np.logspace(-1, 2, 10)*u.TeV
-        >>> fluxes = gs.calc_Gflux(Eg)
+        >>> fluxes = gs.flux(Eg)
 
         Returns
         ----------------------
@@ -128,7 +120,7 @@ class GammaFlux:
         dl = self.snr.distance.to(u.cm) * np.tan(0.45 * u.deg)
 
         # Converting the pixel width from angular size to physical size
-        pixel_width = self.snr.distance.to(u.cm) * np.tan(self.theta_pixel)
+        pixel_width = self.snr.distance.to(u.cm) * np.tan(self.gas.theta_pixel)
         ster = (pixel_width ** 2 / (self.snr.distance.to(u.cm)) ** 2) * u.sr
 
         Gfluxes = []
@@ -138,49 +130,39 @@ class GammaFlux:
             unit = Gflux.unit
             Gfluxes += [Gflux]
 
+        self.energies = energies
+        self.fluxes = Gfluxes * unit
+
         return Gfluxes * unit
 
-    def save_fits(self, template_path, flux, Eg, author='Kirsty Feijen', filename='Gflux_cube.fits'):
+    def save_cube(self, author='Kirsty Feijen', filename='Gflux_cube.fits'):
         """
         Save the gamma-ray flux to a fits cube
 
         Parameters
         ----------------------
-        template_path : str
-            The path for the template fits file
-        flux :  array
-            The gamma-ray flux array to save
-        Eg : array
-            The energies used to calculate the gamma-ray flux
         author : str, optional
             Author of the fits file (default 'Kirsty Feijen')
         filename : str, optional
             The name to save your fits to (default 'Gflux_cube.fits')
 
         """
-
-        file = fits.open(template_path)
-        header = file[0].header
-
-        # Step size of energy bin
-        # step = np.diff(Eg)[0].value
-        step = np.diff(np.log10(Eg.value))[0]
+        step = np.diff(np.log10(self.energies.value))[0]
 
         # Value of the first energy in the energy array
-        # E0 = Eg[0].value
-        E0 = np.log10(Eg[0].value)
+        E0 = np.log10(self.energies[0].value)
 
         # Set header based on template file
-        hdr = fits.PrimaryHDU(data=flux)
-        hdr.header['CTYPE1'] = header['CTYPE1']
-        hdr.header['CRVAL1'] = header['CRVAL1']
-        hdr.header['CRPIX1'] = header['CRPIX1']
-        hdr.header['CDELT1'] = header['CDELT1']
+        hdr = fits.PrimaryHDU(data=self.fluxes)
+        hdr.header['CTYPE1'] = self.gas.header['CTYPE1']
+        hdr.header['CRVAL1'] = self.gas.header['CRVAL1']
+        hdr.header['CRPIX1'] = self.gas.header['CRPIX1']
+        hdr.header['CDELT1'] = self.gas.header['CDELT1']
 
-        hdr.header['CTYPE2'] = header['CTYPE2']
-        hdr.header['CRVAL2'] = header['CRVAL2']
-        hdr.header['CRPIX2'] = header['CRPIX2']
-        hdr.header['CDELT2'] = header['CDELT2']
+        hdr.header['CTYPE2'] = self.gas.header['CTYPE2']
+        hdr.header['CRVAL2'] = self.gas.header['CRVAL2']
+        hdr.header['CRPIX2'] = self.gas.header['CRPIX2']
+        hdr.header['CDELT2'] = self.gas.header['CDELT2']
 
         hdr.header['CTYPE3'] = 'ENER'
         hdr.header['CUNIT3'] = 'J'
@@ -191,7 +173,7 @@ class GammaFlux:
         hdr.header['AUTHOR'] = author
         wcs = WCS(hdr.header)
 
-        cube = SpectralCube(data=flux, wcs=wcs)
+        cube = SpectralCube(data=self.fluxes, wcs=wcs)
         cube.write(filename, format='fits', overwrite=True)
 
         return

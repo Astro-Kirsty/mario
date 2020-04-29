@@ -5,6 +5,7 @@ from astropy.coordinates import SkyCoord
 from astropy.io import fits
 from astropy.wcs import WCS
 
+
 class TotalColumnDensity:
     """
     A class to calculate the total column density for a given CO and HI cube
@@ -80,17 +81,25 @@ class TotalColumnDensity:
         total_header = self.calc_total_col().header
         return total_header
 
-    def save_fits(self, author='Kirsty Feijen'):
+    def save_fits(self, author='Kirsty Feijen', filename='total_column.fits'):
         """
         Save the total column density to a fits file
+
+        Parameters
+        ----------------------
+        author : str, optional
+            Author of the fits file (default 'Kirsty Feijen')
+        filename : str, optional
+            The name to save your fits to (default 'total_column.fits')
 
         """
         hdu = fits.PrimaryHDU(data=self.calc_total_col().value)
         hdu.header = self.total_header()
         hdu.header['AUTHOR'] = author
-        hdu.writeto('Fits/Total_new.fits', overwrite=True)
-        
+        hdu.writeto(filename, overwrite=True)
+
         return
+
 
 class GasParameters:
     """
@@ -98,35 +107,24 @@ class GasParameters:
 
     """
 
-    def __init__(self, snr, file_path):
+    def __init__(self, snr, gas_map_path):
         """
         Parameters
         ----------------------
         snr : class
             The class for the supernova remnant counterpart
-        file_path : str
+        gas_map_path : str
             Path to the gas map in the format of fits
-
-        Returns
-        ----------------------
-        dict
-            Description of the gamma-ray source.
 
         Examples
         ----------------------
-        >>> path = 'Documents/Fits_Files/Total_26_56.fits'
-        >>> gp = GasParameters(G8, path)
-        >>> gp.header.remove('CRPIX3')
-        >>> gp.header.remove('CDELT3')
-        >>> gp.header.remove('NAXIS3')
-        >>> gp.header.remove('CRVAL3')
-        >>> gp.header.remove('CTYPE3')
-        >>> gp.header['NAXIS']=2
+        >>> gas_map_path = 'Total_26_56.fits'
+        >>> gp = GasParameters(snr=G8, gas_map_path=gas_map_path)
 
         """
         self.snr = snr
 
-        file = fits.open(file_path)
+        file = fits.open(gas_map_path)
         self.total_col_dens = file[0].data * u.cm ** (-2)
 
         if len(np.shape(self.total_col_dens)) == 3:
@@ -134,10 +132,10 @@ class GasParameters:
 
         self.header = file[0].header
 
-        # Calcuation of pixel size/radius
+        # Width of pixel
         self.theta_pixel = (self.header['CDELT2']) * u.deg
 
-    def calc_nH2(self):
+    def nH2_cell(self):
         """
         Calculates the number density of each pixel in your map
 
@@ -157,10 +155,11 @@ class GasParameters:
         # Calculation of number density
         nH2 = (self.total_col_dens / volume) * area
         nH2[nH2 < 0] = 0
+        nH2[np.isnan(nH2)] = 0
 
         return nH2
 
-    def calc_dist(self):
+    def dist_cell(self):
         """
         Calculates the distance to each pixel in your map, taking the coordinates
         of the counterpart as the centre.
@@ -176,11 +175,11 @@ class GasParameters:
         # Converting from pixel coords to sky coords
         xvalue, yvalue = self.total_col_dens.shape
         xx, yy = np.meshgrid(range(yvalue), range(xvalue))
-        wx, wy = WCS(self.header).wcs_pix2world(xx, yy, 0)
+        wx, wy = WCS(self.header).wcs_pix2world(xx, yy, 1)
         pixel_coord = SkyCoord(wx * u.deg, wy * u.deg, frame='galactic')
 
         # Calculate the distance to each cell
         theta_sep = (OBJ_coord.separation(pixel_coord)).deg * u.deg
-        dist_cell = self.snr.distance.to(u.cm) * np.tan(theta_sep)
+        dist = self.snr.distance.to(u.cm) * np.tan(theta_sep)
 
-        return dist_cell
+        return dist

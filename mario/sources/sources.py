@@ -1,7 +1,7 @@
 from astropy import units as u
 
 
-class Source:
+class GammaSource:
     """
     A class used to define a gamma-ray source
     """
@@ -9,40 +9,32 @@ class Source:
     @u.quantity_input(flux_GeV=1 / (u.s * u.cm ** 2),
                       flux_E_GeV=u.TeV,
                       flux_TeV=1 / (u.s * u.cm ** 2),
-                      flux_E_TeV=u.TeV,
-                      mass=u.solMass)
-    def __init__(self, name, spectral_index, flux_GeV, flux_E_GeV, flux_TeV, flux_E_TeV, mass):
+                      flux_E_TeV=u.TeV)
+    def __init__(self, name, spectral_index, flux_GeV, flux_E_GeV, flux_TeV, flux_E_TeV):
         """
         Parameters
         ----------------------
         name : str
             The name of the gamma-ray source
         spectral_index : float
-            The spectral index of the gamma-ray source
+            The spectral index of the gamma-ray source in the TeV regime
         flux_GeV : float
-            The photon flux above a certain energy of the GeV gamma-ray source
+            The integral photon flux above a certain energy for the GeV gamma-ray source
         flux_E_GeV : float
-            The energy of the photon flux
+            The lower energy limit for the integral photon flux at GeV energies
         flux_TeV : float
-            The photon flux above a certain energy of the TeV gamma-ray source
+            The integral photon flux above a certain energy for the TeV gamma-ray source
         flux_E_TeV : float
-            The energy of the photon flux
-        mass : float
-            The solar mass of the interstellar medium surrounding the gamma-ray source
+            The lower energy limit for the integral photon flux at TeV energies
 
-        Returns
-        ----------------------
-        dict
-            Description of the gamma-ray source.
 
         Examples
         ----------------------
-        >>> hess = Source(name='HESS J1806', spectral_index=2.69,
+        >>> hess = GammaSource(name='HESS J1806', spectral_index=2.69,
            flux_GeV=1.56e-9 / (u.s * u.cm**2),
            flux_E_GeV=0.01 * u.GeV,
            flux_TeV=5.3e-11/(u.s * u.cm**2),
-           flux_E_TeV=0.2 * u.TeV,
-           mass=7.9e5 * u.solMass)
+           flux_E_TeV=0.2 * u.TeV)
 
         """
         self.name = name
@@ -51,44 +43,41 @@ class Source:
         self.flux_E_GeV = flux_E_GeV
         self.flux_TeV = flux_TeV
         self.flux_E_TeV = flux_E_TeV
-        self.mass = mass
 
 
 class SNR:
     """
-    A class used to define the counterpart supernova remnant
+    A class used to define the supernova remnant
 
     """
 
     @u.quantity_input(glon=u.deg, glat=u.deg, radius=u.deg,
-                      age=u.kyr, distance=u.kpc)
-    def __init__(self, name, glon, glat, radius, age, distance):
+                      age=u.kyr, distance=u.kpc,
+                      gas_mass=u.solMass)
+    def __init__(self, name, glon, glat, radius, age, distance, gas_mass):
         """
         Parameters
         ----------------------
         name : str
-            The name of the supernova remnant counterpart
+            The name of the supernova remnant
         glon : float
-            The galactic longitude of the supernova remnant counterpart
+            The galactic longitude of the supernova remnant
         glat :float
-            The galactic latitude of the supernova remnant counterpart
+            The galactic latitude of the supernova remnant
         radius : float
-            The radius of the supernova remnant counterpart
+            The radius of the supernova remnant
         age : float
-            The age of the supernova remnant counterpart
+            The age of the supernova remnant
         distance: float
-            The distance from Earth to the supernova remnant counterpart
-
-        Returns
-        ----------------------
-        dict
-            Description of the supernova remnant counterpart
+            The distance from Earth to the supernova remnant
+        gas_mass : float
+            The solar mass of the interstellar medium surrounding the SNR (at the distance of the SNR)
 
         Examples
         ----------------------
         >>> G8 = SNR(name='SNR G8.7-0.1',
                  glon=8.744205 * u.deg, glat=-0.096288 * u.deg, radius=0.375*u.deg,
-                 age=15 * u.kyr, distance=4.5 * u.kpc)
+                 age=15 * u.kyr, distance=4.5 * u.kpc, gas_mass = 7.9e5 * u.solMass)
         """
         self.name = name
         self.glon = glon
@@ -96,3 +85,4 @@ class SNR:
         self.radius = radius
         self.age = age
         self.distance = distance
+        self.gas_mass = gas_mass

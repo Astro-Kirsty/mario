@@ -1,4 +1,4 @@
-from . import ProtonSpectrum
+from . import protonspectrum
 
-__all__ = ['ProtonSpectrum']
+__all__ = ['protonspectrum']
 

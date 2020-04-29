@@ -1,4 +1,4 @@
-from . import GammaCounts, GammaFlux
+from . import flux, spatialmodel
 
-__all__ = ['GammaCounts', 'GammaFlux']
+__all__ = ['flux', 'spatialmodel']
 

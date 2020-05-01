@@ -324,10 +324,9 @@ class SpatialModel3D(SpatialModel):
         >>> 
 
         """
-        nsize = data.spectral_axis.size
-        Emin = data.spectral_axis[0].value
-        Emax = data.spectral_axis[-1].value
-        self.energies = np.logspace(Emin, Emax, nsize)
+        self.energies = np.logspace(self.header['CRVAL3'],
+                                    self.header['CRVAL3'] + (self.header['NAXIS3'] - 1) * self.header['CDELT3'],
+                                    self.header['NAXIS3'])
 
         self.amplitude_PL = None
         self.index_PL = None
@@ -359,7 +358,7 @@ class SpatialModel3D(SpatialModel):
         rsd_dof_PL = np.empty((xsize, ysize))
 
         log_energies = np.log10(self.energies)
-        data = self.data.unmasked_data[:, :, :].value
+        data = self.data
 
         for ix in range(xsize):
             for iy in range(ysize):
@@ -390,7 +389,7 @@ class SpatialModel3D(SpatialModel):
         rsd_dof_LP = np.empty((xsize, ysize))
 
         log_energies = np.log10(self.energies)
-        data = self.data.unmasked_data[:, :, :].value
+        data = self.data
 
         for ix in range(xsize):
             for iy in range(ysize):
@@ -516,9 +515,11 @@ class SpatialModel3D(SpatialModel):
         fluxes = np.empty((self.data.shape[0]))
 
         for i in range(self.data.shape[0]):
-            fluxes[i] = np.sum(mask.multiply(self.data[i, :, :].value))
+            fluxes[i] = np.sum(mask.multiply(self.data[i, :, :]))
 
-        energies = 10 ** self.data.spectral_axis.value
+        energies = np.logspace(self.header['CRVAL3'],
+                               self.header['CRVAL3'] + (self.header['NAXIS3'] - 1) * self.header['CDELT3'],
+                               self.header['NAXIS3'])
 
         return energies, fluxes
 
@@ -537,6 +538,8 @@ class SpatialModel3D(SpatialModel):
         lpixel, bpixel = wcs.world_to_pixel(coord)
 
         fluxes = self.data[:, int(bpixel), int(lpixel)]
-        energies = 10 ** self.data.spectral_axis.value
+        energies = np.logspace(self.header['CRVAL3'],
+                               self.header['CRVAL3'] + (self.header['NAXIS3'] - 1) * self.header['CDELT3'],
+                               self.header['NAXIS3'])
 
         return energies, fluxes

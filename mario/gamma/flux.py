@@ -135,7 +135,7 @@ class GammaFlux:
 
         return Gfluxes * unit
 
-    def save_cube(self, author='Kirsty Feijen', filename='Gflux_cube.fits'):
+    def save_cube(self, author='', filename='Gflux_cube.fits'):
         """
         Save the gamma-ray flux to a fits cube
 
@@ -153,7 +153,7 @@ class GammaFlux:
         E0 = np.log10(self.energies[0].value)
 
         # Set header based on template file
-        hdr = fits.PrimaryHDU(data=self.fluxes)
+        hdr = fits.PrimaryHDU(data=self.fluxes.value)
         hdr.header['CTYPE1'] = self.gas.header['CTYPE1']
         hdr.header['CRVAL1'] = self.gas.header['CRVAL1']
         hdr.header['CRPIX1'] = self.gas.header['CRPIX1']
@@ -164,16 +164,11 @@ class GammaFlux:
         hdr.header['CRPIX2'] = self.gas.header['CRPIX2']
         hdr.header['CDELT2'] = self.gas.header['CDELT2']
 
-        hdr.header['CTYPE3'] = 'ENER'
-        hdr.header['CUNIT3'] = 'J'
+        hdr.header['CTYPE3'] = 'log ENERGY'
+        hdr.header['CUNIT3'] = 'TeV'
         hdr.header['CRVAL3'] = E0
         hdr.header['CRPIX3'] = 1.
         hdr.header['CDELT3'] = step
 
         hdr.header['AUTHOR'] = author
-        wcs = WCS(hdr.header)
-
-        cube = SpectralCube(data=self.fluxes, wcs=wcs)
-        cube.write(filename, format='fits', overwrite=True)
-
-        return
+        hdr.writeto(filename, overwrite=True)

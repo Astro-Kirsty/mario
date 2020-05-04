@@ -1,0 +1,31 @@
+hess1806:
+  name: 'HESS J1806'
+  spectral_index: 2.69
+  GeV:
+    integral_flux: !astropy.units.Quantity
+      value: 1.56e-9
+      unit: !astropy.units.Unit {unit: 1 / (s * cm**2)}
+    integral_lower_energy: !astropy.units.Quantity
+      value: 10
+      unit: !astropy.units.Unit {unit: GeV}
+    plot_emin: !astropy.units.Quantity
+      value: 60
+      unit: !astropy.units.Unit {unit: GeV}
+    plot_emax: !astropy.units.Quantity
+      value: 630
+      unit: !astropy.units.Unit {unit: GeV}
+    color: '#CC1C24'
+  TeV:
+    integral_flux: !astropy.units.Quantity
+      value: 5.3e-11
+      unit: !astropy.units.Unit {unit: 1 / (s * cm**2)}
+    integral_lower_energy: !astropy.units.Quantity
+      value: 200
+      unit: !astropy.units.Unit {unit: GeV}
+    plot_emin: !astropy.units.Quantity
+      value: 600
+      unit: !astropy.units.Unit {unit: GeV}
+    plot_emax: !astropy.units.Quantity
+      value: 8
+      unit: !astropy.units.Unit {unit: TeV}
+    color: '#FF2531'

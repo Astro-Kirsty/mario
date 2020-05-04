@@ -1,0 +1,63 @@
+G8:
+  name: 'SNR G8.7-0.1'
+  glon: !astropy.units.Quantity
+    value: 8.744205
+    unit: !astropy.units.Unit {unit: deg}
+  glat: !astropy.units.Quantity
+    value: -0.096288
+    unit: !astropy.units.Unit {unit: deg}
+  radius: !astropy.units.Quantity
+    value: 0.375
+    unit: !astropy.units.Unit {unit: deg}
+  distance: !astropy.units.Quantity
+    value: 4.5
+    unit: !astropy.units.Unit {unit: kpc}
+  gas_mass: !astropy.units.Quantity
+    value: 7.9e5
+    unit: !astropy.units.Unit {unit: solMass}
+  age: 
+    - !astropy.units.Quantity
+      unit: &id001 !astropy.units.Unit {unit: kyr}
+      value: 15
+    - !astropy.units.Quantity
+      unit: *id001
+      value: 28
+  cloud:
+    glon: !astropy.units.Quantity
+      value: 8.575
+      unit: !astropy.units.Unit {unit: deg}
+    glat: !astropy.units.Quantity
+      value: -0.24
+      unit: !astropy.units.Unit {unit: deg}
+  nH: !astropy.units.Quantity
+    value: 160
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+
+PSR1803:
+  name: 'Progenitor SNR of PSR J1803-2137'
+  glon: !astropy.units.Quantity
+    value: 8.310
+    unit: !astropy.units.Unit {unit: deg}
+  glat: !astropy.units.Quantity
+    value: 0.1568
+    unit: !astropy.units.Unit {unit: deg}
+  radius: !astropy.units.Quantity
+    value: 0.2
+    unit: !astropy.units.Unit {unit: deg}
+  distance: !astropy.units.Quantity
+    value: 3.8
+    unit: !astropy.units.Unit {unit: kpc}
+  gas_mass: !astropy.units.Quantity
+    value: 3.596e5
+    unit: !astropy.units.Unit {unit: solMass}
+  age: 
+    - !astropy.units.Quantity
+      unit: &id002 !astropy.units.Unit {unit: kyr}
+      value: 16
+  distance_cloud_release_point: !astropy.units.Quantity
+    value: 10
+    unit: !astropy.units.Unit {unit: pc}
+  nH: !astropy.units.Quantity
+    value: 325
+    unit: !astropy.units.Unit {unit: cm**(-3)}

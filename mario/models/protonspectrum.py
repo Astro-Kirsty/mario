@@ -129,7 +129,7 @@ class ProtonSpectrum:
         self.tesc = escape_time(tsedov=tsedov, Ec=Ec, Ec_max=Ec_max, delta=delta)
         self.Ebudget=Ebudget
 
-    @u.quantity_input(cloud_coord=u.deg, d=u.pc)
+    #@u.quantity_input(cloud_coord=u.deg, d=u.pc)
     def define_cloud(self, cloud_coord):
         """
         Calculates the distance from the cloud to the release point of cosmic ray protons

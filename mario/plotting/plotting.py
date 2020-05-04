@@ -187,14 +187,16 @@ def add_kcr(ax=None, label='CR Flux at Earth', **kwargs):
 
 
 @u.quantity_input(emin=u.GeV, emax=u.GeV)
-def add_kcr_src(spectrum, emin, emax, ax=None, label='', **kwargs):
+def add_kcr_src(gamma_src, snr, emin, emax, ax=None, label='', **kwargs):
     """
     Plot the cosmic ray enhancement factors for GeV and TeV energies
 
     Parameters
     ----------
-    spectrum : array
-        The proton spectra you want to plot
+    gamma_src: ??
+        ???
+    snr: ??
+        ???
     emin : float
         Minimum energy from gamma-ray detection in GeV
     emax : float
@@ -208,13 +210,13 @@ def add_kcr_src(spectrum, emin, emax, ax=None, label='', **kwargs):
     """
 
     if np.mean([emin.to(u.GeV).value, emax.to(u.GeV).value]) > 1000:
-        kcr = ((spectrum.gamma_src.flux_TeV / (2.85e-13 / (u.cm ** 2 * u.s))) *
-               (spectrum.gamma_src.flux_E_TeV / u.TeV) ** 1.6 *
-               ((spectrum.snr.distance / u.kpc) ** 2 / ((spectrum.snr.gas_mass.to(u.solMass)) / (1e5 * u.solMass))))
+        kcr = ((gamma_src.flux_TeV / (2.85e-13 / (u.cm ** 2 * u.s))) *
+               (gamma_src.flux_E_TeV / u.TeV) ** 1.6 *
+               ((snr.distance / u.kpc) ** 2 / ((snr.gas_mass.to(u.solMass)) / (1e5 * u.solMass))))
     else:
-        kcr = ((spectrum.gamma_src.flux_GeV / (1.45e-13 / (u.cm ** 2 * u.s))) *
-               (spectrum.gamma_src.flux_E_GeV / u.TeV) ** 1.75 *
-               ((spectrum.snr.distance / u.kpc) ** 2 / ((spectrum.snr.gas_mass.to(u.solMass)) / (1e5 * u.solMass))))
+        kcr = ((gamma_src.flux_GeV / (1.45e-13 / (u.cm ** 2 * u.s))) *
+               (gamma_src.flux_E_GeV / u.TeV) ** 1.75 *
+               ((snr.distance / u.kpc) ** 2 / ((snr.gas_mass.to(u.solMass)) / (1e5 * u.solMass))))
 
     line, = plt.plot([emin.to(u.GeV).value, emax.to(u.GeV).value],
                      [kcr * 2.2, kcr * 2.2], **kwargs)

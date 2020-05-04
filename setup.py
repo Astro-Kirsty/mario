@@ -24,11 +24,20 @@ setup(
         'matplotlib',
         'scipy',
         'spectral_cube>=0.4.5',
-        'gammapy=0.16'],
+        'gammapy~=0.16',
+        'astropy',
+        'click',
+        ],
     classifiers=[
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
     ],
+    zip_safe=False,
+    entry_points={
+        'console_scripts': [
+            'mario_plot_proton_spectrum = mario.scripts.plot_proton_spectrum:main',
+        ],
+    }          
 )

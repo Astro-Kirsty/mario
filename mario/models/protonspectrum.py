@@ -112,9 +112,9 @@ class ProtonSpectrum:
         Ec_max : float, optional
             Maximum injection energy of cosmic ray protons (default is 500 TeV)
         delta : float, optional
-            Describes the energy-dependent release of CRs (default is 0.5)
+            Describes the energy-dependent release of cosmic rays (default is 0.5)
         Ebudget : float, optional
-            ZDONM
+            Energy budget of cosmic ray protons (default is 1e50 erg)
 
         Examples
         ----------------------
@@ -205,7 +205,6 @@ class ProtonSpectrum:
         diff_radius = 2 * np.sqrt(diff_coeff * self.snr.age * frac)
 
         # Calculation of normalisation constant, N0
-        # Ebudget = (1e50 * u.erg).to(u.GeV)
         alpha = 2
         t0 = 1 * u.yr
         R = calc_dist_CR_release_point(E51=1, n=1 * u.cm ** (-3), u1=1.4 * u.kg, tesc=t0)

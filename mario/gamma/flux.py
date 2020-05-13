@@ -154,6 +154,8 @@ class GammaFlux:
 
         # Set header based on template file
         hdr = fits.PrimaryHDU(data=self.fluxes.value)
+        hdr.header['BUNIT'] = f'{self.fluxes.unit}'
+        
         hdr.header['CTYPE1'] = self.gas.header['CTYPE1']
         hdr.header['CRVAL1'] = self.gas.header['CRVAL1']
         hdr.header['CRPIX1'] = self.gas.header['CRPIX1']
@@ -169,6 +171,10 @@ class GammaFlux:
         hdr.header['CRVAL3'] = E0
         hdr.header['CRPIX3'] = 1.
         hdr.header['CDELT3'] = step
+        
+        hdr.header['GDELTA'] = f'{self.ps.diff_delta}'
+        hdr.header['GCHI'] = f'{self.ps.diff_chi}'
+        hdr.header['GEBUDGET'] = f'{self.ps.Ebudget}'
 
         hdr.header['AUTHOR'] = author
         hdr.writeto(filename, overwrite=True)

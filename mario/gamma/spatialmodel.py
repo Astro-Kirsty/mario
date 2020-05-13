@@ -11,7 +11,7 @@ from astropy.wcs import WCS
 import matplotlib.pyplot as plt
 
 
-def oversample(data, header, grid_size=0.005 * u.deg, radius=0.06 * u.deg):
+def oversample(data, header, grid_size=0.005 * u.deg, radius=0.06 * u.deg, diff_vals=True):
     """
     Oversample a map
 
@@ -22,9 +22,11 @@ def oversample(data, header, grid_size=0.005 * u.deg, radius=0.06 * u.deg):
     header : str
         The header of the fits file
     grid_size : float, optional
-        Size of grid pixels (default 0.005deg)
+        Size of grid pixels (default is 0.005deg)
     aperture_size : float, optional
-        Size of aperture you want to smooth (default 0.06deg)
+        Size of aperture you want to smooth (default is 0.06deg)
+	diff_vals : bool, optional
+		If the fits file header contains the diffusion parameters (default is True)
 
     """
     wcs = WCS(header)
@@ -50,11 +52,17 @@ def oversample(data, header, grid_size=0.005 * u.deg, radius=0.06 * u.deg):
     hdu.header['CTYPE1'] = header['CTYPE1']
     hdu.header['CRVAL1'] = header['CRVAL1']
     hdu.header['CRPIX1'] = header['CRPIX1']
+
     hdu.header['CDELT1'] = -grid_size.value
     hdu.header['CTYPE2'] = header['CTYPE2']
     hdu.header['CRVAL2'] = header['CRVAL2']
     hdu.header['CRPIX2'] = data_oversample.shape[0] / 2
     hdu.header['CDELT2'] = grid_size.value
+
+    if diff_vals:
+        hdu.header['GDELTA'] = header['GDELTA']
+        hdu.header['GCHI'] = header['GCHI']
+        hdu.header['GEBUDGET'] = header['GEBUDGET']
 
     return hdu.header, data_oversample
 
@@ -111,7 +119,7 @@ class SpectralModel:
         Parameters
         ----------
         fit : str
-            Choose which function to fit (default 'PL')
+            Choose which function to fit (default is 'PL')
         """
         # NOTE: if the flux has units must use .value
         log_fluxes = np.log10(self.fluxes)
@@ -206,7 +214,7 @@ class SpectralModel:
         fit_params : array
             The fit parameters
         fit : str
-            The fit for the data (default 'PL')
+            The fit for the data (default is 'PL')
 
         """
         if fit == 'PL':
@@ -249,9 +257,9 @@ class SpatialModel:
         data : array
             The data array of interest
         header : str, optional
-            The header of the fits file (default 'self.header')
+            The header of the fits file (default is 'self.header')
         filename : str, optional
-            The name to save your fits to (default 'file.fits')
+            The name to save your fits to (default is 'file.fits')
 
         """
         hdr = fits.PrimaryHDU(data=data)
@@ -261,7 +269,7 @@ class SpatialModel:
 
         hdr.writeto(filename, overwrite=True)
 
-    def plot(self, data, fig=None, ax=None, colorbar_label='', **kwargs):
+    def plot(self, data, fig=None, ax=None, colorbar_label='', diff_label=False, **kwargs):
 
         wcs = WCS(self.header, naxis=2)
 
@@ -300,6 +308,17 @@ class SpatialModel:
         ylim, xlim = data.shape
         ax.set_xlim([0, xlim])
         ax.set_ylim([0, ylim])
+
+        if diff_label:
+                    chi = self.header['GCHI']
+                    delta = self.header['GDELTA']
+                    ebudget = self.header['GEBUDGET']
+
+                    ax.text(0.03, 0.9, 
+                            f'$\chi$={chi}, $\delta$={delta}, '+'E$_{budget}$='+f'{ebudget}',
+                            horizontalalignment='left',
+                            transform=ax.transAxes,
+                            fontsize=15, color='black')
 
         return fig, ax
 
@@ -444,7 +463,7 @@ class SpatialModel3D(SpatialModel):
         livetime : float
             The livetime of telescope observations
         fit : str
-            The fit for the data (default 'best')
+            The fit for the data (default is 'best')
 
         """
 

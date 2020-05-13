@@ -109,9 +109,9 @@ def proton_spectrum(spectrum, age_label=False, diff_label=False,
     spectrum : array
         The proton spectra you want to plot
     age_label : bool
-        Plot the age label (default True)
+        Plot the age label (default is True)
     diff_label : bool
-        Plot the diffusion label (default True)
+        Plot the diffusion label (default is True)
     fig : str
         Set the figure for the plot
     ax : str
@@ -171,7 +171,7 @@ def add_kcr(ax=None, label='CR Flux at Earth', **kwargs):
     ax : str
         Set the axis for the figure
     label : bool
-        Set the label of the line (default 'CR Flux at Earth')
+        Set the label of the line (default is 'CR Flux at Earth')
     **kwargs : keywords
         Initialisation keywords
     """
@@ -240,9 +240,9 @@ def set_limits(ax, header, l=[7.5, 9.5], b=[-0.5, 0.5]):
     header : str
         The header of the fits file
     l : array
-        The galactic longitude to plot (default l=[7.5, 9.5])
+        The galactic longitude to plot (default is l=[7.5, 9.5])
     b : array
-        The galactic latitude to plot (default b=[-0.5, 0.5])
+        The galactic latitude to plot (default is b=[-0.5, 0.5])
     """
     c1 = coord.SkyCoord(l=l[0] * u.deg, b=b[0] * u.deg, frame='galactic').to_pixel(WCS(header))
     c2 = coord.SkyCoord(l=l[1] * u.deg, b=b[1] * u.deg, frame='galactic').to_pixel(WCS(header))

@@ -51,7 +51,7 @@ def calc_dist_CR_release_point(E51, n, u1, tesc):
         The distance at which cosmic ray protons are released
     """
     R = (0.31 * E51 ** (1 / 5) * (n / u.cm ** (-3)) ** (-1 / 5) *
-         (u1 / (1.4 * u.kg)) ** (-1 / 5) * (tesc / u.yr) ** (2 / 5))
+         (u1 / (1.4 * u.kg)) ** (-1 / 5) * (tesc / u.yr) ** (2 / 5)) * u.pc
     return R
 
 
@@ -152,7 +152,7 @@ class ProtonSpectrum:
         R = calc_dist_CR_release_point(E51=1, n=1 * u.cm ** (-3),
                                        u1=1.4 * u.kg, tesc=self.tesc)
 
-        ang_dist = np.arctan(R / (self.snr.distance.to(u.pc) / u.pc)).to(u.deg)
+        ang_dist = np.arctan(R / (self.snr.distance.to(u.pc))).to(u.deg)
         theta_cloud = cloud_source_sep - ang_dist
 
         self.dist_cloud = (self.snr.distance * np.tan(theta_cloud)).to(u.pc)

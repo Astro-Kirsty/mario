@@ -4,6 +4,7 @@ from spectral_cube import SpectralCube
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
 from astropy.wcs import WCS
+from mario.models.protonspectrum import calc_dist_CR_release_point, escape_time
 
 
 class TotalColumnDensity:
@@ -107,7 +108,8 @@ class GasParameters:
 
     """
 
-    def __init__(self, snr, gas_map_path):
+    def __init__(self, snr, gas_map_path, 
+                 tsedov=100 * u.yr, Ec=150 * u.TeV, Ec_max=500 * u.TeV, delta=0.5):
         """
         Parameters
         ----------------------
@@ -134,6 +136,8 @@ class GasParameters:
 
         # Width of pixel
         self.theta_pixel = (self.header['CDELT2']) * u.deg
+        
+        self.tesc = escape_time(tsedov=tsedov, Ec=Ec, Ec_max=Ec_max, delta=delta)
 
     def nH2_cell(self):
         """
@@ -181,5 +185,11 @@ class GasParameters:
         # Calculate the distance to each cell
         theta_sep = (OBJ_coord.separation(pixel_coord)).deg * u.deg
         dist = self.snr.distance.to(u.cm) * np.tan(theta_sep)
+        
+        R = calc_dist_CR_release_point(E51=1, n=1 * u.cm ** (-3),
+                                       u1=1.4 * u.kg, tesc=self.tesc)
+        
+        distance_from_release_point = dist - R
+        distance_from_release_point[distance_from_release_point < R] = 0
 
-        return dist
+        return distance_from_release_point

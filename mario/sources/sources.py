@@ -45,7 +45,7 @@ class GammaSource:
         self.flux_E_TeV = flux_E_TeV
 
 
-class SNR:
+class Accelerator:
     """
     A class used to define the supernova remnant
 
@@ -61,23 +61,23 @@ class SNR:
         name : str
             The name of the supernova remnant
         glon : float
-            The galactic longitude of the supernova remnant
+            The galactic longitude of the accelerator
         glat :float
-            The galactic latitude of the supernova remnant
+            The galactic latitude of the accelerator
         radius : float
-            The radius of the supernova remnant
+            The radius of the accelerator
         age : float
-            The age of the supernova remnant
+            The age of the accelerator
         distance: float
-            The distance from Earth to the supernova remnant
+            The distance from Earth to the accelerator
         gas_mass : float
-            The solar mass of the interstellar medium surrounding the SNR (at the distance of the SNR)
+            The solar mass of the interstellar medium surrounding the accelerator (at the distance to the accelerator)
 
         Examples
         ----------------------
-        >>> G8 = SNR(name='SNR G8.7-0.1',
-                 glon=8.744205 * u.deg, glat=-0.096288 * u.deg, radius=0.375*u.deg,
-                 age=15 * u.kyr, distance=4.5 * u.kpc, gas_mass = 7.9e5 * u.solMass)
+        >>> G8 = Accelerator(name='SNR G8.7-0.1',
+                 			 glon=8.744205 * u.deg, glat=-0.096288 * u.deg, radius=0.375*u.deg,
+                 			 age=15 * u.kyr, distance=4.5 * u.kpc, gas_mass = 7.9e5 * u.solMass)
         """
         self.name = name
         self.glon = glon

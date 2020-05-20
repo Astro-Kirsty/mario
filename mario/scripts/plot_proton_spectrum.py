@@ -7,7 +7,7 @@ import click
 from astropy.io.misc import yaml
 
 from ..sources.sources import GammaSource
-from ..sources.sources import SNR
+from ..sources.sources import Accelerator
 from ..models.protonspectrum import ProtonSpectrum
 from ..plotting.plotting import proton_spectrum, add_kcr_src, add_kcr
 
@@ -56,7 +56,7 @@ def main(gamma_source_config_path, accelerator_config_path, model_config_path, a
     figures = []
 
     for age in acc_cfg['age']:
-        acc = SNR(
+        acc = Accelerator(
                 name=acc_cfg['name'],
                 glon=acc_cfg['glon'], 
                 glat=acc_cfg['glat'], 

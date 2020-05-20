@@ -7,8 +7,8 @@ config_model = ./models.yaml
 
 
 all: $(config_acc) $(config_gam_srcs) $(config_model)
-	mario_plot_proton_spectrum 'hess1806' 'G8'
-	mario_plot_proton_spectrum 'hess1806' 'PSR1803'
+	mario_plot_proton_spectrum 'hess1804' 'G8'
+	mario_plot_proton_spectrum 'hess1804' 'PSR1803'
 	
 clean:
 	rm -rf $(build_dir)

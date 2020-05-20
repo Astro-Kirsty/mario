@@ -1,5 +1,5 @@
-hess1806:
-  name: 'HESS J1806'
+hess1804:
+  name: 'HESS J1804'
   spectral_index: 2.69
   GeV:
     integral_flux: !astropy.units.Quantity

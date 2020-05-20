@@ -23,7 +23,7 @@ The following example will show you how to plot the proton spectra of given coun
 
 ```python
 from mario.sources.sources import Source
-hess = Source(name='HESS J1806', spectral_index=2.69, 
+hess = Source(name='HESS J1804', spectral_index=2.69, 
             flux_GeV=1.56e-9 / (u.s * u.cm**2),
             flux_E_GeV=0.01 * u.TeV,
             flux_TeV=5.3e-11/(u.s * u.cm**2),

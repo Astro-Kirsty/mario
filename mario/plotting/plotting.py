@@ -60,7 +60,7 @@ def add_SNR_centre(snr, ax, **kwargs):
                         transform=ax.get_transform('galactic'), **kwargs)
     ax.add_patch(snr_region)
 
-    ax.text(snr.glon.value, snr.glat.value + (snr.radius * 0.15).to(u.deg).value, snr.name,
+    ax.text(snr.glon.value, snr.glat.value - (snr.radius * 0.4).to(u.deg).value, snr.name,
             color=snr_region.get_facecolor(),
             transform=ax.get_transform('galactic'),
             fontdict=font1, zorder=10,

@@ -3,6 +3,7 @@ import astropy.units as u
 from astropy.io import fits
 from astropy.coordinates import SkyCoord
 from scipy.optimize import curve_fit
+from scipy import integrate
 from gammapy.spectrum import SpectrumDataset
 from gammapy.modeling.models import (PowerLawSpectralModel, LogParabolaSpectralModel,
                                      ExpCutoffPowerLawSpectralModel, SkyModel)
@@ -23,7 +24,7 @@ def oversample(data, header, grid_size=0.005 * u.deg, radius=0.06 * u.deg, diff_
         The header of the fits file
     grid_size : float, optional
         Size of grid pixels (default is 0.005deg)
-    aperture_size : float, optional
+    radius : float, optional
         Size of aperture you want to smooth (default is 0.06deg)
 	diff_vals : bool, optional
 		If the fits file header contains the diffusion parameters (default is True)
@@ -512,6 +513,32 @@ class SpatialModel3D(SpatialModel):
         integral = func_max - func_min
 
         return integral
+
+    def integrate_LP(self, emin, emax):
+        """
+        Integrate the LogParabola model from emin to emax
+
+        Parameters
+        ----------------------
+        emin : float
+            The minimum energy for the integral
+        emax : float
+            The maximum energy for the integral
+
+        """
+
+        Esize, xsize, ysize = self.data.shape
+        E = self.energies
+
+        integral = np.empty((xsize, ysize))
+        for ix in range(xsize):
+            for iy in range(ysize):
+                LP_linear = lambda E: (self.amplitude_LP[ix, iy] * 
+                                       E ** (- self.alpha_LP[ix, iy] - self.beta_LP[ix, iy]*np.log10(E)))
+                integral[ix, iy] = integrate.quad(LP_linear, emin, emax)[0]
+
+        return integral
+    
 
     def sum_region(self, coords, radius):
         """

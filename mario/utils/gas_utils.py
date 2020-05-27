@@ -4,7 +4,7 @@ from spectral_cube import SpectralCube
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
 from astropy.wcs import WCS
-from mario.models.protonspectrum import calc_dist_CR_release_point, escape_time
+from mario.utils.model_utils import calc_dist_CR_release_point, escape_time
 
 
 class TotalColumnDensity:

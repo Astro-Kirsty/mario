@@ -1,4 +1,4 @@
-hess1804:
+HESSJ1804:
   name: 'HESS J1804'
   spectral_index: 2.69
   GeV:
@@ -14,7 +14,7 @@ hess1804:
     plot_emax: !astropy.units.Quantity
       value: 630
       unit: !astropy.units.Unit {unit: GeV}
-    color: '#CC1C24'
+    color: 'red'
   TeV:
     integral_flux: !astropy.units.Quantity
       value: 5.3e-11
@@ -28,4 +28,4 @@ hess1804:
     plot_emax: !astropy.units.Quantity
       value: 8
       unit: !astropy.units.Unit {unit: TeV}
-    color: '#FF2531'
+    color: 'green'

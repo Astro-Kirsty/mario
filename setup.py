@@ -38,6 +38,9 @@ setup(
     entry_points={
         'console_scripts': [
             'mario_plot_proton_spectrum = mario.scripts.plot_proton_spectrum:main',
+            'mario_create_gamma_cube = mario.scripts.create_gamma_cube:main',
+            'mario_plot_integrated_flux = mario.scripts.plot_integrated_flux:main',
+            'mario_plot_spectral_flux = mario.scripts.plot_spectral_flux:main',
         ],
     }          
 )

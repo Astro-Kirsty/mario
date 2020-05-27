@@ -34,7 +34,7 @@ G8:
     unit: !astropy.units.Unit {unit: cm**(-3)}
 
 
-PSR1803:
+PSRJ1803:
   name: 'Progenitor SNR of PSR J1803-2137'
   glon: !astropy.units.Quantity
     value: 8.310
@@ -61,3 +61,5 @@ PSR1803:
   nH: !astropy.units.Quantity
     value: 325
     unit: !astropy.units.Unit {unit: cm**(-3)}
+
+

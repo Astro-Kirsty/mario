@@ -6,10 +6,10 @@ from matplotlib.backends.backend_pdf import PdfPages
 import click
 from astropy.io.misc import yaml
 
-from ..sources.sources import GammaSource
-from ..sources.sources import Accelerator
-from ..models.protonspectrum import ProtonSpectrum
-from ..plotting.plotting import proton_spectrum, add_kcr_src, add_kcr
+from mario.sources.sources import GammaSource
+from mario.sources.sources import Accelerator
+from mario.models.protonspectrum import ProtonSpectrum
+from mario.plotting.plotting import proton_spectrum, add_kcr_src, add_kcr
 
 
 @click.command()
@@ -135,8 +135,8 @@ def main(gamma_source_config_path, accelerator_config_path, model_config_path, a
 
             ax = add_kcr(label='', 
                 ax=ax,
-                ls='-', lw=3, alpha=0.5, zorder=0,
-                color='#AA7D08')
+                ls='-.', lw=3, alpha=0.5, zorder=0,
+                color='magenta')
 
             lines = ax.get_lines()
             legend = plt.legend(

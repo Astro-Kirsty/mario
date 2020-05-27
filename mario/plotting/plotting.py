@@ -109,9 +109,9 @@ def proton_spectrum(spectrum, age_label=False, diff_label=False,
     spectrum : array
         The proton spectra you want to plot
     age_label : bool
-        Plot the age label (default is True)
+        Plot the age label (default is False)
     diff_label : bool
-        Plot the diffusion label (default is True)
+        Plot the diffusion label (default is False)
     fig : str
         Set the figure for the plot
     ax : str
@@ -122,6 +122,7 @@ def proton_spectrum(spectrum, age_label=False, diff_label=False,
     Examples
     ----------------------
     >>> from plotting.plotting import proton_spectrum
+	>>> Ep = np.logspace(0, 6, 50)*u.GeV
     >>> ps.flux(Ep, rcloud=ps.dist_cloud)
     >>> fig, ax  = proton_spectrum(spectrum=ps, diff_label=True)
 
@@ -160,6 +161,71 @@ def proton_spectrum(spectrum, age_label=False, diff_label=False,
                   ncol=1,
                   labelspacing=0.3)
     return fig, ax
+
+
+def electron_spectrum(spectrum, age_label=False, diff_label=False,
+                    fig=None, ax=None, **kwargs):
+    """
+    Plot the electron spectrum
+
+    Parameters
+    ----------
+    spectrum : array
+        The proton spectra you want to plot
+    age_label : bool
+        Plot the age label (default is False)
+    diff_label : bool
+        Plot the diffusion label (default is False)
+    fig : str
+        Set the figure for the plot
+    ax : str
+        Set the axis for the figure
+    **kwargs : keywords
+        Initialisation keywords
+
+    Examples
+    ----------------------
+    >>> from plotting.plotting import electron_spectrum
+    >>> Ee = np.logspace(-3, 6, 50)*u.GeV
+    >>> es.flux(Ee, rcloud=10*u.pc)
+    >>> fig, ax  = electron_spectrum(spectrum=es, diff_label=True)
+
+    """
+    if fig is None:
+        fig = plt.figure(figsize=(8, 6))
+
+    if ax is None:
+        ax = plt.gca()
+
+    energy = spectrum.energies[:, 0, 0]
+    flux = spectrum.fluxes[:, 0, 0] 
+
+    ax.plot(energy, (flux.to(u.cm**(-3))).value,
+            label=f'{spectrum.snr.age:1.0f}',
+            **kwargs)
+
+    if diff_label:
+        ax.text(0.03, 0.93, f'$\chi$= {spectrum.diff_chi},   $\delta$= {spectrum.diff_delta}',
+                horizontalalignment='left',
+                transform=ax.transAxes,
+                fontsize=15, color='black')
+
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+
+    ax.set_xlim(1e-3, 1e4)
+    ax.set_ylim(2e-20, 1e-16)
+
+    ax.set_xlabel('Energy (GeV)')
+    ax.set_ylabel('J$_e$ (photons cm$^{-3}$)')
+
+    if age_label:
+        ax.legend(title='Age of SNR',
+                  loc='lower right',
+                  ncol=1,
+                  labelspacing=0.3)
+    return fig, ax
+
 
 
 def add_kcr(ax=None, label='CR Flux at Earth', **kwargs):

@@ -10,9 +10,9 @@
 #xtick.color : black
 #ytick.color : black
 
-#axes.prop_cycle: cycler('color', ['darkblue', 'royalblue', 'skyblue'])
+#axes.prop_cycle: cycler('color', ['darkblue', '005191', '0081E7'])
 
-axes.prop_cycle: cycler('color', ['darkblue', '005191', '0081E7'])
+axes.prop_cycle: cycler('color', ['black', 'darkblue', '0081E7'])
 
 
 font.family: Arial

@@ -1,7 +1,7 @@
 HESSJ1804:
-  name: 'HESS J1804'
-  spectral_index: 2.69
   GeV:
+    name: 'FGES J1804.8-2144'
+    spectral_index: 2.01
     integral_flux: !astropy.units.Quantity
       value: 1.56e-9
       unit: !astropy.units.Unit {unit: 1 / (s * cm**2)}
@@ -16,6 +16,8 @@ HESSJ1804:
       unit: !astropy.units.Unit {unit: GeV}
     color: 'red'
   TeV:
+    name: 'HESS J1804-216'
+    spectral_index: 2.69
     integral_flux: !astropy.units.Quantity
       value: 5.3e-11
       unit: !astropy.units.Unit {unit: 1 / (s * cm**2)}

@@ -1,0 +1,51 @@
+G8_Plot:
+  name: 'SNR G8.7-0.1'
+
+  emin: 1
+
+  emax: 100
+
+  grid_size: !astropy.units.Quantity
+    value: 0.02
+    unit: !astropy.units.Unit {unit: deg}
+
+  radius: !astropy.units.Quantity
+    value: 0.1
+    unit: !astropy.units.Unit {unit: deg}
+
+  src_fits: 'HESSJ1804-216_Map.fits'
+
+  con_levels: [30,40,50,60]
+
+  glon_limit: [7.8, 9.3]
+
+  glat_limit: [-0.47, 0.5]
+
+  snr_centre: False
+
+PSRJ1803_Plot:
+  name: 'Progenitor SNR of PSR J1803-2137'
+
+  emin: 1
+
+  emax: 100
+
+  grid_size: !astropy.units.Quantity
+    value: 0.02
+    unit: !astropy.units.Unit {unit: deg}
+
+  radius: !astropy.units.Quantity
+    value: 0.1
+    unit: !astropy.units.Unit {unit: deg}
+
+  src_fits: 'HESSJ1804-216_Map.fits'
+
+  con_levels: [30,40,50,60]
+
+  glon_limit: [7.55, 9.2]
+
+  glat_limit: [-0.47,0.47]
+
+  snr_centre: True
+
+

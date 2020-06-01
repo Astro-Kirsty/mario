@@ -53,6 +53,13 @@ class GammaFlux:
         # Calculation of proton flux
         Jp = self.ps.flux(Ep.to(u.GeV), self.dist_cell).to(u.TeV ** (-1) * u.cm ** (-3))
 
+        # Calculation of CR proton background
+        f_bg = (2.2 * (Ep.to(u.GeV) / u.GeV) **(-2.75))* (1 / (u.cm**2 * u.GeV * u.sr * u.s) )
+        J_bg = f_bg * (4*np.pi*u.sr / (c.to(u.cm / u.s)))
+        Jp[self.dist_cell == 0] = J_bg
+        
+        self.Jp = Jp
+
         if type(Ep.value) == np.ndarray:
             Ep = Ep[:, None, None]
 

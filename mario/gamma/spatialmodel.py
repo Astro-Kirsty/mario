@@ -360,7 +360,12 @@ class SpatialModel3D(SpatialModel):
         self.best_fit = None
 
     def fit(self, fit='best'):
-        """ Choosing the fit for the data """
+        """ Choosing the fit for the data 
+        Parameters
+        ----------------------
+		fit : The fit for the data (options 'best', 'PL', 'LP'
+		"""
+
         if fit == 'best':
             self._fitPL()
             self._fitLP()

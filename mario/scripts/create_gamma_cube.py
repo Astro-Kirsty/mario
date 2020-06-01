@@ -43,8 +43,8 @@ def main(gamma_source_config_path, accelerator_config_path, model_config_path, a
       
 
     gam_src = GammaSource(
-        name=gam_src_cfg['name'], 
-        spectral_index=gam_src_cfg['spectral_index'], 
+        name=gam_src_cfg['TeV']['name'], 
+        spectral_index=gam_src_cfg['TeV']['spectral_index'], 
         flux_E_GeV=gam_src_cfg['GeV']['integral_lower_energy'], 
         flux_GeV=gam_src_cfg['GeV']['integral_flux'], 
         flux_E_TeV=gam_src_cfg['TeV']['integral_lower_energy'], 

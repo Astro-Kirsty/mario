@@ -74,11 +74,8 @@ class ElectronSpectrum:
         # Calculation of normalisation constant, N0
         t0 = 1 * u.yr
         R = calc_dist_CR_release_point(E51=1, n=1 * u.cm ** (-3), u1=1.4 * u.kg, tesc=t0)
-
         V = (4 / 3) * np.pi * R ** 3
-
         intg = (1e5**2 - 1**2) /2
-
         N0 = (self.Ebudget.to(u.GeV)/u.GeV * np.pi ** (3 / 2) * R ** 3) / (V * intg)
         
 

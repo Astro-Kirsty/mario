@@ -51,6 +51,7 @@ def main(gamma_source_config_path, accelerator_config_path, model_config_path, a
 
     chis = model_cfg['diff_chi']
     deltas = model_cfg['diff_delta']
+    Ebudgets = model_cfg['Ebudget']
 
     energies = np.logspace(0, 6, 50)*u.GeV
     figures = []
@@ -71,32 +72,32 @@ def main(gamma_source_config_path, accelerator_config_path, model_config_path, a
             ax = figures[-1].add_subplot(1, 1, 1)
 
             for delta in deltas:
+                for Ebudget in Ebudgets:
+                    ps = ProtonSpectrum(
+                        gamma_src=gam_src, 
+                        snr=acc, 
+                        nH=acc_cfg['nH'],
+                        diff_chi=chi, 
+                        diff_delta=delta,
+                        tsedov=model_cfg['tsedov'],
+                        Ec=model_cfg['Ec'],
+                        Ec_max=model_cfg['Ec_max'],
+                        Ebudget=Ebudget,
+                        ) 
 
-                ps = ProtonSpectrum(
-                    gamma_src=gam_src, 
-                    snr=acc, 
-                    nH=acc_cfg['nH'],
-                    diff_chi=chi, 
-                    diff_delta=delta,
-                    tsedov=model_cfg['tsedov'],
-                    Ec=model_cfg['Ec'],
-                    Ec_max=model_cfg['Ec_max'],
-                    Ebudget=model_cfg['Ebudget'],
-                    ) 
-
-                if 'cloud' in acc_cfg:
-                    ps.define_cloud(cloud_coord=(
-                                acc_cfg['cloud']['glon'], 
-                                acc_cfg['cloud']['glat'])
-                                )
-                    ps.flux(energies, rcloud=ps.dist_cloud)
-                else:
-                    ps.flux(energies, rcloud=acc_cfg['distance_cloud_release_point'])
+                    if 'cloud' in acc_cfg:
+                        ps.define_cloud(cloud_coord=(
+                                    acc_cfg['cloud']['glon'], 
+                                    acc_cfg['cloud']['glat'])
+                                    )
+                        ps.flux(energies, rcloud=ps.dist_cloud)
+                    else:
+                        ps.flux(energies, rcloud=acc_cfg['distance_cloud_release_point'])
 
 
-                figures[-1], ax  = proton_spectrum(
-                    spectrum=ps, 
-                    fig=figures[-1], ax=ax)
+                    figures[-1], ax  = proton_spectrum(
+                        spectrum=ps, 
+                        fig=figures[-1], ax=ax)
 
             lines = ax.get_lines()
             legend = plt.legend(

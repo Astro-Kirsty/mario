@@ -99,7 +99,7 @@ def add_gamma_src(src_fits, con_levels, ax, colors):
     return ax
 
 
-def proton_spectrum(spectrum, age_label=False, diff_label=False,
+def proton_spectrum(spectrum, age_label=False, diff_label=False, time_dep_label=False, 
                     fig=None, ax=None, **kwargs):
     """
     Plot the proton spectrum
@@ -141,7 +141,7 @@ def proton_spectrum(spectrum, age_label=False, diff_label=False,
             **kwargs)
 
     if diff_label:
-        ax.text(0.03, 0.93, f'$\chi$= {spectrum.diff_chi},   $\delta$= {spectrum.diff_delta}',
+        ax.text(0.03, 0.93, f'$\chi$={spectrum.diff_chi},   $\delta$={spectrum.diff_delta}',
                 horizontalalignment='left',
                 transform=ax.transAxes,
                 fontsize=15, color='black')
@@ -160,6 +160,11 @@ def proton_spectrum(spectrum, age_label=False, diff_label=False,
                   loc='lower right',
                   ncol=1,
                   labelspacing=0.3)
+
+    if time_dep_label:
+        ax.set_title(f'$\delta_p$={spectrum.deltap}, $n_0$={spectrum.n0.value}'+
+                     ' cm$^{-3}$, E$_{\gamma}$='+f'{spectrum.Eg_esc:.1f}')
+
     return fig, ax
 
 
@@ -205,7 +210,7 @@ def electron_spectrum(spectrum, age_label=False, diff_label=False,
             **kwargs)
 
     if diff_label:
-        ax.text(0.03, 0.93, f'$\chi$= {spectrum.diff_chi},   $\delta$= {spectrum.diff_delta}',
+        ax.text(0.03, 0.93, f'$\chi$={spectrum.diff_chi},   $\delta$={spectrum.diff_delta}',
                 horizontalalignment='left',
                 transform=ax.transAxes,
                 fontsize=15, color='black')
@@ -217,7 +222,7 @@ def electron_spectrum(spectrum, age_label=False, diff_label=False,
     ax.set_ylim(2e-20, 1e-16)
 
     ax.set_xlabel('Energy (GeV)')
-    ax.set_ylabel('J$_e$ (photons cm$^{-3}$)')
+    ax.set_ylabel('J$_e$ (cm$^{-3}$)')
 
     if age_label:
         ax.legend(title='Age of SNR',
@@ -259,10 +264,10 @@ def add_kcr_src(gamma_src, snr, emin, emax, ax=None, label='', **kwargs):
 
     Parameters
     ----------
-    gamma_src: ??
-        ???
-    snr: ??
-        ???
+    gamma_src: class
+        The gamma-ray source class
+    snr: class
+        Definition for the counterpart supernova remnant
     emin : float
         Minimum energy from gamma-ray detection in GeV
     emax : float

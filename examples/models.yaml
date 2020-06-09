@@ -23,16 +23,19 @@ hadronic:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 1e50
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: !astropy.units.Unit {unit: erg}
 
 
 
 hadronic_1:
-  diff_chi: 0.1
+  diff_chi: 
+    - 0.1
 
-  diff_delta: 0.3
+  diff_delta: 
+    - 0.3
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -48,18 +51,22 @@ hadronic_1:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 2.17e51
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 2.17e51
+      unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 15
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 15
+      unit: !astropy.units.Unit {unit: kyr}
 
 hadronic_2:
-  diff_chi: 0.01
+  diff_chi: 
+    - 0.01
 
-  diff_delta: 0.3
+  diff_delta: 
+    - 0.3
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -79,14 +86,17 @@ hadronic_2:
     value: 1.15e50
     unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 15
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 15
+      unit: !astropy.units.Unit {unit: kyr}
 
 hadronic_4:
-  diff_chi: 0.1
+  diff_chi: 
+    - 0.1
 
-  diff_delta: 0.5
+  diff_delta: 
+    - 0.5
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -106,14 +116,17 @@ hadronic_4:
     value: 1.86e52
     unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 15
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 15
+      unit: !astropy.units.Unit {unit: kyr}
 
 hadronic_5:
-  diff_chi: 0.01
+  diff_chi: 
+    - 0.01
 
-  diff_delta: 0.5
+  diff_delta: 
+    - 0.5
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -133,14 +146,17 @@ hadronic_5:
     value: 8.13e50
     unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 15
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 15
+      unit: !astropy.units.Unit {unit: kyr}
 
 hadronic_6:
-  diff_chi: 0.001
+  diff_chi: 
+    - 0.001
 
-  diff_delta: 0.5
+  diff_delta: 
+    - 0.5
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -160,14 +176,17 @@ hadronic_6:
     value: 7.22e49
     unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 15
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 15
+      unit: !astropy.units.Unit {unit: kyr}
 
 hadronic_7:
-  diff_chi: 0.1
+  diff_chi: 
+    - 0.1
 
-  diff_delta: 0.7
+  diff_delta: 
+    - 0.7
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -187,14 +206,17 @@ hadronic_7:
     value: 1.44e53
     unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 15
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 15
+      unit: !astropy.units.Unit {unit: kyr}
 
 hadronic_8:
-  diff_chi: 0.01
+  diff_chi:  
+    - 0.01
 
-  diff_delta: 0.7
+  diff_delta:  
+    - 0.7
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -214,14 +236,17 @@ hadronic_8:
     value: 7.22e51
     unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 15
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 15
+      unit: !astropy.units.Unit {unit: kyr}
 
 hadronic_9:
-  diff_chi: 0.001
+  diff_chi:  
+    - 0.001
 
-  diff_delta: 0.7
+  diff_delta:  
+    - 0.7
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -241,15 +266,18 @@ hadronic_9:
     value: 3.6e50
     unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 15
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 15
+      unit: !astropy.units.Unit {unit: kyr}
 
 # 28 kyrs
 hadronic_11:
-  diff_chi: 0.1
+  diff_chi:  
+    - 0.1
 
-  diff_delta: 0.3
+  diff_delta:  
+    - 0.3
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -269,14 +297,17 @@ hadronic_11:
     value: 5.85e51
     unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 28
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 28
+      unit: !astropy.units.Unit {unit: kyr}
 
 hadronic_12:
-  diff_chi: 0.01
+  diff_chi:  
+    - 0.01
 
-  diff_delta: 0.3
+  diff_delta:  
+    - 0.3
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -296,14 +327,17 @@ hadronic_12:
     value: 4.41e52
     unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 28
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 28
+      unit: !astropy.units.Unit {unit: kyr}
 
 hadronic_14:
-  diff_chi: 0.1
+  diff_chi:  
+    - 0.1
 
-  diff_delta: 0.5
+  diff_delta:  
+    - 0.5
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -323,14 +357,17 @@ hadronic_14:
     value: 4.41e52
     unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 28
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 28
+      unit: !astropy.units.Unit {unit: kyr}
 
 hadronic_15:
-  diff_chi: 0.01
+  diff_chi:  
+    - 0.01
 
-  diff_delta: 0.5
+  diff_delta:  
+    - 0.5
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -350,14 +387,17 @@ hadronic_15:
     value: 2.07e51
     unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 28
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 28
+      unit: !astropy.units.Unit {unit: kyr}
 
 hadronic_16:
-  diff_chi: 0.001
+  diff_chi:  
+    - 0.001
 
-  diff_delta: 0.5
+  diff_delta:  
+    - 0.5
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -377,14 +417,17 @@ hadronic_16:
     value: 1.27e50
     unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 28
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 28
+      unit: !astropy.units.Unit {unit: kyr}
 
 hadronic_17:
-  diff_chi: 0.1
+  diff_chi:  
+    - 0.1
 
-  diff_delta: 0.7
+  diff_delta:  
+    - 0.7
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -404,14 +447,17 @@ hadronic_17:
     value: 3.72e53
     unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 28
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 28
+      unit: !astropy.units.Unit {unit: kyr}
 
 hadronic_18:
-  diff_chi: 0.01
+  diff_chi:  
+    - 0.01
 
-  diff_delta: 0.7
+  diff_delta:  
+    - 0.7
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -431,14 +477,17 @@ hadronic_18:
     value: 1.9e52
     unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 28
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 28
+      unit: !astropy.units.Unit {unit: kyr}
 
 hadronic_19:
-  diff_chi: 0.001
+  diff_chi:  
+    - 0.001
 
-  diff_delta: 0.7
+  diff_delta:  
+    - 0.7
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -458,16 +507,19 @@ hadronic_19:
     value: 7.95e50
     unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 28
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 28
+      unit: !astropy.units.Unit {unit: kyr}
 
 
 #Progenitor
 hadronic_p1:
-  diff_chi: 0.1
+  diff_chi:  
+    - 0.1
 
-  diff_delta: 0.3
+  diff_delta:  
+    - 0.3
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -487,14 +539,17 @@ hadronic_p1:
     value: 2.27e51
     unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 16
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 16
+      unit: !astropy.units.Unit {unit: kyr}
 
 hadronic_p2:
-  diff_chi: 0.01
+  diff_chi:  
+    - 0.01
 
-  diff_delta: 0.3
+  diff_delta:  
+    - 0.3
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -514,14 +569,17 @@ hadronic_p2:
     value: 1.06e50
     unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 16
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 16
+      unit: !astropy.units.Unit {unit: kyr}
 
 hadronic_p4:
-  diff_chi: 0.1
+  diff_chi:  
+    - 0.1
 
-  diff_delta: 0.5
+  diff_delta:  
+    - 0.5
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -541,14 +599,17 @@ hadronic_p4:
     value: 2.22e52
     unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 16
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 16
+      unit: !astropy.units.Unit {unit: kyr}
 
 hadronic_p5:
-  diff_chi: 0.01
+  diff_chi:  
+    - 0.01
 
-  diff_delta: 0.5
+  diff_delta:  
+    - 0.5
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -568,14 +629,17 @@ hadronic_p5:
     value: 8.43e50
     unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 16
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 16
+      unit: !astropy.units.Unit {unit: kyr}
 
 hadronic_p6:
-  diff_chi: 0.001
+  diff_chi:  
+    - 0.001
 
-  diff_delta: 0.5
+  diff_delta:  
+    - 0.5
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -595,14 +659,17 @@ hadronic_p6:
     value: 5.87e49
     unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 16
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 16
+      unit: !astropy.units.Unit {unit: kyr}
 
 hadronic_p7:
-  diff_chi: 0.1
+  diff_chi:  
+    - 0.1
 
-  diff_delta: 0.7
+  diff_delta:  
+    - 0.7
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -622,14 +689,17 @@ hadronic_p7:
     value: 2.12e53
     unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 16
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 16
+      unit: !astropy.units.Unit {unit: kyr}
 
 hadronic_p8:
-  diff_chi: 0.01
+  diff_chi:  
+    - 0.01
 
-  diff_delta: 0.7
+  diff_delta:  
+    - 0.7
 
   tsedov: !astropy.units.Quantity
     value: 100
@@ -654,9 +724,11 @@ hadronic_p8:
     value: 16
 
 hadronic_p9:
-  diff_chi: 0.001
+  diff_chi:  
+    - 0.001
 
-  diff_delta: 0.7
+  diff_delta:  
+    - 0.7
 
   tsedov: !astropy.units.Quantity
     value: 100

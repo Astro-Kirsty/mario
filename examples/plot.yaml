@@ -13,7 +13,7 @@ G8_Plot:
     value: 0.1
     unit: !astropy.units.Unit {unit: deg}
 
-  src_fits: 'HESSJ1804-216_Map.fits'
+  src_fits: '/home/kirsty/Documents/PhD/GitHub/data/HESSJ1804-216_Map.fits'
 
   con_levels: [30,40,50,60]
 
@@ -23,7 +23,7 @@ G8_Plot:
 
   snr_centre: False
 
-PSRJ1803_Plot:
+PJ_Plot:
   name: 'Progenitor SNR of PSR J1803-2137'
 
   emin: 1
@@ -38,7 +38,7 @@ PSRJ1803_Plot:
     value: 0.1
     unit: !astropy.units.Unit {unit: deg}
 
-  src_fits: 'HESSJ1804-216_Map.fits'
+  src_fits: '/home/kirsty/Documents/PhD/GitHub/data/HESSJ1804-216_Map.fits'
 
   con_levels: [30,40,50,60]
 

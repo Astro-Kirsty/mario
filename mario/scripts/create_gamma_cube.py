@@ -52,44 +52,51 @@ def main(gamma_source_config_path, accelerator_config_path, model_config_path, a
         )
 
     Ep = np.logspace(0, 6, 50)*u.GeV
+    chis = model_cfg['diff_chi']
+    deltas = model_cfg['diff_delta']
+    Ebudgets = model_cfg['Ebudget']
 
-    acc = Accelerator(
-            name=acc_cfg['name'],
-            glon=acc_cfg['glon'], 
-            glat=acc_cfg['glat'], 
-            radius=acc_cfg['radius'],
-            age=model_cfg['acc_age'], 
-            distance=acc_cfg['distance'],
-            gas_mass=acc_cfg['gas_mass']
-            )
+    for age in acc_cfg['age']:
+        acc = Accelerator(
+                name=acc_cfg['name'],
+                glon=acc_cfg['glon'], 
+                glat=acc_cfg['glat'], 
+                radius=acc_cfg['radius'],
+                age=age, 
+                distance=acc_cfg['distance'],
+                gas_mass=acc_cfg['gas_mass']
+                )
 
-    ps = ProtonSpectrum(
-        gamma_src=gam_src, 
-        snr=acc, 
-        nH=acc_cfg['nH'],
-        diff_chi=model_cfg['diff_chi'], 
-        diff_delta=model_cfg['diff_delta'],
-        tsedov=model_cfg['tsedov'],
-        Ec=model_cfg['Ec'],
-        Ec_max=model_cfg['Ec_max'],
-        Ebudget=model_cfg['Ebudget'],
-        ) 
+        for chi in chis:
+            for delta in deltas:
+                for Ebudget in Ebudgets:
+                    ps = ProtonSpectrum(
+                        gamma_src=gam_src, 
+                        snr=acc, 
+                        nH=acc_cfg['nH'],
+                        diff_chi=chi, 
+                        diff_delta=delta,
+                        tsedov=model_cfg['tsedov'],
+                        Ec=model_cfg['Ec'],
+                        Ec_max=model_cfg['Ec_max'],
+                        Ebudget=Ebudget,
+                        ) 
 
-    if 'cloud' in acc_cfg:
-        ps.define_cloud(cloud_coord=(
-                    acc_cfg['cloud']['glon'], 
-                    acc_cfg['cloud']['glat'])
-                    )
-        ps.flux(Ep, rcloud=ps.dist_cloud)
-    else:
-        ps.flux(Ep, rcloud=acc_cfg['distance_cloud_release_point'])
+                    if 'cloud' in acc_cfg:
+                        ps.define_cloud(cloud_coord=(
+                                    acc_cfg['cloud']['glon'], 
+                                    acc_cfg['cloud']['glat'])
+                                    )
+                        ps.flux(Ep, rcloud=ps.dist_cloud)
+                    else:
+                        ps.flux(Ep, rcloud=acc_cfg['distance_cloud_release_point'])
 
-    gp = GasParameters(snr=acc, gas_map_path=total_column_density)
+                    gp = GasParameters(snr=acc, gas_map_path=total_column_density)
 
-    Eg = np.logspace(np.log10(0.1), np.log10(100), 31)*u.TeV
-    gs = GammaFlux(snr=acc, ps=ps, gas=gp)
-    gs.flux(Eg)
-    gs.save_cube(filename=f'Flux_{acc_cfg["name"]}_age{acc.age.value:.0f}_delta{ps.diff_delta}_chi{ps.diff_chi}__E{ps.Ebudget.value}.fits')
+                    Eg = np.logspace(np.log10(0.1), np.log10(100), 31)*u.TeV
+                    gs = GammaFlux(snr=acc, ps=ps, gas=gp)
+                    gs.flux(Eg)
+                    gs.save_cube(filename=f'Flux_{accelerator}_age{acc.age.value:.0f}_delta{ps.diff_delta}_chi{ps.diff_chi}_E{ps.Ebudget.value}.fits')
 
 
 if __name__ == '__main__':

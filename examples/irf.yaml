@@ -1,0 +1,61 @@
+HESS_irf:
+  telescope: 'HESS'
+
+  irf_path: '/home/kirsty/Documents/PhD/GitHub/data/hess_dl3_dr1'
+  obs_id : 47829
+
+  offset: !astropy.units.Quantity
+    value: 0.5
+    unit: !astropy.units.Unit {unit: deg}
+
+# need a better more informative name here
+  Emin:  !astropy.units.Quantity
+    value: 0.19
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Emax:  !astropy.units.Quantity
+    value: 10.78
+    unit: !astropy.units.Unit {unit: TeV}
+
+  livetime: !astropy.units.Quantity
+    value: 15.7
+    unit: !astropy.units.Unit {unit: hr}
+
+  grid_size: !astropy.units.Quantity
+    value: 0.005
+    unit: !astropy.units.Unit {unit: deg}
+
+  radius: !astropy.units.Quantity
+    value: 0.06
+    unit: !astropy.units.Unit {unit: deg}
+
+
+CTA_irf:
+  telescope: 'CTA'
+
+  irf_path: '/home/kirsty/Documents/PhD/GitHub/data/South_z20_50h/irf_file.fits'
+
+  offset: !astropy.units.Quantity
+    value: 0.5
+    unit: !astropy.units.Unit {unit: deg}
+
+  Emin:  !astropy.units.Quantity
+    value: 0.19
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Emax:  !astropy.units.Quantity
+    value: 10.78
+    unit: !astropy.units.Unit {unit: TeV}
+
+  livetime: !astropy.units.Quantity
+    value: 15.7
+    unit: !astropy.units.Unit {unit: hr}
+
+  grid_size: !astropy.units.Quantity
+    value: 0.005
+    unit: !astropy.units.Unit {unit: deg}
+
+  radius: !astropy.units.Quantity
+    value: 0.06
+    unit: !astropy.units.Unit {unit: deg}
+

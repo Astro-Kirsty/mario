@@ -14,7 +14,6 @@ from mario.plotting.plotting import add_SNR, add_SNR_centre, add_gamma_src, set_
 
 
 @click.command()
-@click.argument('input')
 @click.argument('accelerator')
 @click.option('--accelerator_config_path', 
                 default='accelerators.yaml',
@@ -23,8 +22,9 @@ from mario.plotting.plotting import add_SNR, add_SNR_centre, add_gamma_src, set_
 @click.option('--plot_config_path', 
                 default='plot.yaml',
                 type=click.Path(exists=True, dir_okay=False))
+@click.argument('gamma_cube')
 
-def main(input, accelerator, plot_type, accelerator_config_path, plot_config_path):
+def main(accelerator, plot_type, gamma_cube, accelerator_config_path, plot_config_path):
 
     with open(accelerator_config_path) as file:
         acc_cfg = yaml.load(file)[accelerator]
@@ -54,7 +54,7 @@ def main(input, accelerator, plot_type, accelerator_config_path, plot_config_pat
     glat_limit = plot_cfg['glat_limit']
     snr_centre = plot_cfg['snr_centre']
 
-    cube = fits.open(input)
+    cube = fits.open(gamma_cube)
     data = cube[0].data
     header = cube[0].header
 
@@ -101,7 +101,7 @@ def main(input, accelerator, plot_type, accelerator_config_path, plot_config_pat
 
     set_limits(ax, oversampled_header, l=glon_limit, b=glat_limit)
 
-    filename, newfilename = input.split('Flux')
+    filename, newfilename = gamma_cube.split('Flux')
     fig.savefig(f'Integral_flux_{emin:.0f}_{emax:.0f}'+newfilename+'.pdf', bbox_inches='tight', pad_inches=0.06)
 
 

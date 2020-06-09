@@ -41,8 +41,8 @@ def main(gamma_source_config_path, accelerator_config_path, model_config_path, g
       
 
     gam_src = GammaSource(
-        name=gam_src_cfg['name'], 
-        spectral_index=gam_src_cfg['spectral_index'], 
+        name=gam_src_cfg['TeV']['name'], 
+        spectral_index=gam_src_cfg['TeV']['spectral_index'], 
         flux_E_GeV=gam_src_cfg['GeV']['integral_lower_energy'], 
         flux_GeV=gam_src_cfg['GeV']['integral_flux'], 
         flux_E_TeV=gam_src_cfg['TeV']['integral_lower_energy'], 
@@ -51,6 +51,7 @@ def main(gamma_source_config_path, accelerator_config_path, model_config_path, g
 
     chis = model_cfg['diff_chi']
     deltas = model_cfg['diff_delta']
+    Ebudgets = model_cfg['Ebudget']
 
     energies = np.logspace(-3, 6, 50)*u.GeV
     figures = []
@@ -71,32 +72,33 @@ def main(gamma_source_config_path, accelerator_config_path, model_config_path, g
             ax = figures[-1].add_subplot(1, 1, 1)
 
             for delta in deltas:
+                for Ebudget in Ebudgets:
 
-                es = ElectronSpectrum(
-                    gamma_src=gam_src, 
-                    snr=acc, 
-                    nH=acc_cfg['nH'],
-                    diff_chi=chi, 
-                    diff_delta=delta,
-                    tsedov=model_cfg['tsedov'],
-                    Ec=model_cfg['Ec'],
-                    Ec_max=model_cfg['Ec_max'],
-                    Ebudget=model_cfg['Ebudget'],
-                    ) 
+                    es = ElectronSpectrum(
+                        gamma_src=gam_src, 
+                        snr=acc, 
+                        nH=acc_cfg['nH'],
+                        diff_chi=chi, 
+                        diff_delta=delta,
+                        tsedov=model_cfg['tsedov'],
+                        Ec=model_cfg['Ec'],
+                        Ec_max=model_cfg['Ec_max'],
+                        Ebudget=Ebudget,
+                        ) 
 
-                if 'cloud' in acc_cfg:
-                    es.define_cloud(cloud_coord=(
-                                acc_cfg['cloud']['glon'], 
-                                acc_cfg['cloud']['glat'])
-                                )
-                    es.flux(energies, rcloud=ps.dist_cloud)
-                else:
-                    es.flux(energies, rcloud=acc_cfg['distance_cloud_release_point'])
+                    if 'cloud' in acc_cfg:
+                        es.define_cloud(cloud_coord=(
+                                    acc_cfg['cloud']['glon'], 
+                                    acc_cfg['cloud']['glat'])
+                                    )
+                        es.flux(energies, rcloud=ps.dist_cloud)
+                    else:
+                        es.flux(energies, rcloud=acc_cfg['distance_cloud_release_point'])
 
 
-                figures[-1], ax  = electron_spectrum(
-                    spectrum=es, 
-                    fig=figures[-1], ax=ax)
+                    figures[-1], ax  = electron_spectrum(
+                        spectrum=es, 
+                        fig=figures[-1], ax=ax)
 
             lines = ax.get_lines()
             legend = plt.legend(

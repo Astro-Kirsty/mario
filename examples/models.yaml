@@ -1,4 +1,4 @@
-hadronic:
+generic:
   diff_chi:
     - 0.1
     - 0.01
@@ -28,6 +28,41 @@ hadronic:
       value: 1e50
       unit: !astropy.units.Unit {unit: erg}
 
+G8_timedependent:
+  diff_chi:
+    - 0.1
+    - 0.01
+    - 0.001
+
+  diff_delta:
+    - 0.3
+    - 0.5
+    - 0.7
+
+  tsedov: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: yr}
+
+  Ec: !astropy.units.Quantity
+    value: 150
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Ec_max: !astropy.units.Quantity
+    value: 500
+    unit: !astropy.units.Unit {unit: TeV}
+
+  delta: 0.5
+
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: !astropy.units.Unit {unit: erg}
+
+  deltap: 0.7
+
+  n0: !astropy.units.Quantity
+    value: 0.03
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
 
 hadronic_1:
@@ -53,8 +88,11 @@ hadronic_1:
 
   Ebudget: 
     - !astropy.units.Quantity
-      value: 2.17e51
-      unit: !astropy.units.Unit {unit: erg}
+      value: 2.36e51
+      unit: &id001 !astropy.units.Unit {unit: erg}
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: *id001 
 
   acc_age: 
     - !astropy.units.Quantity
@@ -82,9 +120,10 @@ hadronic_2:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 1.15e50
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 3.803e50
+      unit: !astropy.units.Unit {unit: erg}
 
   acc_age: 
     - !astropy.units.Quantity
@@ -112,9 +151,10 @@ hadronic_4:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 1.86e52
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 1.69e52
+      unit: !astropy.units.Unit {unit: erg}
 
   acc_age: 
     - !astropy.units.Quantity
@@ -142,9 +182,10 @@ hadronic_5:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 8.13e50
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 1.33e51
+      unit: !astropy.units.Unit {unit: erg}
 
   acc_age: 
     - !astropy.units.Quantity
@@ -172,9 +213,10 @@ hadronic_6:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 7.22e49
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 4.5e50
+      unit: !astropy.units.Unit {unit: erg}
 
   acc_age: 
     - !astropy.units.Quantity
@@ -202,9 +244,10 @@ hadronic_7:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 1.44e53
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 2.42e52
+      unit: !astropy.units.Unit {unit: erg}
 
   acc_age: 
     - !astropy.units.Quantity
@@ -232,9 +275,10 @@ hadronic_8:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 7.22e51
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 7.56e51
+      unit: !astropy.units.Unit {unit: erg}
 
   acc_age: 
     - !astropy.units.Quantity
@@ -262,9 +306,10 @@ hadronic_9:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 3.6e50
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 1.01e51
+      unit: !astropy.units.Unit {unit: erg}
 
   acc_age: 
     - !astropy.units.Quantity
@@ -293,9 +338,10 @@ hadronic_11:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 5.85e51
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 5.28e51
+      unit: !astropy.units.Unit {unit: erg}
 
   acc_age: 
     - !astropy.units.Quantity
@@ -323,9 +369,10 @@ hadronic_12:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 4.41e52
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 5.74e50
+      unit: !astropy.units.Unit {unit: erg}
 
   acc_age: 
     - !astropy.units.Quantity
@@ -353,9 +400,10 @@ hadronic_14:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 4.41e52
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 2.43e52
+      unit: !astropy.units.Unit {unit: erg}
 
   acc_age: 
     - !astropy.units.Quantity
@@ -383,9 +431,10 @@ hadronic_15:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 2.07e51
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 2.58e51
+      unit: !astropy.units.Unit {unit: erg}
 
   acc_age: 
     - !astropy.units.Quantity
@@ -413,9 +462,10 @@ hadronic_16:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 1.27e50
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 5.18e50
+      unit: !astropy.units.Unit {unit: erg}
 
   acc_age: 
     - !astropy.units.Quantity
@@ -443,9 +493,10 @@ hadronic_17:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 3.72e53
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 2.43e52
+      unit: !astropy.units.Unit {unit: erg}
 
   acc_age: 
     - !astropy.units.Quantity
@@ -473,9 +524,10 @@ hadronic_18:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 1.9e52
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 1.70e52
+      unit: !astropy.units.Unit {unit: erg}
 
   acc_age: 
     - !astropy.units.Quantity
@@ -503,9 +555,10 @@ hadronic_19:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 7.95e50
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 1.62e51
+      unit: !astropy.units.Unit {unit: erg}
 
   acc_age: 
     - !astropy.units.Quantity
@@ -535,9 +588,10 @@ hadronic_p1:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 2.27e51
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 2.78e51
+      unit: !astropy.units.Unit {unit: erg}
 
   acc_age: 
     - !astropy.units.Quantity
@@ -565,9 +619,10 @@ hadronic_p2:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 1.06e50
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 3.28e50
+      unit: !astropy.units.Unit {unit: erg}
 
   acc_age: 
     - !astropy.units.Quantity
@@ -595,9 +650,10 @@ hadronic_p4:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 2.22e52
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 2.21e52
+      unit: !astropy.units.Unit {unit: erg}
 
   acc_age: 
     - !astropy.units.Quantity
@@ -625,9 +681,10 @@ hadronic_p5:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 8.43e50
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 1.34e51
+      unit: !astropy.units.Unit {unit: erg}
 
   acc_age: 
     - !astropy.units.Quantity
@@ -655,9 +712,10 @@ hadronic_p6:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 5.87e49
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 3.91e50
+      unit: !astropy.units.Unit {unit: erg}
 
   acc_age: 
     - !astropy.units.Quantity
@@ -685,9 +743,10 @@ hadronic_p7:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 2.12e53
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 2.27e52
+      unit: !astropy.units.Unit {unit: erg}
 
   acc_age: 
     - !astropy.units.Quantity
@@ -715,13 +774,15 @@ hadronic_p8:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 7.32e51
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 8.78e51
+      unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 16
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 16
+      unit: !astropy.units.Unit {unit: kyr}
 
 hadronic_p9:
   diff_chi:  
@@ -744,10 +805,12 @@ hadronic_p9:
 
   delta: 0.5
 
-  Ebudget: !astropy.units.Quantity
-    value: 3.38e50
-    unit: !astropy.units.Unit {unit: erg}
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 8.82e50
+      unit: !astropy.units.Unit {unit: erg}
 
-  acc_age: !astropy.units.Quantity
-    unit: !astropy.units.Unit {unit: kyr}
-    value: 16
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 16
+      unit: !astropy.units.Unit {unit: kyr}

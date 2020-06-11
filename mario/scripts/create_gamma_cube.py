@@ -55,8 +55,9 @@ def main(gamma_source_config_path, accelerator_config_path, model_config_path, a
     chis = model_cfg['diff_chi']
     deltas = model_cfg['diff_delta']
     Ebudgets = model_cfg['Ebudget']
+    ages = model_cfg['acc_age']
 
-    for age in acc_cfg['age']:
+    for age in ages:
         acc = Accelerator(
                 name=acc_cfg['name'],
                 glon=acc_cfg['glon'], 

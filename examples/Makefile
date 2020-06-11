@@ -10,10 +10,6 @@ config_plot = ./plot.yaml
 
 all: cube spectra_plot flux_plot
 
-cube: $(config_acc) $(config_gam_srcs) $(config_model)
-	mario_create_gamma_cube 'HESSJ1804' 'G8' 'hadronic' $(data_dir)/total_col_dens_26_56.fits
-	mario_create_gamma_cube 'HESSJ1804' 'PJ' 'hadronic' $(data_dir)/total_col_dens_8_26.fits
-
 cube_G8: $(config_acc) $(config_gam_srcs) $(config_model)
 	mario_create_gamma_cube 'HESSJ1804' 'G8' 'hadronic_1' $(data_dir)/total_col_dens_26_56.fits
 	mario_create_gamma_cube 'HESSJ1804' 'G8' 'hadronic_2' $(data_dir)/total_col_dens_26_56.fits
@@ -48,9 +44,10 @@ cube_PJ: $(config_acc) $(config_gam_srcs) $(config_model)
 
 
 spectra_plot: $(config_acc) $(config_gam_srcs) $(config_model)
-	mario_plot_proton_spectrum 'HESSJ1804' 'G8'
-	mario_plot_proton_spectrum 'HESSJ1804' 'PJ'
-	mario_plot_electron_spectrum 'HESSJ1804' 'PJ'
+	mario_plot_proton_spectrum 'HESSJ1804' 'G8' 'generic'
+	mario_plot_proton_spectrum 'HESSJ1804' 'PJ' 'generic'
+	mario_plot_electron_spectrum 'HESSJ1804' 'PJ' 'generic'
+	mario_plot_proton_spectrum 'HESSJ1804' 'G8' 'G8_timedependent' --timedependent True
 
 int_flux_plot: $(config_acc) $(config_plot)
 	mario_plot_integrated_flux 'G8' 'G8_Plot' $(data_dir)/Flux_G8_age28_delta0.3_chi0.1_E2.17e+51.fits

@@ -8,13 +8,14 @@ from astropy.io.misc import yaml
 
 from mario.sources.sources import GammaSource
 from mario.sources.sources import Accelerator
-from mario.models.protonspectrum import ProtonSpectrum
+from mario.models.protonspectrum import ProtonSpectrum, TimeDependentProtonSpectrum
 from mario.plotting.plotting import proton_spectrum, add_kcr_src, add_kcr
 
 
 @click.command()
 @click.argument('gamma_source')
 @click.argument('accelerator')
+@click.argument('model')
 @click.option('--gamma_source_config_path', 
                 default='gamma_sources.yaml',
                 type=click.Path(exists=True, dir_okay=False))
@@ -26,9 +27,10 @@ from mario.plotting.plotting import proton_spectrum, add_kcr_src, add_kcr
                 type=click.Path(exists=True, dir_okay=False))
 @click.option('-o', '--output', 
                 help='Output path', default='./')
+@click.option('--timedependent', default=False, type=bool)
 
 
-def main(gamma_source_config_path, accelerator_config_path, model_config_path, accelerator, gamma_source, output):
+def main(gamma_source, accelerator, model, output, timedependent, gamma_source_config_path, accelerator_config_path, model_config_path):
 
     with open(gamma_source_config_path) as file:
         gam_src_cfg = yaml.load(file)[gamma_source]
@@ -37,7 +39,7 @@ def main(gamma_source_config_path, accelerator_config_path, model_config_path, a
         acc_cfg = yaml.load(file)[accelerator]
 
     with open(model_config_path) as file:
-        model_cfg = yaml.load(file)['hadronic']
+        model_cfg = yaml.load(file)[model]
       
 
     gam_src = GammaSource(
@@ -72,7 +74,7 @@ def main(gamma_source_config_path, accelerator_config_path, model_config_path, a
             ax = figures[-1].add_subplot(1, 1, 1)
 
             for delta in deltas:
-                for Ebudget in Ebudgets:
+                for Ebudget in Ebudgets:                       
                     ps = ProtonSpectrum(
                         gamma_src=gam_src, 
                         snr=acc, 
@@ -93,11 +95,41 @@ def main(gamma_source_config_path, accelerator_config_path, model_config_path, a
                         ps.flux(energies, rcloud=ps.dist_cloud)
                     else:
                         ps.flux(energies, rcloud=acc_cfg['distance_cloud_release_point'])
-
-
-                    figures[-1], ax  = proton_spectrum(
-                        spectrum=ps, 
-                        fig=figures[-1], ax=ax)
+                        
+                    if timedependent:
+                        pst = TimeDependentProtonSpectrum(
+                                gamma_src=gam_src, 
+                                snr=acc, 
+                                nH=acc_cfg['nH'],
+                                diff_chi=chi, 
+                                diff_delta=delta,
+                                tsedov=model_cfg['tsedov'],
+                                Ec=model_cfg['Ec'],
+                                Ec_max=model_cfg['Ec_max'],
+                                Ebudget=Ebudget,
+                                n0=model_cfg['n0'], 
+                                deltap=model_cfg['deltap'],
+                                ) 
+                        if 'cloud' in acc_cfg:
+                            pst.define_cloud(cloud_coord=(
+                                        acc_cfg['cloud']['glon'], 
+                                        acc_cfg['cloud']['glat'])
+                                        )
+                            pst.flux(energies, rcloud=ps.dist_cloud)
+                        else:
+                            pst.flux(energies, rcloud=acc_cfg['distance_cloud_release_point'])
+                        
+                        figures[-1], ax  = proton_spectrum(
+                                                spectrum=ps, 
+                                                fig=figures[-1], ax=ax,
+                                                ls=':')
+                        figures[-1], ax  = proton_spectrum(
+                                                spectrum=pst, 
+                                                fig=figures[-1], ax=ax)
+                    else:
+                        figures[-1], ax  = proton_spectrum(
+                            spectrum=ps, 
+                            fig=figures[-1], ax=ax)
 
             lines = ax.get_lines()
             legend = plt.legend(
@@ -145,10 +177,15 @@ def main(gamma_source_config_path, accelerator_config_path, model_config_path, a
                 ['$k_{CR}$ (GeV)', '$k_{CR}$ (TeV)', '$k_{CR}$ (Earth)'],
                 loc='lower left'
                 )
-    
-    with PdfPages(output+f'ProtonSpectra_{gam_src.name}_{acc.name}.pdf') as pdf:
-        for fig in figures:
-            pdf.savefig(fig, bbox_inches='tight')
+
+    if timedependent:
+        with PdfPages(output+f'TimeDependentProtonSpectra_{gam_src.name}_{acc.name}.pdf') as pdf:
+            for fig in figures:
+                pdf.savefig(fig, bbox_inches='tight')
+    else: 
+        with PdfPages(output+f'ProtonSpectra_{gam_src.name}_{acc.name}.pdf') as pdf:
+            for fig in figures:
+                pdf.savefig(fig, bbox_inches='tight')
 
 
 if __name__ == '__main__':

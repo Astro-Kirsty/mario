@@ -149,7 +149,7 @@ def proton_spectrum(spectrum, age_label=False, diff_label=False, time_dep_label=
     ax.set_xscale('log')
     ax.set_yscale('log')
 
-    ax.set_xlim(7e1, 1e5)
+    ax.set_xlim(7e1, 1e6)
     ax.set_ylim(1e-3, 1e4)
 
     ax.set_xlabel('Energy (GeV)')

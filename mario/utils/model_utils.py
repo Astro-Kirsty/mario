@@ -76,3 +76,31 @@ def escape_time(tsedov, Ec, Ec_max, delta):
     """
     tesc = tsedov * (Ec / Ec_max) ** (-1 / delta)
     return tesc
+
+
+def calc_Ebudget(integral_data, integral_header, int_flux_max_obs):
+    """
+    Calculates the energy budget from the observations you want to compare to
+
+    Parameters
+    ----------------------
+    integral_data : array
+        The integrated gamma-ray flux data
+    integral_header : str
+        The header of the integrated gamma-ray flux data
+    int_flux_max_obs : float
+        Maximum values of your observations
+
+    Returns
+    ----------------------
+    float
+        The energy budget to match observations
+
+    """
+
+    int_flux_max_model = np.max(integral_data)
+    Ebudget_model = integral_header['GEBUDGET'].split(' erg')[0]
+
+    Ebudget = (int_flux_max_obs / int_flux_max_model) * float(Ebudget_model)
+
+    return Ebudget

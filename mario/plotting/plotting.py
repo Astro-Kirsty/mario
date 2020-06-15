@@ -162,6 +162,7 @@ def proton_spectrum(spectrum, age_label=False, diff_label=False, time_dep_label=
                   labelspacing=0.3)
 
     if time_dep_label:
+        spectrum.escape_energy()
         ax.set_title(f'$\delta_p$={spectrum.deltap}, $n_0$={spectrum.n0.value}'+
                      ' cm$^{-3}$, E$_{\gamma}$='+f'{spectrum.Eg_esc:.1f}')
 

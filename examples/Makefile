@@ -47,7 +47,7 @@ spectra_plot: $(config_acc) $(config_gam_srcs) $(config_model)
 	mario_plot_proton_spectrum 'HESSJ1804' 'G8' 'generic'
 	mario_plot_proton_spectrum 'HESSJ1804' 'PJ' 'generic'
 	mario_plot_electron_spectrum 'HESSJ1804' 'PJ' 'generic'
-	mario_plot_proton_spectrum 'HESSJ1804' 'G8' 'G8_timedependent' --timedependent True
+	mario_plot_proton_spectrum 'HESSJ1804' 'G8' 'time_hadronic'
 
 int_flux_plot: $(config_acc) $(config_plot)
 	mario_plot_integrated_flux 'G8' 'G8_Plot' $(data_dir)/Flux_G8_age28_delta0.3_chi0.1_E2.17e+51.fits

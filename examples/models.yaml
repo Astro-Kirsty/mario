@@ -21,14 +21,14 @@ generic:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
-
   Ebudget: 
     - !astropy.units.Quantity
       value: 1e50
       unit: !astropy.units.Unit {unit: erg}
 
-G8_timedependent:
+  timedependent: False
+
+time_hadronic:
   diff_chi:
     - 0.1
     - 0.01
@@ -51,8 +51,6 @@ G8_timedependent:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
-
   Ebudget: 
     - !astropy.units.Quantity
       value: 1e50
@@ -63,6 +61,13 @@ G8_timedependent:
   n0: !astropy.units.Quantity
     value: 0.03
     unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 28
+      unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: True
 
 
 hadronic_1:

@@ -27,10 +27,10 @@ from mario.plotting.plotting import proton_spectrum, add_kcr_src, add_kcr
                 type=click.Path(exists=True, dir_okay=False))
 @click.option('-o', '--output', 
                 help='Output path', default='./')
-@click.option('--timedependent', default=False, type=bool)
+#@click.option('--timedependent', default=False, type=bool)
 
 
-def main(gamma_source, accelerator, model, output, timedependent, gamma_source_config_path, accelerator_config_path, model_config_path):
+def main(gamma_source, accelerator, model, output, gamma_source_config_path, accelerator_config_path, model_config_path):
 
     with open(gamma_source_config_path) as file:
         gam_src_cfg = yaml.load(file)[gamma_source]
@@ -54,6 +54,7 @@ def main(gamma_source, accelerator, model, output, timedependent, gamma_source_c
     chis = model_cfg['diff_chi']
     deltas = model_cfg['diff_delta']
     Ebudgets = model_cfg['Ebudget']
+    timedependent = model_cfg['timedependent']
 
     energies = np.logspace(0, 6, 50)*u.GeV
     figures = []
@@ -101,6 +102,7 @@ def main(gamma_source, accelerator, model, output, timedependent, gamma_source_c
                                 gamma_src=gam_src, 
                                 snr=acc, 
                                 nH=acc_cfg['nH'],
+                                Ep = energies,
                                 diff_chi=chi, 
                                 diff_delta=delta,
                                 tsedov=model_cfg['tsedov'],
@@ -125,7 +127,9 @@ def main(gamma_source, accelerator, model, output, timedependent, gamma_source_c
                                                 ls=':')
                         figures[-1], ax  = proton_spectrum(
                                                 spectrum=pst, 
-                                                fig=figures[-1], ax=ax)
+                                                fig=figures[-1], ax=ax,
+                                                color=ax.lines[-1].get_color())
+
                     else:
                         figures[-1], ax  = proton_spectrum(
                             spectrum=ps, 
@@ -138,7 +142,6 @@ def main(gamma_source, accelerator, model, output, timedependent, gamma_source_c
                 loc = 'upper right'
                 )
             ax.add_artist(legend)
-
             ax.text(0.05, 0.95, f'{acc_cfg["name"]} ({age:.0f})',
                 horizontalalignment='left',
                 verticalalignment='top',

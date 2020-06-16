@@ -31,6 +31,7 @@ cube_G8: $(config_acc) $(config_gam_srcs) $(config_model)
 	mario_create_gamma_cube 'HESSJ1804' 'G8' 'hadronic_18' $(data_dir)/total_col_dens_26_56.fits
 	mario_create_gamma_cube 'HESSJ1804' 'G8' 'hadronic_19' $(data_dir)/total_col_dens_26_56.fits
 
+
 cube_PJ: $(config_acc) $(config_gam_srcs) $(config_model)
 	mario_create_gamma_cube 'HESSJ1804' 'PJ' 'hadronic_p1' $(data_dir)/total_col_dens_8_26.fits
 	mario_create_gamma_cube 'HESSJ1804' 'PJ' 'hadronic_p2' $(data_dir)/total_col_dens_8_26.fits

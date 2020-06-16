@@ -6,10 +6,10 @@ from astropy.io.misc import yaml
 
 from mario.sources.sources import GammaSource
 from mario.sources.sources import Accelerator
-from mario.models.protonspectrum import ProtonSpectrum
+from mario.models.protonspectrum import ProtonSpectrum, TimeDependentProtonSpectrum
 from mario.utils.gas_utils import GasParameters
 from mario.gamma.flux import GammaFlux
-
+from astropy.io import fits
 
 
 @click.command()
@@ -55,6 +55,7 @@ def main(gamma_source_config_path, accelerator_config_path, model_config_path, a
     chis = model_cfg['diff_chi']
     deltas = model_cfg['diff_delta']
     Ebudgets = model_cfg['Ebudget']
+    timedependent = model_cfg['timedependent']
     ages = model_cfg['acc_age']
 
     for age in ages:
@@ -71,17 +72,34 @@ def main(gamma_source_config_path, accelerator_config_path, model_config_path, a
         for chi in chis:
             for delta in deltas:
                 for Ebudget in Ebudgets:
-                    ps = ProtonSpectrum(
-                        gamma_src=gam_src, 
-                        snr=acc, 
-                        nH=acc_cfg['nH'],
-                        diff_chi=chi, 
-                        diff_delta=delta,
-                        tsedov=model_cfg['tsedov'],
-                        Ec=model_cfg['Ec'],
-                        Ec_max=model_cfg['Ec_max'],
-                        Ebudget=Ebudget,
-                        ) 
+                    if timedependent:
+                        ps = TimeDependentProtonSpectrum(
+                                gamma_src=gam_src, 
+                                snr=acc, 
+                                nH=acc_cfg['nH'],
+                                diff_chi=chi, 
+                                diff_delta=delta,
+                                tsedov=model_cfg['tsedov'],
+                                Ec=model_cfg['Ec'],
+                                Ec_max=model_cfg['Ec_max'],
+                                n0=model_cfg['n0'], 
+                                deltap=model_cfg['deltap'],
+                                Ebudget=Ebudget
+                                ) 
+                    else:
+                        ps = ProtonSpectrum(
+                                gamma_src=gam_src, 
+                                snr=acc, 
+                                nH=acc_cfg['nH'],
+                                diff_chi=chi, 
+                                diff_delta=delta,
+                                tsedov=model_cfg['tsedov'],
+                                Ec=model_cfg['Ec'],
+                                Ec_max=model_cfg['Ec_max'],
+                                deltap=model_cfg['deltap'],
+                                n0=model_cfg['n0'],
+                                Ebudget=Ebudget,
+                                ) 
 
                     if 'cloud' in acc_cfg:
                         ps.define_cloud(cloud_coord=(
@@ -97,7 +115,14 @@ def main(gamma_source_config_path, accelerator_config_path, model_config_path, a
                     Eg = np.logspace(np.log10(0.1), np.log10(100), 31)*u.TeV
                     gs = GammaFlux(snr=acc, ps=ps, gas=gp)
                     gs.flux(Eg)
-                    gs.save_cube(filename=f'Flux_{accelerator}_age{acc.age.value:.0f}_delta{ps.diff_delta}_chi{ps.diff_chi}_E{ps.Ebudget.value}.fits')
+                    if timedependent:
+                        gs.save_cube(filename=f'FluxTime_{accelerator}_age{acc.age.value:.0f}_delta{ps.diff_delta}_chi{ps.diff_chi}_E{ps.Ebudget.value}.fits')
+                        ps.escape_energy()
+                        with fits.open(f'FluxTime_{accelerator}_age{acc.age.value:.0f}_delta{ps.diff_delta}_chi{ps.diff_chi}_E{ps.Ebudget.value}.fits', 'update') as f:
+                            for hdu in f:
+                                hdu.header['COMMENT'] = f'Eg_esc={ps.Eg_esc:.3f}, tesc_snr={ps.tesc_snr:.3e}'
+                    else:
+                        gs.save_cube(filename=f'Flux_{accelerator}_age{acc.age.value:.0f}_delta{ps.diff_delta}_chi{ps.diff_chi}_E{ps.Ebudget.value}.fits')
 
 
 if __name__ == '__main__':

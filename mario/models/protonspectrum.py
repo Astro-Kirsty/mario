@@ -57,8 +57,6 @@ class ProtonSpectrum:
         self.diff_chi = diff_chi
         self.diff_delta = diff_delta
 
-        self.time = self.snr.age
-
         self.tsedov = tsedov
         self.Ec = Ec
         self.Ec_max = Ec_max
@@ -69,6 +67,11 @@ class ProtonSpectrum:
         self.u1 = 1.4 * u.kg
 
         self.Ebudget = Ebudget
+
+
+    def time(self, Ep):
+        return self.snr.age
+
 
     #@u.quantity_input(cloud_coord=u.deg, d=u.pc)
     def define_cloud(self, cloud_coord, Ec=None):
@@ -95,10 +98,12 @@ class ProtonSpectrum:
 
         tesc = escape_time(tsedov=self.tsedov, Ec=Ec, Ec_max=self.Ec_max, delta=self.deltap)
         
-        R = calc_dist_CR_release_point(E51=self.E51, n=self.n0, u1=self.u1, tesc=tesc)
+        Rc = calc_dist_CR_release_point(E51=self.E51, n=self.n0, u1=self.u1, tesc=tesc)
 
-        ang_dist = np.arctan(R / (self.snr.distance.to(u.pc))).to(u.deg)
-        theta_cloud = cloud_source_sep - ang_dist
+        Rc_ang_dist = np.arctan(Rc / (self.snr.distance.to(u.pc))).to(u.deg)
+        theta_cloud = cloud_source_sep - Rc_ang_dist
+
+#        theta_cloud[Rc_ang_dist > cloud_source_sep] = 100*u.deg
 
         self.dist_cloud = (self.snr.distance * np.tan(theta_cloud)).to(u.pc)
 
@@ -131,8 +136,10 @@ class ProtonSpectrum:
 
         if type(Ep.value) == np.ndarray:
             Ep = Ep[:, None, None]
-            if type(rcloud.value) == np.ndarray:
+            if len(np.shape(rcloud.value)) == 2:
+            #if type(rcloud.value) == np.ndarray:
                 rcloud = rcloud * np.ones((len(Ep), np.shape(rcloud)[0], np.shape(rcloud)[1]))
+                #rcloud = rcloud[:, None, None]
 
         if B_mag is None:
             B_mag = calc_Bmag(self.nH)
@@ -145,9 +152,9 @@ class ProtonSpectrum:
         cool_time = (6e7 * (self.nH / u.cm ** -3) ** (-1) * u.yr).to(u.s)
 
         # Calculation of diffusion radius
-        frac = ((np.exp(self.time * self.diff_delta / cool_time) - 1)
-                / (self.time * self.diff_delta / cool_time))
-        diff_radius = 2 * np.sqrt(diff_coeff * self.time * frac)
+        frac = ((np.exp(self.time(Ep) * self.diff_delta / cool_time) - 1)
+                / (self.time(Ep) * self.diff_delta / cool_time))
+        diff_radius = 2 * np.sqrt(diff_coeff * self.time(Ep) * frac)
                
         # Calculation of normalisation constant, N0
         alpha = 2
@@ -165,6 +172,8 @@ class ProtonSpectrum:
         expo = (- ((self.gamma_src.spectral_index - 1) * self.snr.age / cool_time) - (rcloud / diff_radius) ** 2)
         flux = (coeff / u.GeV * np.exp(expo)).to(u.TeV ** (-1) * u.cm ** (-3))
 
+        flux[rcloud < 0 ] = 0 * (u.TeV ** (-1) * u.cm ** (-3))
+
         self.energies = Ep
         self.fluxes = flux
 
@@ -173,24 +182,22 @@ class ProtonSpectrum:
 
 class TimeDependentProtonSpectrum(ProtonSpectrum):
 
-    def __init__(self, gamma_src, snr, nH, Ep, diff_chi=0.01, diff_delta=0.5,
+    def __init__(self, gamma_src, snr, nH, diff_chi=0.01, diff_delta=0.5,
                  tsedov=100 * u.yr, Ec=150 * u.TeV, Ec_max=500 * u.TeV, deltap=1.0,
                  Ebudget=1e50 * u.erg, n0=0.03 * u.cm ** (-3)):
         super(TimeDependentProtonSpectrum, self).__init__(gamma_src, snr, nH, diff_chi, diff_delta,
                                                           tsedov, Ec, Ec_max, deltap, n0, Ebudget)
 
-        self.Ep = Ep
-
-        self.tesc = escape_time(tsedov=self.tsedov, Ec=self.Ep.to(u.TeV), 
-                                Ec_max=self.Ec_max, delta=self.deltap)
-        self.time = (self.snr.age - self.tesc)
-        self.time[self.tesc > self.snr.age] = 0.05*u.kyr
         
-        if type(self.time.value) == np.ndarray:
-            self.time = self.time[:, None, None]
-            
-        self.Resc = calc_dist_CR_release_point(E51=self.E51, n=self.n0, u1=self.u1, tesc=self.tesc)
+    def time(self, Ep):
+        tesc = escape_time(tsedov=self.tsedov, Ec=Ep.to(u.TeV), Ec_max=self.Ec_max, delta=self.deltap)
+        time_esc = (self.snr.age - tesc)
+        time_esc[tesc > self.snr.age] = 0.05*u.kyr
+        return time_esc
 
+    def escape_radius(self, Ep):
+        tesc = escape_time(tsedov=self.tsedov, Ec=Ep.to(u.TeV), Ec_max=self.Ec_max, delta=self.deltap)
+        return calc_dist_CR_release_point(E51=self.E51, n=self.n0, u1=self.u1, tesc=self.tesc)
 
     def escape_energy(self):
     
@@ -198,10 +205,12 @@ class TimeDependentProtonSpectrum(ProtonSpectrum):
         r_snr = self.snr.distance.to(u.pc) * np.tan(self.snr.radius)
         tesc_snr = ( r_snr / (0.31*u.pc * self.E51**(1/5) * (self.n0/u.cm**(-3))**(-1/5) * 
                               (self.u1/ (1.4*u.kg))**(-1/5)))**(5/2) * u.yr
-        Eg_esc = (self.Ec_max * (tesc_snr / self.tsedov)**(-self.deltap) ) * 0.17
+        Ep_esc = self.Ec_max * (tesc_snr / self.tsedov)**(-self.deltap)
 
-        self.Eg_esc = Eg_esc
+        self.Ep_esc = Ep_esc
+        self.Eg_esc = Ep_esc * 0.17
         self.tesc_snr = tesc_snr
+
 
         return 
 

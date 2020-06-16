@@ -27,7 +27,6 @@ from mario.plotting.plotting import proton_spectrum, add_kcr_src, add_kcr
                 type=click.Path(exists=True, dir_okay=False))
 @click.option('-o', '--output', 
                 help='Output path', default='./')
-#@click.option('--timedependent', default=False, type=bool)
 
 
 def main(gamma_source, accelerator, model, output, gamma_source_config_path, accelerator_config_path, model_config_path):
@@ -85,6 +84,8 @@ def main(gamma_source, accelerator, model, output, gamma_source_config_path, acc
                         tsedov=model_cfg['tsedov'],
                         Ec=model_cfg['Ec'],
                         Ec_max=model_cfg['Ec_max'],
+                        n0=model_cfg['n0'], 
+                        deltap=model_cfg['deltap'],
                         Ebudget=Ebudget,
                         ) 
 
@@ -102,20 +103,20 @@ def main(gamma_source, accelerator, model, output, gamma_source_config_path, acc
                                 gamma_src=gam_src, 
                                 snr=acc, 
                                 nH=acc_cfg['nH'],
-                                Ep = energies,
                                 diff_chi=chi, 
                                 diff_delta=delta,
                                 tsedov=model_cfg['tsedov'],
                                 Ec=model_cfg['Ec'],
                                 Ec_max=model_cfg['Ec_max'],
-                                Ebudget=Ebudget,
                                 n0=model_cfg['n0'], 
                                 deltap=model_cfg['deltap'],
+                                Ebudget=Ebudget,
                                 ) 
                         if 'cloud' in acc_cfg:
                             pst.define_cloud(cloud_coord=(
                                         acc_cfg['cloud']['glon'], 
-                                        acc_cfg['cloud']['glat'])
+                                        acc_cfg['cloud']['glat']),
+                                        Ec = energies
                                         )
                             pst.flux(energies, rcloud=ps.dist_cloud)
                         else:

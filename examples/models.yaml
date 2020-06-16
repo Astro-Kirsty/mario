@@ -21,6 +21,12 @@ generic:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
   Ebudget: 
     - !astropy.units.Quantity
       value: 1e50
@@ -89,7 +95,11 @@ hadronic_1:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -123,7 +133,11 @@ hadronic_2:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -154,7 +168,11 @@ hadronic_4:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -185,7 +203,11 @@ hadronic_5:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -216,7 +238,11 @@ hadronic_6:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -247,7 +273,11 @@ hadronic_7:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -278,7 +308,11 @@ hadronic_8:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -309,7 +343,11 @@ hadronic_9:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -341,7 +379,11 @@ hadronic_11:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -372,7 +414,11 @@ hadronic_12:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -403,7 +449,11 @@ hadronic_14:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -434,7 +484,11 @@ hadronic_15:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -465,7 +519,11 @@ hadronic_16:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -496,7 +554,11 @@ hadronic_17:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -527,7 +589,11 @@ hadronic_18:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -558,7 +624,11 @@ hadronic_19:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -591,7 +661,11 @@ hadronic_p1:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -622,7 +696,11 @@ hadronic_p2:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -653,7 +731,11 @@ hadronic_p4:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -684,7 +766,11 @@ hadronic_p5:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -715,7 +801,11 @@ hadronic_p6:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -746,7 +836,11 @@ hadronic_p7:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -777,7 +871,11 @@ hadronic_p8:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity
@@ -808,7 +906,11 @@ hadronic_p9:
     value: 500
     unit: !astropy.units.Unit {unit: TeV}
 
-  delta: 0.5
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
 
   Ebudget: 
     - !astropy.units.Quantity

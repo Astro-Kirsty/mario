@@ -109,7 +109,8 @@ class GasParameters:
     """
 
     def __init__(self, snr, gas_map_path, 
-                 tsedov=100 * u.yr, Ec=150 * u.TeV, Ec_max=500 * u.TeV, delta=0.5):
+                 tsedov=100 * u.yr, Ec=150 * u.TeV, Ec_max=500 * u.TeV, 
+                 deltap=0.5, n0= 1 * u.cm ** (-3)):
         """
         Parameters
         ----------------------
@@ -137,7 +138,15 @@ class GasParameters:
         # Width of pixel
         self.theta_pixel = (self.header['CDELT2']) * u.deg
         
-        self.tesc = escape_time(tsedov=tsedov, Ec=Ec, Ec_max=Ec_max, delta=delta)
+
+        self.tsedov = tsedov
+        self.Ec = Ec
+        self.Ec_max = Ec_max
+        self.deltap = deltap
+        self.n0 = n0
+
+        self.E51 = 1
+        self.u1 = 1.4 * u.kg
 
     def nH2_cell(self):
         """
@@ -173,6 +182,7 @@ class GasParameters:
         array
             The distance to each pixel from the accelerator
         """
+
         # Set the coordinates of the counterpart
         OBJ_coord = SkyCoord(self.snr.glon, self.snr.glat, frame='galactic')
 
@@ -186,10 +196,11 @@ class GasParameters:
         theta_sep = (OBJ_coord.separation(pixel_coord)).deg * u.deg
         dist = self.snr.distance.to(u.cm) * np.tan(theta_sep)
         
-        R = calc_dist_CR_release_point(E51=1, n=1 * u.cm ** (-3),
-                                       u1=1.4 * u.kg, tesc=self.tesc)
+        tesc = escape_time(tsedov=self.tsedov, Ec=self.Ec, Ec_max=self.Ec_max, delta=self.deltap)
+        Rc = calc_dist_CR_release_point(E51=self.E51, n=self.n0,
+                                       u1=self.u1, tesc=tesc)
         
-        distance_from_release_point = dist - R
-        distance_from_release_point[distance_from_release_point < R] = 0
+        distance_from_release_point = dist - Rc
+        distance_from_release_point[distance_from_release_point < Rc] = 0
 
         return distance_from_release_point

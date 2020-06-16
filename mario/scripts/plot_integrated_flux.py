@@ -89,7 +89,7 @@ def main(accelerator, plot_type, gamma_cube, accelerator_config_path, plot_confi
     fig = plt.figure(figsize=(8, 4))
     ax = fig.add_subplot(111, projection=WCS(oversampled_header))
     fig, ax = sm.plot(oversampled_data, cmap=plt.cm.hot_r, fig=fig, ax=ax, 
-                      colorbar_label=f'Integrated flux ({emin:.0f}-{emax:.0f}TeV) cm$^{-2}$ s$^{-1}$', 
+                      colorbar_label=f'Integrated flux ({emin:.0f}-{emax:.0f}TeV)'+' cm$^{-2}$ s$^{-1}$', 
                       diff_label=True)
 
     add_gamma_src(src_fits, con_levels, ax, 'black')

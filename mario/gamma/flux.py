@@ -183,5 +183,9 @@ class GammaFlux:
         hdr.header['GCHI'] = f'{self.ps.diff_chi}'
         hdr.header['GEBUDGET'] = f'{self.ps.Ebudget}'
 
+        hdr.header['COMMENT'] = f'tsedov={self.ps.tsedov}, Ec_max={self.ps.Ec_max}'
+        hdr.header['COMMENT'] = f'Ec={self.ps.Ec}'
+        hdr.header['COMMENT'] = f'n0={self.ps.n0}, deltap={self.ps.deltap}' 
+
         hdr.header['AUTHOR'] = author
         hdr.writeto(filename, overwrite=True)

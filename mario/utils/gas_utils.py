@@ -196,11 +196,4 @@ class GasParameters:
         theta_sep = (OBJ_coord.separation(pixel_coord)).deg * u.deg
         dist = self.snr.distance.to(u.cm) * np.tan(theta_sep)
         
-        tesc = escape_time(tsedov=self.tsedov, Ec=self.Ec, Ec_max=self.Ec_max, delta=self.deltap)
-        Rc = calc_dist_CR_release_point(E51=self.E51, n=self.n0,
-                                       u1=self.u1, tesc=tesc)
-        
-        distance_from_release_point = dist - Rc
-        distance_from_release_point[distance_from_release_point < Rc] = 0
-
-        return distance_from_release_point
+        return dist

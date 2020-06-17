@@ -68,12 +68,13 @@ class ProtonSpectrum:
 
         self.Ebudget = Ebudget
 
+        self.model = 'ProtonSpectrum'
+
 
     def time(self, Ep):
         return self.snr.age
 
 
-    #@u.quantity_input(cloud_coord=u.deg, d=u.pc)
     def define_cloud(self, cloud_coord, Ec=None):
         """
         Calculates the distance from the cloud to the release point of cosmic ray protons
@@ -102,8 +103,6 @@ class ProtonSpectrum:
 
         Rc_ang_dist = np.arctan(Rc / (self.snr.distance.to(u.pc))).to(u.deg)
         theta_cloud = cloud_source_sep - Rc_ang_dist
-
-#        theta_cloud[Rc_ang_dist > cloud_source_sep] = 100*u.deg
 
         self.dist_cloud = (self.snr.distance * np.tan(theta_cloud)).to(u.pc)
 
@@ -137,9 +136,7 @@ class ProtonSpectrum:
         if type(Ep.value) == np.ndarray:
             Ep = Ep[:, None, None]
             if len(np.shape(rcloud.value)) == 2:
-            #if type(rcloud.value) == np.ndarray:
                 rcloud = rcloud * np.ones((len(Ep), np.shape(rcloud)[0], np.shape(rcloud)[1]))
-                #rcloud = rcloud[:, None, None]
 
         if B_mag is None:
             B_mag = calc_Bmag(self.nH)
@@ -188,6 +185,7 @@ class TimeDependentProtonSpectrum(ProtonSpectrum):
         super(TimeDependentProtonSpectrum, self).__init__(gamma_src, snr, nH, diff_chi, diff_delta,
                                                           tsedov, Ec, Ec_max, deltap, n0, Ebudget)
 
+        self.model = 'TimeDependentProtonSpectrum'
         
     def time(self, Ep):
         tesc = escape_time(tsedov=self.tsedov, Ec=Ep.to(u.TeV), Ec_max=self.Ec_max, delta=self.deltap)

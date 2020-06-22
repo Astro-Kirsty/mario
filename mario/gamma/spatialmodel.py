@@ -122,7 +122,7 @@ class SpectralModel:
         fit : str
             Choose which function to fit (default is 'PL')
         """
-        # NOTE: if the flux has units must use .value
+
         log_fluxes = np.log10(self.fluxes)
         log_energies = np.log10(self.energies)
 
@@ -389,7 +389,7 @@ class SpatialModel3D(SpatialModel):
             for iy in range(ysize):
                 fluxes = data[:, ix, iy]
                 log_fluxes = np.log10(fluxes)
-                if np.isfinite(log_fluxes).any():
+                if np.isfinite(log_fluxes).all():
                     popt, pcov = curve_fit(PL_log,
                                            log_energies, log_fluxes,
                                            p0=[log_fluxes[0], 3])

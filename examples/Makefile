@@ -13,7 +13,7 @@ all: cube spectra_plot flux_plot
 cube_G8: $(config_acc) $(config_gam_srcs) $(config_model)
 	mario_create_gamma_cube 'HESSJ1804' 'G8' 'hadronic_1' $(data_dir)/total_col_dens_26_56.fits
 	mario_create_gamma_cube 'HESSJ1804' 'G8' 'hadronic_2' $(data_dir)/total_col_dens_26_56.fits
-#	mario_create_gamma_cube 'HESSJ1804' 'G8' 'hadronic_3' $(data_dir)/total_col_dens_26_56.fits
+	mario_create_gamma_cube 'HESSJ1804' 'G8' 'hadronic_3' $(data_dir)/total_col_dens_26_56.fits
 	mario_create_gamma_cube 'HESSJ1804' 'G8' 'hadronic_4' $(data_dir)/total_col_dens_26_56.fits
 	mario_create_gamma_cube 'HESSJ1804' 'G8' 'hadronic_5' $(data_dir)/total_col_dens_26_56.fits
 	mario_create_gamma_cube 'HESSJ1804' 'G8' 'hadronic_6' $(data_dir)/total_col_dens_26_56.fits
@@ -23,7 +23,7 @@ cube_G8: $(config_acc) $(config_gam_srcs) $(config_model)
 
 	mario_create_gamma_cube 'HESSJ1804' 'G8' 'hadronic_11' $(data_dir)/total_col_dens_26_56.fits
 	mario_create_gamma_cube 'HESSJ1804' 'G8' 'hadronic_12' $(data_dir)/total_col_dens_26_56.fits
-#	mario_create_gamma_cube 'HESSJ1804' 'G8' 'hadronic_13' $(data_dir)/total_col_dens_26_56.fits
+	mario_create_gamma_cube 'HESSJ1804' 'G8' 'hadronic_13' $(data_dir)/total_col_dens_26_56.fits
 	mario_create_gamma_cube 'HESSJ1804' 'G8' 'hadronic_14' $(data_dir)/total_col_dens_26_56.fits
 	mario_create_gamma_cube 'HESSJ1804' 'G8' 'hadronic_15' $(data_dir)/total_col_dens_26_56.fits
 	mario_create_gamma_cube 'HESSJ1804' 'G8' 'hadronic_16' $(data_dir)/total_col_dens_26_56.fits
@@ -35,7 +35,7 @@ cube_G8: $(config_acc) $(config_gam_srcs) $(config_model)
 cube_PJ: $(config_acc) $(config_gam_srcs) $(config_model)
 	mario_create_gamma_cube 'HESSJ1804' 'PJ' 'hadronic_p1' $(data_dir)/total_col_dens_8_26.fits
 	mario_create_gamma_cube 'HESSJ1804' 'PJ' 'hadronic_p2' $(data_dir)/total_col_dens_8_26.fits
-#	mario_create_gamma_cube 'HESSJ1804' 'PJ' 'hadronic_p3' $(data_dir)/total_col_dens_8_26.fits
+	mario_create_gamma_cube 'HESSJ1804' 'PJ' 'hadronic_p3' $(data_dir)/total_col_dens_8_26.fits
 	mario_create_gamma_cube 'HESSJ1804' 'PJ' 'hadronic_p4' $(data_dir)/total_col_dens_8_26.fits
 	mario_create_gamma_cube 'HESSJ1804' 'PJ' 'hadronic_p5' $(data_dir)/total_col_dens_8_26.fits
 	mario_create_gamma_cube 'HESSJ1804' 'PJ' 'hadronic_p6' $(data_dir)/total_col_dens_8_26.fits

@@ -167,8 +167,7 @@ class GasParameters:
 
         # Calculation of number density
         nH2 = (self.total_col_dens / volume) * area
-        nH2[nH2 < 0] = 0
-        nH2[np.isnan(nH2)] = 0
+        nH2[nH2 < 0] = np.nan
 
         return nH2
 

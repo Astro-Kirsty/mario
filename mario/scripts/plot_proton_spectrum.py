@@ -72,6 +72,7 @@ def main(gamma_source, accelerator, model, output, gamma_source_config_path, acc
         for chi in chis:
             figures.append(plt.figure())
             ax = figures[-1].add_subplot(1, 1, 1)
+            lines = []
 
             for delta in deltas:
                 for Ebudget in Ebudgets:                       
@@ -116,7 +117,6 @@ def main(gamma_source, accelerator, model, output, gamma_source_config_path, acc
                             pst.define_cloud(cloud_coord=(
                                         acc_cfg['cloud']['glon'], 
                                         acc_cfg['cloud']['glat']),
-                                        Ec = energies
                                         )
                             pst.flux(energies, rcloud=ps.dist_cloud)
                         else:
@@ -136,7 +136,8 @@ def main(gamma_source, accelerator, model, output, gamma_source_config_path, acc
                             spectrum=ps, 
                             fig=figures[-1], ax=ax)
 
-            lines = ax.get_lines()
+                    lines += [ax.get_lines()[-1]]
+
             legend = plt.legend(
                 [lines[i] for i in range(len(deltas))],
                 [f'$\delta$ = {j}' for j in deltas],

@@ -114,6 +114,8 @@ hadronic_1:
       value: 15
       unit: !astropy.units.Unit {unit: kyr}
 
+  timedependent: False
+
 hadronic_2:
   diff_chi: 
     - 0.01
@@ -142,12 +144,57 @@ hadronic_2:
   Ebudget: 
     - !astropy.units.Quantity
       value: 3.803e50
-      unit: !astropy.units.Unit {unit: erg}
+      unit: &id002 !astropy.units.Unit {unit: erg}
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: *id002 
 
   acc_age: 
     - !astropy.units.Quantity
       value: 15
       unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: False
+
+hadronic_3:
+  diff_chi: 
+    - 0.001
+
+  diff_delta: 
+    - 0.3
+
+  tsedov: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: yr}
+
+  Ec: !astropy.units.Quantity
+    value: 150
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Ec_max: !astropy.units.Quantity
+    value: 500
+    unit: !astropy.units.Unit {unit: TeV}
+
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 1.365e51
+      unit: &id003 !astropy.units.Unit {unit: erg}
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: *id003
+
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 15
+      unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: False
 
 hadronic_4:
   diff_chi: 
@@ -177,12 +224,17 @@ hadronic_4:
   Ebudget: 
     - !astropy.units.Quantity
       value: 1.69e52
-      unit: !astropy.units.Unit {unit: erg}
+      unit: &id004 !astropy.units.Unit {unit: erg}
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: *id004
 
   acc_age: 
     - !astropy.units.Quantity
       value: 15
       unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: False
 
 hadronic_5:
   diff_chi: 
@@ -219,6 +271,8 @@ hadronic_5:
       value: 15
       unit: !astropy.units.Unit {unit: kyr}
 
+  timedependent: False
+
 hadronic_6:
   diff_chi: 
     - 0.001
@@ -253,6 +307,8 @@ hadronic_6:
     - !astropy.units.Quantity
       value: 15
       unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: False
 
 hadronic_7:
   diff_chi: 
@@ -289,6 +345,8 @@ hadronic_7:
       value: 15
       unit: !astropy.units.Unit {unit: kyr}
 
+  timedependent: False
+
 hadronic_8:
   diff_chi:  
     - 0.01
@@ -324,6 +382,8 @@ hadronic_8:
       value: 15
       unit: !astropy.units.Unit {unit: kyr}
 
+  timedependent: False
+
 hadronic_9:
   diff_chi:  
     - 0.001
@@ -358,6 +418,8 @@ hadronic_9:
     - !astropy.units.Quantity
       value: 15
       unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: False
 
 # 28 kyrs
 hadronic_11:
@@ -395,6 +457,8 @@ hadronic_11:
       value: 28
       unit: !astropy.units.Unit {unit: kyr}
 
+  timedependent: False
+
 hadronic_12:
   diff_chi:  
     - 0.01
@@ -429,6 +493,45 @@ hadronic_12:
     - !astropy.units.Quantity
       value: 28
       unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: False
+
+hadronic_13:
+  diff_chi:  
+    - 0.001
+
+  diff_delta:  
+    - 0.3
+
+  tsedov: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: yr}
+
+  Ec: !astropy.units.Quantity
+    value: 150
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Ec_max: !astropy.units.Quantity
+    value: 500
+    unit: !astropy.units.Unit {unit: TeV}
+
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 5.672e50
+      unit: !astropy.units.Unit {unit: erg}
+
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 28
+      unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: False
 
 hadronic_14:
   diff_chi:  
@@ -465,6 +568,8 @@ hadronic_14:
       value: 28
       unit: !astropy.units.Unit {unit: kyr}
 
+  timedependent: False
+
 hadronic_15:
   diff_chi:  
     - 0.01
@@ -499,6 +604,8 @@ hadronic_15:
     - !astropy.units.Quantity
       value: 28
       unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: False
 
 hadronic_16:
   diff_chi:  
@@ -535,6 +642,8 @@ hadronic_16:
       value: 28
       unit: !astropy.units.Unit {unit: kyr}
 
+  timedependent: False
+
 hadronic_17:
   diff_chi:  
     - 0.1
@@ -569,6 +678,8 @@ hadronic_17:
     - !astropy.units.Quantity
       value: 28
       unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: False
 
 hadronic_18:
   diff_chi:  
@@ -605,6 +716,8 @@ hadronic_18:
       value: 28
       unit: !astropy.units.Unit {unit: kyr}
 
+  timedependent: False
+
 hadronic_19:
   diff_chi:  
     - 0.001
@@ -639,6 +752,8 @@ hadronic_19:
     - !astropy.units.Quantity
       value: 28
       unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: False
 
 
 #Progenitor
@@ -677,6 +792,8 @@ hadronic_p1:
       value: 16
       unit: !astropy.units.Unit {unit: kyr}
 
+  timedependent: False
+
 hadronic_p2:
   diff_chi:  
     - 0.01
@@ -711,6 +828,46 @@ hadronic_p2:
     - !astropy.units.Quantity
       value: 16
       unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: False
+
+hadronic_p2:
+  diff_chi:  
+    - 0.01
+
+  diff_delta:  
+    - 0.3
+
+  tsedov: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: yr}
+
+  Ec: !astropy.units.Quantity
+    value: 150
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Ec_max: !astropy.units.Quantity
+    value: 500
+    unit: !astropy.units.Unit {unit: TeV}
+
+  deltap: 0.5
+
+  n0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 1.07e+51
+      unit: !astropy.units.Unit {unit: erg}
+
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 16
+      unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: False
+
 
 hadronic_p4:
   diff_chi:  
@@ -747,6 +904,8 @@ hadronic_p4:
       value: 16
       unit: !astropy.units.Unit {unit: kyr}
 
+  timedependent: False
+
 hadronic_p5:
   diff_chi:  
     - 0.01
@@ -781,6 +940,8 @@ hadronic_p5:
     - !astropy.units.Quantity
       value: 16
       unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: False
 
 hadronic_p6:
   diff_chi:  
@@ -817,6 +978,8 @@ hadronic_p6:
       value: 16
       unit: !astropy.units.Unit {unit: kyr}
 
+  timedependent: False
+
 hadronic_p7:
   diff_chi:  
     - 0.1
@@ -851,6 +1014,8 @@ hadronic_p7:
     - !astropy.units.Quantity
       value: 16
       unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: False
 
 hadronic_p8:
   diff_chi:  
@@ -887,6 +1052,8 @@ hadronic_p8:
       value: 16
       unit: !astropy.units.Unit {unit: kyr}
 
+  timedependent: False
+
 hadronic_p9:
   diff_chi:  
     - 0.001
@@ -921,3 +1088,5 @@ hadronic_p9:
     - !astropy.units.Quantity
       value: 16
       unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: False

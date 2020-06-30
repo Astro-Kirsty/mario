@@ -4,6 +4,7 @@ from astropy.constants import c
 from astropy.coordinates import SkyCoord
 from scipy.integrate import quad
 from mario.utils.model_utils import calc_Bmag, calc_dist_CR_release_point, escape_time
+from astropy.io import fits
 
 def N0_eval(x, alpha):
     return x ** (1 - alpha)
@@ -165,16 +166,62 @@ class ProtonSpectrum:
               (np.exp(- ((alpha - 1) * t0 / cool_time) - 1) * V * intt))
 
         # Calculation of proton flux
-        coeff = (N0 * (Ep / u.GeV) ** (-self.gamma_src.spectral_index)) / (np.pi ** (3 / 2) * diff_radius ** 3)
-        expo = (- ((self.gamma_src.spectral_index - 1) * self.snr.age / cool_time) - (rcloud / diff_radius) ** 2)
+        coeff = (N0 * (Ep / u.GeV) ** (-alpha)) / (np.pi ** (3 / 2) * diff_radius ** 3)
+        expo = (- ((alpha - 1) * self.snr.age / cool_time) - (rcloud / diff_radius) ** 2)
         flux = (coeff / u.GeV * np.exp(expo)).to(u.TeV ** (-1) * u.cm ** (-3))
 
-        flux[rcloud < 0 ] = 0 * (u.TeV ** (-1) * u.cm ** (-3))
+        flux[rcloud <= 0 ] = 0 * (u.TeV ** (-1) * u.cm ** (-3))
 
         self.energies = Ep
         self.fluxes = flux
 
         return flux
+
+    def save_cube(self, gp, author='', filename='Protonflux_cube.fits'):
+        """
+        Save the proton flux to a fits cube
+
+        Parameters
+        ----------------------
+        author : str, optional
+            Author of the fits file (default 'Kirsty Feijen')
+        filename : str, optional
+            The name to save your fits to (default 'Protonflux_cube.fits')
+
+        """
+        step = np.diff(np.log10(self.energies[:,0,0].to(u.TeV).value))[0]
+
+        E0 = np.log10(self.energies[0, 0, 0].to(u.TeV).value)
+
+        hdr = fits.PrimaryHDU(data=self.fluxes.value)
+        hdr.header['BUNIT'] = f'{self.fluxes.unit}'
+        
+        hdr.header['CTYPE1'] = gp.header['CTYPE1']
+        hdr.header['CRVAL1'] = gp.header['CRVAL1']
+        hdr.header['CRPIX1'] = gp.header['CRPIX1']
+        hdr.header['CDELT1'] = gp.header['CDELT1']
+
+        hdr.header['CTYPE2'] = gp.header['CTYPE2']
+        hdr.header['CRVAL2'] = gp.header['CRVAL2']
+        hdr.header['CRPIX2'] = gp.header['CRPIX2']
+        hdr.header['CDELT2'] = gp.header['CDELT2']
+
+        hdr.header['CTYPE3'] = 'log ENERGY'
+        hdr.header['CUNIT3'] = 'TeV'
+        hdr.header['CRVAL3'] = E0
+        hdr.header['CRPIX3'] = 1.
+        hdr.header['CDELT3'] = step
+        
+        hdr.header['GDELTA'] = f'{self.diff_delta}'
+        hdr.header['GCHI'] = f'{self.diff_chi}'
+        hdr.header['GEBUDGET'] = f'{self.Ebudget}'
+
+        hdr.header['COMMENT'] = f'tsedov={self.tsedov}, Ec_max={self.Ec_max}'
+        hdr.header['COMMENT'] = f'Ec={self.Ec}'
+        hdr.header['COMMENT'] = f'n0={self.n0}, deltap={self.deltap}' 
+
+        hdr.header['AUTHOR'] = author
+        hdr.writeto(filename, overwrite=True)
 
 
 class TimeDependentProtonSpectrum(ProtonSpectrum):
@@ -209,8 +256,74 @@ class TimeDependentProtonSpectrum(ProtonSpectrum):
         self.Eg_esc = Ep_esc * 0.17
         self.tesc_snr = tesc_snr
 
-
         return 
 
+class BackgroundProtonSpectrum:
+    """
+    A class used to determine the background cosmic ray proton spectra
 
+    """
+
+    def __init__(self, gas_map_path):
+        
+        file = fits.open(gas_map_path)
+        self.data = file[0].data * u.cm ** (-2)
+
+        if len(np.shape(self.data)) == 3:
+            self.data = file[0].data[0][:][:] * u.cm ** (-2)
+        
+        
+    def flux(self, Ep):
+        
+        ysize, xsize =  self.data.shape
+        
+        f_bg = (2.2 * (Ep.to(u.GeV) / u.GeV) **(-2.75))* (1 / (u.cm**2 * u.GeV * u.sr * u.s) )
+        J_bg = (f_bg * (4*np.pi*u.sr / (c.to(u.cm / u.s)))) .to(u.TeV ** (-1) * u.cm ** (-3))
+
+        J_bg_array = (np.ones([Ep.size, ysize, xsize]) * J_bg[:, None, None])
+
+        self.energies = Ep
+        self.fluxes = J_bg_array
+
+        
+        return J_bg_array
+        
+
+    def save_cube(self, gas, author='', filename='Protonflux_cube.fits'):
+        """
+        Save the proton flux to a fits cube
+
+        Parameters
+        ----------------------
+        author : str, optional
+            Author of the fits file (default 'Kirsty Feijen')
+        filename : str, optional
+            The name to save your fits to (default 'Protonflux_cube.fits')
+
+        """
+        step = np.diff(np.log10(self.energies.value))[0]
+
+        E0 = np.log10(self.energies[0].value)
+
+        hdr = fits.PrimaryHDU(data=self.fluxes.value)
+        hdr.header['BUNIT'] = f'{self.fluxes.unit}'
+        
+        hdr.header['CTYPE1'] = gas.header['CTYPE1']
+        hdr.header['CRVAL1'] = gas.header['CRVAL1']
+        hdr.header['CRPIX1'] = gas.header['CRPIX1']
+        hdr.header['CDELT1'] = gas.header['CDELT1']
+
+        hdr.header['CTYPE2'] = gas.header['CTYPE2']
+        hdr.header['CRVAL2'] = gas.header['CRVAL2']
+        hdr.header['CRPIX2'] = gas.header['CRPIX2']
+        hdr.header['CDELT2'] = gas.header['CDELT2']
+
+        hdr.header['CTYPE3'] = 'log ENERGY'
+        hdr.header['CUNIT3'] = 'TeV'
+        hdr.header['CRVAL3'] = E0
+        hdr.header['CRPIX3'] = 1.
+        hdr.header['CDELT3'] = step
+
+        hdr.header['AUTHOR'] = author
+        hdr.writeto(filename, overwrite=True)
 

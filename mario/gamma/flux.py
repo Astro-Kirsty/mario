@@ -14,7 +14,7 @@ class GammaFlux:
     """
 
     @u.quantity_input(nH2_cell=u.cm ** (-3))
-    def __init__(self, snr, proton_cube_path, gas):
+    def __init__(self, snr, proton_cube_path, gp):
 
         self.snr = snr
         
@@ -26,8 +26,8 @@ class GammaFlux:
                               self.header['CRVAL3'] + (self.header['NAXIS3'] - 1) * self.header['CDELT3'],
                               self.header['NAXIS3'])* u.Unit(self.header['CUNIT3'])
         
-        self.gas = gas
-        self.nH2_cell = self.gas.nH2_cell()       
+        self.gp = gp
+        self.nH2_cell = self.gp.nH2_cell()       
         
         if type(self.Ep.value) == np.ndarray:
             self.Ep = self.Ep[:, None, None]
@@ -72,7 +72,7 @@ class GammaFlux:
         dl = self.snr.distance.to(u.cm) * np.tan(0.45 * u.deg)
 
         # Converting the pixel width from angular size to physical size
-        pixel_width = self.snr.distance.to(u.cm) * np.tan(self.gas.theta_pixel)
+        pixel_width = self.snr.distance.to(u.cm) * np.tan(self.gp.theta_pixel)
         ster = (pixel_width ** 2 / (self.snr.distance.to(u.cm)) ** 2) * u.sr
 
         Gfluxes = []
@@ -108,15 +108,15 @@ class GammaFlux:
         hdr = fits.PrimaryHDU(data=self.fluxes.value)
         hdr.header['BUNIT'] = f'{self.fluxes.unit}'
         
-        hdr.header['CTYPE1'] = self.gas.header['CTYPE1']
-        hdr.header['CRVAL1'] = self.gas.header['CRVAL1']
-        hdr.header['CRPIX1'] = self.gas.header['CRPIX1']
-        hdr.header['CDELT1'] = self.gas.header['CDELT1']
+        hdr.header['CTYPE1'] = self.gp.header['CTYPE1']
+        hdr.header['CRVAL1'] = self.gp.header['CRVAL1']
+        hdr.header['CRPIX1'] = self.gp.header['CRPIX1']
+        hdr.header['CDELT1'] = self.gp.header['CDELT1']
 
-        hdr.header['CTYPE2'] = self.gas.header['CTYPE2']
-        hdr.header['CRVAL2'] = self.gas.header['CRVAL2']
-        hdr.header['CRPIX2'] = self.gas.header['CRPIX2']
-        hdr.header['CDELT2'] = self.gas.header['CDELT2']
+        hdr.header['CTYPE2'] = self.gp.header['CTYPE2']
+        hdr.header['CRVAL2'] = self.gp.header['CRVAL2']
+        hdr.header['CRPIX2'] = self.gp.header['CRPIX2']
+        hdr.header['CDELT2'] = self.gp.header['CDELT2']
 
         hdr.header['CTYPE3'] = 'log ENERGY'
         hdr.header['CUNIT3'] = 'TeV'

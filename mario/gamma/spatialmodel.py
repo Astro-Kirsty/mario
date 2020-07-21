@@ -2,6 +2,7 @@ import numpy as np
 import astropy.units as u
 from astropy.io import fits
 from astropy.coordinates import SkyCoord
+from astropy import coordinates as coord
 from scipy.optimize import curve_fit
 from scipy import integrate
 from gammapy.spectrum import SpectrumDataset
@@ -10,6 +11,7 @@ from gammapy.modeling.models import (PowerLawSpectralModel, LogParabolaSpectralM
 from photutils import SkyCircularAperture
 from astropy.wcs import WCS
 import matplotlib.pyplot as plt
+
 
 
 def oversample(data, header, grid_size=0.005 * u.deg, radius=0.06 * u.deg, diff_vals=True):
@@ -118,7 +120,7 @@ class SpectralModel:
         Fit the spectral model
 
         Parameters
-        ----------
+        ----------------------
         fit : str
             Choose which function to fit (default is 'PL')
         """
@@ -142,7 +144,7 @@ class SpectralModel:
         Plot the spectral model
 
         Parameters
-        ----------
+        ----------------------
         fig : str
             Set the figure for the plot
         ax : str
@@ -164,7 +166,7 @@ class SpectralModel:
         ax.set_xscale('log')
         ax.set_yscale('log')
         ax.grid(linestyle='--')
-        ax.legend()
+        ax.legend(loc='lower left', labelspacing=0.3)
 
         return fig, ax
 
@@ -173,7 +175,7 @@ class SpectralModel:
         Plot the spectral model
 
         Parameters
-        ----------
+        ----------------------
         fig : str
             Set the figure for the plot
         ax : str
@@ -311,17 +313,78 @@ class SpatialModel:
         ax.set_ylim([0, ylim])
 
         if diff_label:
-                    chi = self.header['GCHI']
-                    delta = self.header['GDELTA']
-                    ebudget = self.header['GEBUDGET']
+            chi = self.header['GCHI']
+            delta = self.header['GDELTA']
+            ebudget, ebudget_unit = self.header['GEBUDGET'].split()
 
-                    ax.text(0.03, 0.9, 
-                            f'$\chi$={chi}, $\delta$={delta}, '+'E$_{budget}$='+f'{ebudget}',
-                            horizontalalignment='left',
-                            transform=ax.transAxes,
-                            fontsize=15, color='black')
+            ax.text(0.03, 0.9, 
+                    f'$\chi$={chi}, $\delta$={delta}, '+'E$_{budget}$='+f'{float(ebudget):.2e}{ebudget_unit}',
+                    horizontalalignment='left',
+                    transform=ax.transAxes,
+                    fontsize=15, color='black')
 
         return fig, ax
+
+    def calc_residual(self, obs_data, obs_header, gamsrc_glon, gamsrc_glat, gamsrc_radius):
+        """
+        Calculate the residual (observed_data - predicted_data)
+
+        Parameters
+        ----------------------
+        obs_data : array
+            The observation fits file data 
+        obs_header : str
+            The header of the observation fits file
+        gamsrc_glon : float
+            The galactic longitude of the gamma-ray source
+        gamsrc_glat : float
+            The galactic latitude of the gamma-ray source
+        gamsrc_radius : float
+            The radius of the gamma-ray source
+
+        """
+
+        model_wcs = WCS(self.header)
+        glon_last, glat_first = model_wcs.all_pix2world(0, 0, 0)
+        glon_first, glat_last = model_wcs.all_pix2world(self.data.shape[1], self.data.shape[0], 0) 
+
+        obs_wcs = WCS(obs_header)
+
+        last_lon, last_lat = coord.SkyCoord(l=glon_last*u.deg, b=glat_last*u.deg, 
+                                            frame='galactic').to_pixel(obs_wcs)
+        first_lon, first_lat = coord.SkyCoord(l=glon_first*u.deg, b=glat_first*u.deg, 
+                                              frame='galactic').to_pixel(obs_wcs)
+
+        obs_crop = obs_data[int(first_lat):int(last_lat), int(last_lon):int(first_lon)]
+
+        position = SkyCoord(l=gamsrc_glon, b=gamsrc_glat, frame='galactic')
+        aperture = SkyCircularAperture(position, gamsrc_radius).to_pixel(model_wcs)
+        mask = aperture.to_mask(method='center')
+
+        obs_aperture = mask.multiply(obs_crop)
+        model_aperture = mask.multiply(self.data)
+
+        residuals = obs_aperture - model_aperture
+        residuals[residuals == 0] = np.nan
+
+        hdu = fits.PrimaryHDU(data=residuals)
+        hdu.header['NAXIS1'] = residuals.shape[1]
+        hdu.header['NAXIS2'] = residuals.shape[0]
+        hdu.header['CTYPE1'] = self.header['CTYPE1']
+        hdu.header['CRVAL1'] = (gamsrc_glon + gamsrc_radius).value
+        hdu.header['CRPIX1'] = 0.0
+
+        hdu.header['CDELT1'] = self.header['CDELT1']
+        hdu.header['CTYPE2'] = self.header['CTYPE2']
+        hdu.header['CRVAL2'] = (gamsrc_glat - gamsrc_radius).value
+        hdu.header['CRPIX2'] = 0.0
+        hdu.header['CDELT2'] = self.header['CDELT2']
+
+        hdu.header['GDELTA'] = self.header['GDELTA']
+        hdu.header['GCHI'] = self.header['GCHI']
+        hdu.header['GEBUDGET'] = self.header['GEBUDGET']
+
+        return hdu.header, residuals
 
 
 class SpatialModel3D(SpatialModel):
@@ -341,7 +404,9 @@ class SpatialModel3D(SpatialModel):
 
         Examples
         ----------------------
-        >>> 
+        >>> sm = SpatialModel3D(data, header)
+        >>> sm.fit('PL')
+        >>> integral = sm.integrate_PL(1, 100)
 
         """
         self.energies = np.logspace(self.header['CRVAL3'],
@@ -550,7 +615,7 @@ class SpatialModel3D(SpatialModel):
         Calculate the energy and flux in a given region
 
         Parameters
-        ----------
+        ----------------------
         coords : array
             The galactic coordinates for the summation
         radius : float
@@ -580,7 +645,7 @@ class SpatialModel3D(SpatialModel):
         Calculate the energy and flux for a given coordinate
 
         Parameters
-        ----------
+        ----------------------
         coords : array
             The galactic coordinates for the spot of interest
         """

@@ -177,7 +177,7 @@ class ProtonSpectrum:
 
         return flux
 
-    def save_cube(self, gp, author='', filename='Protonflux_cube.fits'):
+    def save_cube(self, gp, author='', filename='ProtonFlux_cube.fits'):
         """
         Save the proton flux to a fits cube
 
@@ -215,6 +215,8 @@ class ProtonSpectrum:
         hdr.header['GDELTA'] = f'{self.diff_delta}'
         hdr.header['GCHI'] = f'{self.diff_chi}'
         hdr.header['GEBUDGET'] = f'{self.Ebudget}'
+
+        hdr.header['GAGE'] = f'{self.snr.age}'
 
         hdr.header['COMMENT'] = f'tsedov={self.tsedov}, Ec_max={self.Ec_max}'
         hdr.header['COMMENT'] = f'Ec={self.Ec}'
@@ -289,7 +291,7 @@ class BackgroundProtonSpectrum:
         return J_bg_array
         
 
-    def save_cube(self, gas, author='', filename='Protonflux_cube.fits'):
+    def save_cube(self, gp, author='', filename='Protonflux_cube.fits'):
         """
         Save the proton flux to a fits cube
 
@@ -308,15 +310,15 @@ class BackgroundProtonSpectrum:
         hdr = fits.PrimaryHDU(data=self.fluxes.value)
         hdr.header['BUNIT'] = f'{self.fluxes.unit}'
         
-        hdr.header['CTYPE1'] = gas.header['CTYPE1']
-        hdr.header['CRVAL1'] = gas.header['CRVAL1']
-        hdr.header['CRPIX1'] = gas.header['CRPIX1']
-        hdr.header['CDELT1'] = gas.header['CDELT1']
+        hdr.header['CTYPE1'] = gp.header['CTYPE1']
+        hdr.header['CRVAL1'] = gp.header['CRVAL1']
+        hdr.header['CRPIX1'] = gp.header['CRPIX1']
+        hdr.header['CDELT1'] = gp.header['CDELT1']
 
-        hdr.header['CTYPE2'] = gas.header['CTYPE2']
-        hdr.header['CRVAL2'] = gas.header['CRVAL2']
-        hdr.header['CRPIX2'] = gas.header['CRPIX2']
-        hdr.header['CDELT2'] = gas.header['CDELT2']
+        hdr.header['CTYPE2'] = gp.header['CTYPE2']
+        hdr.header['CRVAL2'] = gp.header['CRVAL2']
+        hdr.header['CRPIX2'] = gp.header['CRPIX2']
+        hdr.header['CDELT2'] = gp.header['CDELT2']
 
         hdr.header['CTYPE3'] = 'log ENERGY'
         hdr.header['CUNIT3'] = 'TeV'

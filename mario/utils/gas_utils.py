@@ -188,7 +188,7 @@ class GasParameters:
         # Converting from pixel coords to sky coords
         xvalue, yvalue = self.total_col_dens.shape
         xx, yy = np.meshgrid(range(yvalue), range(xvalue))
-        wx, wy = WCS(self.header).wcs_pix2world(xx, yy, 1)
+        wx, wy = WCS(self.header).wcs_pix2world(xx, yy, 0)
         pixel_coord = SkyCoord(wx * u.deg, wy * u.deg, frame='galactic')
 
         # Calculate the distance to each cell

@@ -2,6 +2,7 @@ import numpy as np
 from astropy import units as u
 from astropy.constants import c
 from mario.utils.model_utils import calc_Bmag, calc_dist_CR_release_point, escape_time
+from astropy.io import fits
 
 class ElectronSpectrum:
     """
@@ -160,3 +161,52 @@ class ElectronSpectrum:
         self.fluxes = flux
 
         return flux
+
+
+    def save_cube(self, gp, author='', filename='ElectronFlux_cube.fits'):
+        """
+        Save the proton flux to a fits cube
+
+        Parameters
+        ----------------------
+        author : str, optional
+            Author of the fits file (default 'Kirsty Feijen')
+        filename : str, optional
+            The name to save your fits to (default 'Protonflux_cube.fits')
+
+        """
+        step = np.diff(np.log10(self.energies[:,0,0].to(u.TeV).value))[0]
+
+        E0 = np.log10(self.energies[0, 0, 0].to(u.TeV).value)
+
+        hdr = fits.PrimaryHDU(data=self.fluxes.value)
+        hdr.header['BUNIT'] = f'{self.fluxes.unit}'
+        
+        hdr.header['CTYPE1'] = gp.header['CTYPE1']
+        hdr.header['CRVAL1'] = gp.header['CRVAL1']
+        hdr.header['CRPIX1'] = gp.header['CRPIX1']
+        hdr.header['CDELT1'] = gp.header['CDELT1']
+
+        hdr.header['CTYPE2'] = gp.header['CTYPE2']
+        hdr.header['CRVAL2'] = gp.header['CRVAL2']
+        hdr.header['CRPIX2'] = gp.header['CRPIX2']
+        hdr.header['CDELT2'] = gp.header['CDELT2']
+
+        hdr.header['CTYPE3'] = 'log ENERGY'
+        hdr.header['CUNIT3'] = 'TeV'
+        hdr.header['CRVAL3'] = E0
+        hdr.header['CRPIX3'] = 1.
+        hdr.header['CDELT3'] = step
+        
+        hdr.header['GDELTA'] = f'{self.diff_delta}'
+        hdr.header['GCHI'] = f'{self.diff_chi}'
+        hdr.header['GEBUDGET'] = f'{self.Ebudget}'
+
+        hdr.header['GAGE'] = f'{self.snr.age}'
+
+        hdr.header['COMMENT'] = f'tsedov={self.tsedov}, Ec_max={self.Ec_max}'
+        hdr.header['COMMENT'] = f'Ec={self.Ec}'
+        hdr.header['COMMENT'] = f'n0={self.n0}, deltap={self.deltap}' 
+
+        hdr.header['AUTHOR'] = author
+        hdr.writeto(filename, overwrite=True)

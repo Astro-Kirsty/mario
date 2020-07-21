@@ -101,11 +101,10 @@ def main(accelerator, plot_type, gamma_cube, accelerator_config_path, plot_confi
 
     set_limits(ax, oversampled_header, l=glon_limit, b=glat_limit)
 
-    filename, newfilename = gamma_cube.split('Flux')
-    fig.savefig(f'Integral_flux_{emin:.0f}_{emax:.0f}'+newfilename+'.pdf', bbox_inches='tight', pad_inches=0.06)
+    filename, newfilename = gamma_cube.split('Flux_')
+    fig.savefig(f'Integral_flux_E{emin:.0f}-{emax:.0f}_'+newfilename+'.pdf', bbox_inches='tight', pad_inches=0.06)
 
-    sm.save_fits(data=oversampled_data, header=oversampled_header, 
-                 filename=f'FluxInt_E{emin:.0f}-{emax:.0f}_'+ newfilename)
+    sm.save_fits(data=oversampled_data, filename=f'FluxInt_E{emin:.0f}-{emax:.0f}_'+ newfilename)
 
 
 if __name__ == '__main__':

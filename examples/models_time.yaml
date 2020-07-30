@@ -1,0 +1,722 @@
+hadronic_1:
+  diff_chi: 
+    - 0.1
+
+  diff_delta: 
+    - 0.3
+
+  tsedov: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: yr}
+
+  Ec: !astropy.units.Quantity
+    value: 150
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Ec_max: !astropy.units.Quantity
+    value: 500
+    unit: !astropy.units.Unit {unit: TeV}
+
+  deltap: 0.7
+
+  n0: !astropy.units.Quantity
+    value: 0.03
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 1.1e49
+      unit: &id001 !astropy.units.Unit {unit: erg}
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: *id001
+
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 15
+      unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: True
+
+hadronic_2:
+  diff_chi: 
+    - 0.01
+
+  diff_delta: 
+    - 0.3
+
+  tsedov: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: yr}
+
+  Ec: !astropy.units.Quantity
+    value: 150
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Ec_max: !astropy.units.Quantity
+    value: 500
+    unit: !astropy.units.Unit {unit: TeV}
+
+  deltap: 0.7
+
+  n0: !astropy.units.Quantity
+    value: 0.03
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 1.68096e48
+      unit: &id002 !astropy.units.Unit {unit: erg}
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: *id002
+
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 15
+      unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: True
+
+hadronic_3:
+  diff_chi: 
+    - 0.001
+
+  diff_delta: 
+    - 0.3
+
+  tsedov: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: yr}
+
+  Ec: !astropy.units.Quantity
+    value: 150
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Ec_max: !astropy.units.Quantity
+    value: 500
+    unit: !astropy.units.Unit {unit: TeV}
+
+  deltap: 0.7
+
+  n0: !astropy.units.Quantity
+    value: 0.03
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 3.4115e47
+      unit: &id003 !astropy.units.Unit {unit: erg}
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: *id003
+
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 15
+      unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: True
+
+hadronic_4:
+  diff_chi: 
+    - 0.1
+
+  diff_delta: 
+    - 0.5
+
+  tsedov: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: yr}
+
+  Ec: !astropy.units.Quantity
+    value: 150
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Ec_max: !astropy.units.Quantity
+    value: 500
+    unit: !astropy.units.Unit {unit: TeV}
+
+  deltap: 0.7
+
+  n0: !astropy.units.Quantity
+    value: 0.03
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 1.4321e50
+      unit: &id004 !astropy.units.Unit {unit: erg}
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: *id004
+
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 15
+      unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: True
+
+hadronic_5:
+  diff_chi: 
+    - 0.01
+
+  diff_delta: 
+    - 0.5
+
+  tsedov: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: yr}
+
+  Ec: !astropy.units.Quantity
+    value: 150
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Ec_max: !astropy.units.Quantity
+    value: 500
+    unit: !astropy.units.Unit {unit: TeV}
+
+  deltap: 0.7
+
+  n0: !astropy.units.Quantity
+    value: 0.03
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 9.5473e48
+      unit: &id005 !astropy.units.Unit {unit: erg}
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: *id005
+
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 15
+      unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: True
+
+hadronic_6:
+  diff_chi: 
+    - 0.001
+
+  diff_delta: 
+    - 0.5
+
+  tsedov: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: yr}
+
+  Ec: !astropy.units.Quantity
+    value: 150
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Ec_max: !astropy.units.Quantity
+    value: 500
+    unit: !astropy.units.Unit {unit: TeV}
+
+  deltap: 0.7
+
+  n0: !astropy.units.Quantity
+    value: 0.03
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 1.7532e48
+      unit: &id006 !astropy.units.Unit {unit: erg}
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: *id006
+
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 15
+      unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: True
+
+hadronic_7:
+  diff_chi: 
+    - 0.1
+
+  diff_delta: 
+    - 0.7
+
+  tsedov: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: yr}
+
+  Ec: !astropy.units.Quantity
+    value: 150
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Ec_max: !astropy.units.Quantity
+    value: 500
+    unit: !astropy.units.Unit {unit: TeV}
+
+  deltap: 0.7
+
+  n0: !astropy.units.Quantity
+    value: 0.03
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 1.0282e51
+      unit: &id007 !astropy.units.Unit {unit: erg}
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: *id007
+
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 15
+      unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: True
+
+hadronic_8:
+  diff_chi:  
+    - 0.01
+
+  diff_delta:  
+    - 0.7
+
+  tsedov: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: yr}
+
+  Ec: !astropy.units.Quantity
+    value: 150
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Ec_max: !astropy.units.Quantity
+    value: 500
+    unit: !astropy.units.Unit {unit: TeV}
+
+  deltap: 0.7
+
+  n0: !astropy.units.Quantity
+    value: 0.03
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 1.09574e50
+      unit: &id008 !astropy.units.Unit {unit: erg}
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: *id008
+
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 15
+      unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: True
+
+hadronic_9:
+  diff_chi:  
+    - 0.001
+
+  diff_delta:  
+    - 0.7
+
+  tsedov: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: yr}
+
+  Ec: !astropy.units.Quantity
+    value: 150
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Ec_max: !astropy.units.Quantity
+    value: 500
+    unit: !astropy.units.Unit {unit: TeV}
+
+  deltap: 0.7
+
+  n0: !astropy.units.Quantity
+    value: 0.03
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 8.200e48
+      unit: &id009 !astropy.units.Unit {unit: erg}
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: *id009
+
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 15
+      unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: True
+
+
+# 28 kyr
+hadronic_p1:
+  diff_chi: 
+    - 0.1
+
+  diff_delta: 
+    - 0.3
+
+  tsedov: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: yr}
+
+  Ec: !astropy.units.Quantity
+    value: 150
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Ec_max: !astropy.units.Quantity
+    value: 500
+    unit: !astropy.units.Unit {unit: TeV}
+
+  deltap: 0.7
+
+  n0: !astropy.units.Quantity
+    value: 0.03
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 2.6147e49
+      unit: &id0p1 !astropy.units.Unit {unit: erg}
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: *id0p1
+
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 28
+      unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: True
+
+hadronic_p2:
+  diff_chi: 
+    - 0.01
+
+  diff_delta: 
+    - 0.3
+
+  tsedov: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: yr}
+
+  Ec: !astropy.units.Quantity
+    value: 150
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Ec_max: !astropy.units.Quantity
+    value: 500
+    unit: !astropy.units.Unit {unit: TeV}
+
+  deltap: 0.7
+
+  n0: !astropy.units.Quantity
+    value: 0.03
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 2.6585e48
+      unit: &id0p2 !astropy.units.Unit {unit: erg}
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: *id0p2
+
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 28
+      unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: True
+
+hadronic_p3:
+  diff_chi: 
+    - 0.001
+
+  diff_delta: 
+    - 0.3
+
+  tsedov: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: yr}
+
+  Ec: !astropy.units.Quantity
+    value: 150
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Ec_max: !astropy.units.Quantity
+    value: 500
+    unit: !astropy.units.Unit {unit: TeV}
+
+  deltap: 0.7
+
+  n0: !astropy.units.Quantity
+    value: 0.03
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 5.9372e47
+      unit: &id0p3 !astropy.units.Unit {unit: erg}
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: *id0p3
+
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 28
+      unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: True
+
+hadronic_p4:
+  diff_chi: 
+    - 0.1
+
+  diff_delta: 
+    - 0.5
+
+  tsedov: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: yr}
+
+  Ec: !astropy.units.Quantity
+    value: 150
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Ec_max: !astropy.units.Quantity
+    value: 500
+    unit: !astropy.units.Unit {unit: TeV}
+
+  deltap: 0.7
+
+  n0: !astropy.units.Quantity
+    value: 0.03
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 2.90695e50
+      unit: &id0p4 !astropy.units.Unit {unit: erg}
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: *id0p4
+
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 28
+      unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: True
+
+hadronic_p5:
+  diff_chi: 
+    - 0.01
+
+  diff_delta: 
+    - 0.5
+
+  tsedov: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: yr}
+
+  Ec: !astropy.units.Quantity
+    value: 150
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Ec_max: !astropy.units.Quantity
+    value: 500
+    unit: !astropy.units.Unit {unit: TeV}
+
+  deltap: 0.7
+
+  n0: !astropy.units.Quantity
+    value: 0.03
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 2.2115e49
+      unit: &id0p5 !astropy.units.Unit {unit: erg}
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: *id0p5
+
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 28
+      unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: True
+
+hadronic_p6:
+  diff_chi: 
+    - 0.001
+
+  diff_delta: 
+    - 0.5
+
+  tsedov: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: yr}
+
+  Ec: !astropy.units.Quantity
+    value: 150
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Ec_max: !astropy.units.Quantity
+    value: 500
+    unit: !astropy.units.Unit {unit: TeV}
+
+  deltap: 0.7
+
+  n0: !astropy.units.Quantity
+    value: 0.03
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 2.666e48
+      unit: &id0p6 !astropy.units.Unit {unit: erg}
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: *id0p6
+
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 28
+      unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: True
+
+hadronic_p7:
+  diff_chi: 
+    - 0.1
+
+  diff_delta: 
+    - 0.7
+
+  tsedov: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: yr}
+
+  Ec: !astropy.units.Quantity
+    value: 150
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Ec_max: !astropy.units.Quantity
+    value: 500
+    unit: !astropy.units.Unit {unit: TeV}
+
+  deltap: 0.7
+
+  n0: !astropy.units.Quantity
+    value: 0.03
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 1.9165e51
+      unit: &id0p7 !astropy.units.Unit {unit: erg}
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: *id0p7
+
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 28
+      unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: True
+
+hadronic_p8:
+  diff_chi:  
+    - 0.01
+
+  diff_delta:  
+    - 0.7
+
+  tsedov: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: yr}
+
+  Ec: !astropy.units.Quantity
+    value: 150
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Ec_max: !astropy.units.Quantity
+    value: 500
+    unit: !astropy.units.Unit {unit: TeV}
+
+  deltap: 0.7
+
+  n0: !astropy.units.Quantity
+    value: 0.03
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 2.29658e50
+      unit: &id0p8 !astropy.units.Unit {unit: erg}
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: *id0p8
+
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 28
+      unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: True
+
+hadronic_p9:
+  diff_chi:  
+    - 0.001
+
+  diff_delta:  
+    - 0.7
+
+  tsedov: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: yr}
+
+  Ec: !astropy.units.Quantity
+    value: 150
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Ec_max: !astropy.units.Quantity
+    value: 500
+    unit: !astropy.units.Unit {unit: TeV}
+
+  deltap: 0.7
+
+  n0: !astropy.units.Quantity
+    value: 0.03
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  Ebudget: 
+    - !astropy.units.Quantity
+      value: 1.7847e49
+      unit: &id0p9 !astropy.units.Unit {unit: erg}
+    - !astropy.units.Quantity
+      value: 1e50
+      unit: *id0p9
+
+  acc_age: 
+    - !astropy.units.Quantity
+      value: 28
+      unit: !astropy.units.Unit {unit: kyr}
+
+  timedependent: True
+

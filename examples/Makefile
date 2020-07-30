@@ -6,13 +6,12 @@ hess = /home/kirsty/Documents/PhD/Fits_Files/HESS_2018
 config_acc = ./accelerators.yaml
 config_gam_srcs = ./gamma_sources.yaml
 config_model = ./models.yaml
+config_model_time = ./models_time.yaml
 config_irf = ./irf.yaml
 config_plot = ./plot.yaml
 
 
-all: spectra_plot flux_plot
-
-cube_proton:
+cube_proton: $(config_gam_srcs) $(config_gam_srcs) $(config_model)
 	mario_create_proton_cube  'HESSJ1804' 'G8' 'hadronic_1' ${data_dir)/total_col_dens_26_56.fits
 	mario_create_proton_cube  'HESSJ1804' 'PJ' 'hadronic_p1' ${data_dir)/total_col_dens_8_26.fits
 

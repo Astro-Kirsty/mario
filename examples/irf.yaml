@@ -29,6 +29,8 @@ HESS_irf:
     value: 0.06
     unit: !astropy.units.Unit {unit: deg}
 
+  fit_type: 'best'
+
 
 CTA_irf:
   telescope: 'CTA'
@@ -58,4 +60,6 @@ CTA_irf:
   radius: !astropy.units.Quantity
     value: 0.06
     unit: !astropy.units.Unit {unit: deg}
+
+  fit_type: 'best'
 

@@ -68,6 +68,7 @@ def main(accelerator, plot_type, irf, gamma_cube, accelerator_config_path, plot_
     Emax = irf_cfg['Emax']
     offset = irf_cfg['offset']
     livetime = irf_cfg['livetime']
+    fit_type = irf_cfg['fit_type']
 
     energy = np.logspace(np.log10(Emin.to(u.TeV).value), np.log10(Emax.to(u.TeV).value), 31)*u.TeV
 
@@ -89,7 +90,7 @@ def main(accelerator, plot_type, irf, gamma_cube, accelerator_config_path, plot_
     cube_header = file[0].header
 
     sm3D = SpatialModel3D(cube, cube_header)
-    sm3D.fit('best')
+    sm3D.fit(fit_type)
     sm3D.fake(aeff=aeff, edisp=edisp, livetime=livetime)
     gamma_counts = sm3D.counts
 

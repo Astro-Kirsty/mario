@@ -5,6 +5,8 @@ G8_Plot:
 
   emax: 100
 
+  fit_type: 'PL'
+
   grid_size: !astropy.units.Quantity
     value: 0.02
     unit: !astropy.units.Unit {unit: deg}
@@ -29,6 +31,8 @@ PJ_Plot:
   emin: 1
 
   emax: 100
+
+  fit_type: 'PL'
 
   grid_size: !astropy.units.Quantity
     value: 0.02

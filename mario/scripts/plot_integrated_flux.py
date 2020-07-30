@@ -46,6 +46,7 @@ def main(accelerator, plot_type, gamma_cube, accelerator_config_path, plot_confi
 
     emin = plot_cfg['emin']
     emax = plot_cfg['emax']
+    fit_type = plot_cfg['fit_type']
     grid_size = plot_cfg['grid_size']
     radius = plot_cfg['radius']
     src_fits = plot_cfg['src_fits']
@@ -60,9 +61,9 @@ def main(accelerator, plot_type, gamma_cube, accelerator_config_path, plot_confi
 
 
     sm3D = SpatialModel3D(data, header)
-    sm3D.fit('PL')
+    sm3D.fit(fit_type)
 
-    integrated = sm3D.integrate_PL(emin, emax)
+    integrated = sm3D.integrate(emin, emax, fit_type)
 
 
     hdu = fits.PrimaryHDU(data=integrated)
@@ -89,7 +90,7 @@ def main(accelerator, plot_type, gamma_cube, accelerator_config_path, plot_confi
     fig = plt.figure(figsize=(8, 4))
     ax = fig.add_subplot(111, projection=WCS(oversampled_header))
     fig, ax = sm.plot(oversampled_data, cmap=plt.cm.hot_r, fig=fig, ax=ax, 
-                      colorbar_label=f'Integrated flux ({emin:.0f}-{emax:.0f}TeV)'+' cm$^{-2}$ s$^{-1}$', 
+                      colorbar_label=f'Integrated flux {fit_type} ({emin:.0f}-{emax:.0f}TeV)'+' cm$^{-2}$ s$^{-1}$', 
                       diff_label=True)
 
     add_gamma_src(src_fits, con_levels, ax, 'black')
@@ -102,9 +103,9 @@ def main(accelerator, plot_type, gamma_cube, accelerator_config_path, plot_confi
     set_limits(ax, oversampled_header, l=glon_limit, b=glat_limit)
 
     filename, newfilename = gamma_cube.split('Flux_')
-    fig.savefig(f'Integral_flux_E{emin:.0f}-{emax:.0f}_'+newfilename+'.pdf', bbox_inches='tight', pad_inches=0.06)
+    fig.savefig(f'Integral_flux_{fit_type}_E{emin:.0f}-{emax:.0f}_'+newfilename+'.pdf', bbox_inches='tight', pad_inches=0.06)
 
-    sm.save_fits(data=oversampled_data, filename=f'FluxInt_E{emin:.0f}-{emax:.0f}_'+ newfilename)
+    sm.save_fits(data=oversampled_data, filename=f'FluxInt_{fit_type}_E{emin:.0f}-{emax:.0f}_'+ newfilename)
 
 
 if __name__ == '__main__':

@@ -318,7 +318,7 @@ class SpatialModel:
             ebudget, ebudget_unit = self.header['GEBUDGET'].split()
 
             ax.text(0.03, 0.9, 
-                    f'$\chi$={chi}, $\delta$={delta}, '+'E$_{budget}$='+f'{float(ebudget):.2e}{ebudget_unit}',
+                    f'$\chi$={chi}, $\delta$={delta}, '+'E$_{budget}$='+f'{float(ebudget):.1e}{ebudget_unit}',
                     horizontalalignment='left',
                     transform=ax.transAxes,
                     fontsize=15, color='black')
@@ -425,20 +425,26 @@ class SpatialModel3D(SpatialModel):
         self.best_fit = None
 
     def fit(self, fit='best'):
-        """ Choosing the fit for the data 
+        """ 
+        Choosing the fit for the data 
+
         Parameters
         ----------------------
-		fit : The fit for the data (options 'best', 'PL', 'LP'
-		"""
+        fit : str (options 'best', 'PL', 'LP')
+            The fit for the data
+        """
 
         if fit == 'best':
             self._fitPL()
             self._fitLP()
             self.best_fit = np.argmin([self.rsd_dof_LP, self.rsd_dof_PL], axis=0)
+            self.fit_type = 'best'
         if fit == 'PL':
             self._fitPL()
+            self.fit_type = 'PL'
         if fit == 'LP':
             self._fitLP()
+            self.fit_type = 'LP'
 
     def _fitPL(self):
         """ Fit the data with a simple powerlaw """
@@ -606,6 +612,35 @@ class SpatialModel3D(SpatialModel):
                 LP_linear = lambda E: (self.amplitude_LP[ix, iy] * 
                                        E ** (- self.alpha_LP[ix, iy] - self.beta_LP[ix, iy]*np.log10(E)))
                 integral[ix, iy] = integrate.quad(LP_linear, emin, emax)[0]
+
+        return integral
+
+
+    def integrate(self, emin, emax, fit='best'):
+        """
+        Use the fit_type to determine which integral function to use
+
+        Parameters
+        ----------------------
+        emin : float
+            The minimum energy for the integral
+        emax : float
+            The maximum energy for the integral
+        fit : str (options 'best', 'PL', 'LP')
+            The fit for the data
+
+        """
+        if (fit == 'PL'):
+            integral = self.integrate_PL(emin, emax)
+        if (fit == 'LP'):
+            integral = self.integrate_LP(emin, emax)
+
+
+        if (fit == 'best') | (fit == 'PL'):
+            integral = self.integrate_PL(emin, emax)
+
+        elif (fit == 'best') | (fit == 'PL'):
+            integral = self.integrate_PL(emin, emax)
 
         return integral
     

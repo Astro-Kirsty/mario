@@ -67,6 +67,9 @@ def oversample(data, header, grid_size=0.005 * u.deg, radius=0.06 * u.deg, diff_
         hdu.header['GCHI'] = header['GCHI']
         hdu.header['GEBUDGET'] = header['GEBUDGET']
 
+        hdu.header['GAGE'] = header['GAGE']
+        hdu.header['GMODEL'] = header['GMODEL']
+
     return hdu.header, data_oversample
 
 

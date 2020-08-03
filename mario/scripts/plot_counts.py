@@ -109,6 +109,9 @@ def main(accelerator, plot_type, irf, gamma_cube, accelerator_config_path, plot_
     hdu.header['GCHI'] = cube_header['GCHI']
     hdu.header['GEBUDGET'] = cube_header['GEBUDGET']
 
+    hdu.header['GAGE'] = header['GAGE']
+    hdu.header['GMODEL'] = header['GMODEL']
+
     oversampled_header, oversampled_data = oversample(data=gamma_counts, header=hdu.header, 
                                                       grid_size=grid_size, radius=radius)
     sm = SpatialModel(oversampled_data, oversampled_header)
@@ -132,9 +135,11 @@ def main(accelerator, plot_type, irf, gamma_cube, accelerator_config_path, plot_
 
     set_limits(ax, oversampled_header, l=glon_limit, b=glat_limit)
 
-    filename, newfilename = gamma_cube.split('Flux_')
+    filename, nfilename = gamma_cube.split('Flux_')
+    newfilename = nfilename.split('.fits')[0]
     fig.savefig(f'{telescope}_counts_'+newfilename+'.pdf', bbox_inches='tight', pad_inches=0.06)
 
+    sm.save_fits(data=oversampled_data, filename=f'{telescope}_counts_'+newfilename+'.fits')
 
 
 if __name__ == '__main__':

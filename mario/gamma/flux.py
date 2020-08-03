@@ -128,6 +128,10 @@ class GammaFlux:
         hdr.header['GCHI']   = self.header['GCHI']
         hdr.header['GEBUDGET'] = self.header['GEBUDGET']
 
+        hdr.header['GAGE'] = self.header['GAGE']
+
+        hdr.header['GMODEL'] = self.header['GMODEL']
+
 #         hdr.header['COMMENT']  = self.header['COMMENT']
 
         hdr.header['AUTHOR'] = author

@@ -59,12 +59,10 @@ def main(accelerator, plot_type, gamma_cube, accelerator_config_path, plot_confi
     data = cube[0].data
     header = cube[0].header
 
-
     sm3D = SpatialModel3D(data, header)
     sm3D.fit(fit_type)
 
     integrated = sm3D.integrate(emin, emax, fit_type)
-
 
     hdu = fits.PrimaryHDU(data=integrated)
     hdu.header['CTYPE1'] = header['CTYPE1']
@@ -81,6 +79,8 @@ def main(accelerator, plot_type, gamma_cube, accelerator_config_path, plot_confi
     hdu.header['GCHI'] = header['GCHI']
     hdu.header['GEBUDGET'] = header['GEBUDGET']
 
+    hdu.header['GAGE'] = header['GAGE']
+    hdu.header['GMODEL'] = header['GMODEL']
 
     oversampled_header, oversampled_data = oversample(data=integrated, header=hdu.header, 
                                                       grid_size=grid_size, radius=radius)
@@ -102,10 +102,12 @@ def main(accelerator, plot_type, gamma_cube, accelerator_config_path, plot_confi
 
     set_limits(ax, oversampled_header, l=glon_limit, b=glat_limit)
 
-    filename, newfilename = gamma_cube.split('Flux_')
+    filename, nfilename = gamma_cube.split('Flux_')
+    newfilename = nfilename.split('.fits')[0]
     fig.savefig(f'Integral_flux_{fit_type}_E{emin:.0f}-{emax:.0f}_'+newfilename+'.pdf', bbox_inches='tight', pad_inches=0.06)
 
-    sm.save_fits(data=oversampled_data, filename=f'FluxInt_{fit_type}_E{emin:.0f}-{emax:.0f}_'+ newfilename)
+
+    sm.save_fits(data=oversampled_data, filename=f'FluxInt_{fit_type}_E{emin:.0f}-{emax:.0f}_'+newfilename+'.fits')
 
 
 if __name__ == '__main__':

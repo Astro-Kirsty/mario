@@ -25,7 +25,7 @@ hadronic_1:
 
   Ebudget: 
     - !astropy.units.Quantity
-      value: 1.1e49
+      value: 1.0972e49
       unit: &id001 !astropy.units.Unit {unit: erg}
     - !astropy.units.Quantity
       value: 1e50
@@ -360,7 +360,7 @@ hadronic_9:
 
 
 # 28 kyr
-hadronic_p1:
+hadronic_11:
   diff_chi: 
     - 0.1
 
@@ -400,7 +400,7 @@ hadronic_p1:
 
   timedependent: True
 
-hadronic_p2:
+hadronic_12:
   diff_chi: 
     - 0.01
 
@@ -440,7 +440,7 @@ hadronic_p2:
 
   timedependent: True
 
-hadronic_p3:
+hadronic_13:
   diff_chi: 
     - 0.001
 
@@ -480,7 +480,7 @@ hadronic_p3:
 
   timedependent: True
 
-hadronic_p4:
+hadronic_14:
   diff_chi: 
     - 0.1
 
@@ -520,7 +520,7 @@ hadronic_p4:
 
   timedependent: True
 
-hadronic_p5:
+hadronic_15:
   diff_chi: 
     - 0.01
 
@@ -560,7 +560,7 @@ hadronic_p5:
 
   timedependent: True
 
-hadronic_p6:
+hadronic_16:
   diff_chi: 
     - 0.001
 
@@ -600,7 +600,7 @@ hadronic_p6:
 
   timedependent: True
 
-hadronic_p7:
+hadronic_17:
   diff_chi: 
     - 0.1
 
@@ -640,7 +640,7 @@ hadronic_p7:
 
   timedependent: True
 
-hadronic_p8:
+hadronic_18:
   diff_chi:  
     - 0.01
 
@@ -680,7 +680,7 @@ hadronic_p8:
 
   timedependent: True
 
-hadronic_p9:
+hadronic_19:
   diff_chi:  
     - 0.001
 

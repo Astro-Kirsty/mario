@@ -204,6 +204,8 @@ class ElectronSpectrum:
 
         hdr.header['GAGE'] = f'{self.snr.age}'
 
+        hdr.header['GMODEL'] = 'Leptonic'
+
         hdr.header['COMMENT'] = f'tsedov={self.tsedov}, Ec_max={self.Ec_max}'
         hdr.header['COMMENT'] = f'Ec={self.Ec}'
         hdr.header['COMMENT'] = f'n0={self.n0}, deltap={self.deltap}' 

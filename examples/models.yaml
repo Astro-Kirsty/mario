@@ -826,7 +826,7 @@ hadronic_p1:
 
   Ebudget: 
     - !astropy.units.Quantity
-      value: 3.76058e+48
+      value: 3.3794e+48
       unit: &id0p1 !astropy.units.Unit {unit: erg}
     - !astropy.units.Quantity
       value: 1e50
@@ -866,7 +866,7 @@ hadronic_p2:
 
   Ebudget: 
     - !astropy.units.Quantity
-      value: 4.0452e+47
+      value: 3.066975e+47
       unit: &id0p2 !astropy.units.Unit {unit: erg}
     - !astropy.units.Quantity
       value: 1e50
@@ -906,7 +906,7 @@ hadronic_p3:
 
   Ebudget: 
     - !astropy.units.Quantity
-      value: 5.5528e+47
+      value: 3.491185e+47
       unit: &id0p3 !astropy.units.Unit {unit: erg}
     - !astropy.units.Quantity
       value: 1e50
@@ -947,7 +947,7 @@ hadronic_p4:
 
   Ebudget: 
     - !astropy.units.Quantity
-      value: 3.1379e+49
+      value: 3.933425e+49
       unit: &id0p4 !astropy.units.Unit {unit: erg}
     - !astropy.units.Quantity
       value: 1e50
@@ -987,7 +987,7 @@ hadronic_p5:
 
   Ebudget: 
     - !astropy.units.Quantity
-      value: 2.245e+48
+      value: 1.8852e+48
       unit: &id0p5 !astropy.units.Unit {unit: erg}
     - !astropy.units.Quantity
       value: 1e50
@@ -1027,7 +1027,7 @@ hadronic_p6:
 
   Ebudget: 
     - !astropy.units.Quantity
-      value: 4.4918e+47
+      value: 3.22715e+47
       unit: &id0p6 !astropy.units.Unit {unit: erg}
     - !astropy.units.Quantity
       value: 1e50
@@ -1067,7 +1067,7 @@ hadronic_p7:
 
   Ebudget: 
     - !astropy.units.Quantity
-      value: 3.126e+50
+      value: 4.423948e+50
       unit: &id0p7 !astropy.units.Unit {unit: erg}
     - !astropy.units.Quantity
       value: 1e50
@@ -1107,7 +1107,7 @@ hadronic_p8:
 
   Ebudget: 
     - !astropy.units.Quantity
-      value: 1.788e+49
+      value: 1.639088e+49
       unit: &id0p8 !astropy.units.Unit {unit: erg}
     - !astropy.units.Quantity
       value: 1e50
@@ -1147,7 +1147,7 @@ hadronic_p9:
 
   Ebudget: 
     - !astropy.units.Quantity
-      value: 1.5757e+48
+      value: 1.2505818e+48
       unit: &id0p9 !astropy.units.Unit {unit: erg}
     - !astropy.units.Quantity
       value: 1e50

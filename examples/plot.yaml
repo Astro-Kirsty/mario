@@ -46,7 +46,7 @@ PJ_Plot:
 
   con_levels: [30,40,50,60]
 
-  glon_limit: [7.55, 9.2]
+  glon_limit: [7.55, 9.1]
 
   glat_limit: [-0.47,0.47]
 

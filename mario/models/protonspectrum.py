@@ -171,6 +171,7 @@ class ProtonSpectrum:
         flux = (coeff / u.GeV * np.exp(expo)).to(u.TeV ** (-1) * u.cm ** (-3))
 
         flux[rcloud <= 0 ] = 0 * (u.TeV ** (-1) * u.cm ** (-3))
+        flux[self.time(Ep) <= 0 ] = 0 * (u.TeV ** (-1) * u.cm ** (-3))
 
         self.energies = Ep
         self.fluxes = flux
@@ -241,7 +242,7 @@ class TimeDependentProtonSpectrum(ProtonSpectrum):
     def time(self, Ep):
         tesc = escape_time(tsedov=self.tsedov, Ec=Ep.to(u.TeV), Ec_max=self.Ec_max, delta=self.deltap)
         time_esc = (self.snr.age - tesc)
-        time_esc[tesc > self.snr.age] = 0.05*u.kyr
+        #time_esc[tesc > self.snr.age] = 0.05*u.kyr
         return time_esc
 
     def escape_radius(self, Ep):

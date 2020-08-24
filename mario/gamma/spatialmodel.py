@@ -387,6 +387,9 @@ class SpatialModel:
         hdu.header['GCHI'] = self.header['GCHI']
         hdu.header['GEBUDGET'] = self.header['GEBUDGET']
 
+        hdu.header['GAGE'] = self.header['GAGE']
+        hdu.header['GMODEL'] = self.header['GMODEL']
+
         return hdu.header, residuals
 
 

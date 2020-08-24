@@ -22,7 +22,7 @@ from mario.plotting.plotting import electron_spectrum
                 default='accelerators.yaml',
                 type=click.Path(exists=True, dir_okay=False))
 @click.option('--model_config_path', 
-                default='models.yaml',
+                default='leptonic_models.yaml',
                 type=click.Path(exists=True, dir_okay=False))
 @click.option('-o', '--output', 
                 help='Output path', default='./')

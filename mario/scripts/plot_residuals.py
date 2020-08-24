@@ -67,10 +67,6 @@ def main(accelerator, gamma_source, plot_type, model_path, obs_path, hgps_catalo
 
     src_fits = plot_cfg['src_fits']
     con_levels = plot_cfg['con_levels']
-    glon_limit = plot_cfg['glon_limit']
-    glat_limit = plot_cfg['glat_limit']
-    snr_centre = plot_cfg['snr_centre']
-
 
     # HESS source with 2018 data
     cat = SourceCatalogHGPS(hgps_catalog)
@@ -92,20 +88,16 @@ def main(accelerator, gamma_source, plot_type, model_path, obs_path, hgps_catalo
     sm_model = SpatialModel(model_data, model_header)
     residual_header, residual = sm_model.calc_residual(obs_data, obs_header, glon, glat, radius)
 
+    res_sum = np.nansum(np.absolute(residual))
+    print(f'The residual sum for delta={float(residual_header["GDELTA"])} and chi={float(residual_header["GCHI"])} is {res_sum}')
 
-    fig = plt.figure(figsize=(8, 4))
+    fig = plt.figure(figsize=(10, 5))
     ax = fig.add_subplot(111, projection=WCS(residual_header))
-    fig, ax = sm_model.plot(residual, cmap=plt.cm.viridis, fig=fig, ax=ax, 
-                      colorbar_label=f'Residual map', diff_label=True)
+    fig, ax = sm_model.plot(residual, cmap=plt.cm.RdBu, fig=fig, ax=ax, 
+                      colorbar_label=f'Residual map', diff_label=True,
+                      vmin=-5e-13, vmax=5e-13)
 
-    add_gamma_src(src_fits, con_levels, ax, 'black')
-
-    if snr_centre: 
-        add_SNR_centre(acc, ax, facecolor='#00CED1')
-    else:
-        add_SNR(acc, ax, facecolor='None', edgecolor='blue', ls='--', lw=2)
-
-    set_limits(ax, residual_header, l=glon_limit, b=glat_limit)
+    add_gamma_src(src_fits, con_levels, ax, colors='black', alpha=0.5)
 
     filename, newfilename = model_path.split(f'_{accelerator}')
     fig.savefig(f'Residual_map_{accelerator}'+newfilename+'.pdf', bbox_inches='tight', pad_inches=0.06)

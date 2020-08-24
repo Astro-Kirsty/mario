@@ -23,7 +23,7 @@ from mario.plotting.plotting import proton_spectrum, add_kcr_src, add_kcr
                 default='accelerators.yaml',
                 type=click.Path(exists=True, dir_okay=False))
 @click.option('--model_config_path', 
-                default='models.yaml',
+                default='hadronic_models.yaml',
                 type=click.Path(exists=True, dir_okay=False))
 @click.option('-o', '--output', 
                 help='Output path', default='./')
@@ -107,7 +107,7 @@ def main(gamma_source, accelerator, model, output, gamma_source_config_path, acc
                                 diff_chi=chi, 
                                 diff_delta=delta,
                                 tsedov=model_cfg['tsedov'],
-                                Ec=model_cfg['Ec'],
+                                #Ec=model_cfg['Ec'],
                                 Ec_max=model_cfg['Ec_max'],
                                 n0=model_cfg['n0'], 
                                 deltap=model_cfg['deltap'],

@@ -13,7 +13,10 @@ config_plot = ./plot.yaml
 
 cube_proton: $(config_gam_srcs) $(config_gam_srcs) $(config_model)
 	mario_create_proton_cube  'HESSJ1804' 'G8' 'hadronic_1' ${data_dir)/total_col_dens_26_56.fits
+
 	mario_create_proton_cube  'HESSJ1804' 'PJ' 'hadronic_p1' ${data_dir)/total_col_dens_8_26.fits
+	mario_create_proton_cube  'HESSJ1804' 'PJ' --model_config_path hadronic_time_models.yaml 'hadronic_p1' ${data_dir)/total_col_dens_8_26.fits
+
 
 cube_G8: $(config_acc) $(config_gam_srcs) $(config_model)
 	mario_create_gamma_cube 'G8' $(data_dir)/total_col_dens_26_56.fits $(data_dir)/ProtonFlux/ProtonFlux_G8_age15_delta0.3_chi0.1_E1e+50.fits

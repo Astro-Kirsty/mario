@@ -93,7 +93,7 @@ def main(accelerator, plot_type, gamma_cube, accelerator_config_path, plot_confi
                       colorbar_label=f'Integrated flux {fit_type} ({emin:.0f}-{emax:.0f}TeV)'+' cm$^{-2}$ s$^{-1}$', 
                       diff_label=True)
 
-    add_gamma_src(src_fits, con_levels, ax, 'black')
+    add_gamma_src(src_fits, con_levels, ax, colors='black')
 
     if snr_centre: 
         add_SNR_centre(acc, ax, facecolor='#00CED1')

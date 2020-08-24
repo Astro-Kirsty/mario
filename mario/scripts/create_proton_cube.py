@@ -26,7 +26,7 @@ from mario.utils.model_utils import calc_Bmag, calc_dist_CR_release_point, escap
                 default='accelerators.yaml',
                 type=click.Path(exists=True, dir_okay=False))
 @click.option('--model_config_path', 
-                default='models.yaml',
+                default='hadronic_models.yaml',
                 type=click.Path(exists=True, dir_okay=False))
 
 @click.option('-o', '--output', 
@@ -88,7 +88,7 @@ def main(gamma_source, accelerator, model, total_column_density, output, gamma_s
                                 diff_chi=chi, 
                                 diff_delta=delta,
                                 tsedov=model_cfg['tsedov'],
-                                Ec=model_cfg['Ec'],
+                                #Ec=model_cfg['Ec'],
                                 Ec_max=model_cfg['Ec_max'],
                                 n0=model_cfg['n0'], 
                                 deltap=model_cfg['deltap'],

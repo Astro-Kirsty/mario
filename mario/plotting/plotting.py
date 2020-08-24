@@ -68,7 +68,7 @@ def add_SNR_centre(snr, ax, **kwargs):
     return ax
 
 
-def add_gamma_src(src_fits, con_levels, ax, colors):
+def add_gamma_src(src_fits, con_levels, ax, **kwargs):
     """
     Plot the contours from your gamma-ray source
 
@@ -80,12 +80,12 @@ def add_gamma_src(src_fits, con_levels, ax, colors):
         Contours levels for the fits file
     ax : str
         Set the axis for the figure
-    colors : str
-        Color name or rgb code
+    kwargs : keywords
+        Initialisation keywords
 
     Examples
     ----------------------
-    >>> add_gamma_src('HESSJ1804.fits', [10,20,30,40], ax, 'black')
+    >>> add_gamma_src('HESSJ1804.fits', [10,20,30,40], ax, colors='black')
     """
     src = fits.open(src_fits)
     con_data = src[1].data
@@ -94,7 +94,7 @@ def add_gamma_src(src_fits, con_levels, ax, colors):
     con_header.remove('CUNIT2')
 
     ax.contour(con_data, transform=ax.get_transform(WCS(con_header)),
-               levels=con_levels, colors=colors)
+               levels=con_levels, **kwargs)
 
     return ax
 

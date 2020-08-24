@@ -126,7 +126,7 @@ def main(accelerator, plot_type, irf, gamma_cube, accelerator_config_path, plot_
             transform=ax.transAxes,
             fontsize=12, color='black')
 
-    add_gamma_src(src_fits, con_levels, ax, 'black')
+    add_gamma_src(src_fits, con_levels, ax, colors='black')
 
     if snr_centre: 
         add_SNR_centre(acc, ax, facecolor='#00CED1')

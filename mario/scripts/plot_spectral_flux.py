@@ -87,6 +87,7 @@ def main(gamma_source, gamma_cube, fermi_data, hess_data, gamma_source_config_pa
     amplitude, index = sm.fit('PL')
     fit_vals = sm.fit_data
 
+    print(f'Amplitude is: {10**amplitude}, \n index is: {index}')
 
     fig = plt.figure(figsize=(8, 5))
     ax = fig.add_subplot(111)

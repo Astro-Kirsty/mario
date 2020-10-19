@@ -99,7 +99,7 @@ def add_gamma_src(src_fits, con_levels, ax, **kwargs):
     return ax
 
 
-def proton_spectrum(spectrum, age_label=False, diff_label=False, time_dep_label=False, 
+def proton_spectrum(spectrum, label=None, age_label=False, diff_label=False, time_dep_label=False, 
                     fig=None, ax=None, **kwargs):
     """
     Plot the proton spectrum
@@ -136,8 +136,10 @@ def proton_spectrum(spectrum, age_label=False, diff_label=False, time_dep_label=
     energy = spectrum.energies[:, 0, 0]
     flux = (spectrum.fluxes[:, 0, 0] * energy ** 2.75 * c / (4 * np.pi * u.sr))
 
+    if label is None:
+        label = f'{spectrum.time:1.0f}'
     ax.plot(energy, (flux.to(u.GeV ** (7 / 4) / (u.cm ** 2 * u.s * u.sr))).value,
-            label=f'{spectrum.snr.age:1.0f}',
+            label=label,
             **kwargs)
 
     if diff_label:

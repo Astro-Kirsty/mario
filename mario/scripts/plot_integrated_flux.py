@@ -44,8 +44,8 @@ def main(accelerator, plot_type, gamma_cube, accelerator_config_path, plot_confi
                 gas_mass=acc_cfg['gas_mass']
                 )
 
-    emin = plot_cfg['emin']
-    emax = plot_cfg['emax']
+    Emin = plot_cfg['Emin']
+    Emax = plot_cfg['Emax']
     fit_type = plot_cfg['fit_type']
     grid_size = plot_cfg['grid_size']
     radius = plot_cfg['radius']
@@ -62,7 +62,7 @@ def main(accelerator, plot_type, gamma_cube, accelerator_config_path, plot_confi
     sm3D = SpatialModel3D(data, header)
     sm3D.fit(fit_type)
 
-    integrated = sm3D.integrate(emin, emax, fit_type)
+    integrated = sm3D.integrate(Emin=Emin, Emax=Emax, fit_type)
 
     hdu = fits.PrimaryHDU(data=integrated)
     hdu.header['CTYPE1'] = header['CTYPE1']
@@ -75,12 +75,12 @@ def main(accelerator, plot_type, gamma_cube, accelerator_config_path, plot_confi
     hdu.header['CRPIX2'] = header['CRPIX2']
     hdu.header['CDELT2'] = header['CDELT2']
 
-    hdu.header['GDELTA'] = header['GDELTA']
-    hdu.header['GCHI'] = header['GCHI']
-    hdu.header['GEBUDGET'] = header['GEBUDGET']
+    hdu.header['HDELTA'] = header['HDELTA']
+    hdu.header['HCHI'] = header['HCHI']
+    hdu.header['HEB_ERG'] = header['HEB_ERG']
 
-    hdu.header['GAGE'] = header['GAGE']
-    hdu.header['GMODEL'] = header['GMODEL']
+    hdu.header['HTST_KYR'] = header['HTST_KYR']
+    hdu.header['HNAME'] = header['HNAME']
 
     oversampled_header, oversampled_data = oversample(data=integrated, header=hdu.header, 
                                                       grid_size=grid_size, radius=radius)

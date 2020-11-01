@@ -1,0 +1,5 @@
+generic:
+  eta: 0.001
+
+  alpha: 2
+

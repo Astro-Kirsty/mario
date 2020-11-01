@@ -142,9 +142,9 @@ def calc_Ebudget(integral_data, integral_header, int_flux_max_obs):
     """
 
     int_flux_max_model = np.max(integral_data)
-    Ebudget_model = integral_header['GEBUDGET'].split(' erg')[0]
+    Ebudget_model = integral_header['HEB_ERG']*u.erg
 
-    Ebudget = (int_flux_max_obs / int_flux_max_model) * float(Ebudget_model)
+    Ebudget = (int_flux_max_obs / int_flux_max_model) * Ebudget_model
 
     return Ebudget
 

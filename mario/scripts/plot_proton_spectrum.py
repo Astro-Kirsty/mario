@@ -1,24 +1,21 @@
 import astropy.units as u
 import numpy as np
 import matplotlib.pyplot as plt
+from astropy.constants import c
 from matplotlib.backends.backend_pdf import PdfPages
 
 import click
 from astropy.io.misc import yaml
 
-from mario.sources.sources import GammaSource
-from mario.sources.sources import Accelerator
-from mario.models.protonspectrum import ProtonSpectrum, TimeDependentProtonSpectrum
-from mario.plotting.plotting import proton_spectrum, add_kcr_src, add_kcr
+from mario.sources import GammaSource
+from mario.sources import Accelerator
+from mario.models.hadronic_models import HadronicImpulsivePDF, HadronicImpulsiveTimePDF, HadronicImpulsiveTimeExtentPDF
+from mario.plotting import proton_spectrum, add_kcr_src, add_kcr
 
 
 @click.command()
-@click.argument('gamma_source')
 @click.argument('accelerator')
 @click.argument('model')
-@click.option('--gamma_source_config_path', 
-                default='gamma_sources.yaml',
-                type=click.Path(exists=True, dir_okay=False))
 @click.option('--accelerator_config_path', 
                 default='accelerators.yaml',
                 type=click.Path(exists=True, dir_okay=False))
@@ -28,169 +25,86 @@ from mario.plotting.plotting import proton_spectrum, add_kcr_src, add_kcr
 @click.option('-o', '--output', 
                 help='Output path', default='./')
 
+def main(accelerator, model, output, accelerator_config_path, model_config_path):
 
-def main(gamma_source, accelerator, model, output, gamma_source_config_path, accelerator_config_path, model_config_path):
-
-    with open(gamma_source_config_path) as file:
-        gam_src_cfg = yaml.load(file)[gamma_source]
 
     with open(accelerator_config_path) as file:
         acc_cfg = yaml.load(file)[accelerator]
 
     with open(model_config_path) as file:
         model_cfg = yaml.load(file)[model]
+
       
-
-    gam_src = GammaSource(
-        name=gam_src_cfg['TeV']['name'], 
-        spectral_index=gam_src_cfg['TeV']['spectral_index'], 
-        flux_E_GeV=gam_src_cfg['GeV']['integral_lower_energy'], 
-        flux_GeV=gam_src_cfg['GeV']['integral_flux'], 
-        flux_E_TeV=gam_src_cfg['TeV']['integral_lower_energy'], 
-        flux_TeV=gam_src_cfg['TeV']['integral_flux'],
-        )
-
-    chis = model_cfg['diff_chi']
-    deltas = model_cfg['diff_delta']
-    Ebudgets = model_cfg['Ebudget']
-    timedependent = model_cfg['timedependent']
-
-    energies = np.logspace(0, 6, 50)*u.GeV
+    chis = model_cfg['dif_chi']
+    deltas = model_cfg['dif_delta']
+    n0s = model_cfg['n0s']
+    etas = model_cfg['etas']
+    alpha = model_cfg['alpha']
+    times = acc_cfg['age']
+    Ep = np.logspace(0, 6, 2650)*u.GeV
     figures = []
 
-    for age in acc_cfg['age']:
+    for t in times:
         acc = Accelerator(
                 name=acc_cfg['name'],
                 glon=acc_cfg['glon'], 
                 glat=acc_cfg['glat'], 
                 radius=acc_cfg['radius'],
-                age=age, 
+                age=t,
                 distance=acc_cfg['distance'],
                 gas_mass=acc_cfg['gas_mass']
                 )
+        for n0 in n0s:
+            for eta in etas:
+                for chi in chis:
+                    figures.append(plt.figure())
+                    ax = figures[-1].add_subplot(1, 1, 1)
+                    lines = []
+                    for delta in deltas:
+                        for Emax_t_ST in Emax_t_STs:
 
-        for chi in chis:
-            figures.append(plt.figure())
-            ax = figures[-1].add_subplot(1, 1, 1)
-            lines = []
+                            ps = HadronicImpulsiveTimePDF(n=model_cfg['n'],
+                                                          n0=n0,
+                                                          t_ST=t,
+                                                          dif_chi=chi,
+                                                          dif_delta=delta,
+                                                          Emax_t_ST=Emax_t_ST)
+                            ps.calc_pdf(E=Ep, R=[50]*u.pc, t=t)
+    #                        ps.calc_pdf(E=Ep, R=model_cfg['R'], t=t)
+                            Ebudget = eta * ps.E_SN
+                            Emin = 1*u.GeV
+                            Emax = Emax_t_ST
+                            N0 = (Ebudget * (1-alpha) / (((Emax/u.GeV)**(1-alpha) - (Emin/u.GeV)**(1-alpha))*u.GeV)).decompose()
 
-            for delta in deltas:
-                for Ebudget in Ebudgets:                       
-                    ps = ProtonSpectrum(
-                        gamma_src=gam_src, 
-                        snr=acc, 
-                        nH=acc_cfg['nH'],
-                        diff_chi=chi, 
-                        diff_delta=delta,
-                        tsedov=model_cfg['tsedov'],
-                        Ec=model_cfg['Ec'],
-                        Ec_max=model_cfg['Ec_max'],
-                        n0=model_cfg['n0'], 
-                        deltap=model_cfg['deltap'],
-                        Ebudget=Ebudget,
-                        ) 
+                            cool_time = (6e7 * (ps.n / u.cm**-3) ** (-1) * u.yr)
+                            losses = np.exp(- ((alpha - 1) * t  / cool_time)) 
 
-                    if 'cloud' in acc_cfg:
-                        ps.define_cloud(cloud_coord=(
-                                    acc_cfg['cloud']['glon'], 
-                                    acc_cfg['cloud']['glat'])
-                                    )
-                        ps.flux(energies, rcloud=ps.dist_cloud)
-                    else:
-                        ps.flux(energies, rcloud=acc_cfg['distance_cloud_release_point'])
-                        
-                    if timedependent:
-                        pst = TimeDependentProtonSpectrum(
-                                gamma_src=gam_src, 
-                                snr=acc, 
-                                nH=acc_cfg['nH'],
-                                diff_chi=chi, 
-                                diff_delta=delta,
-                                tsedov=model_cfg['tsedov'],
-                                #Ec=model_cfg['Ec'],
-                                Ec_max=model_cfg['Ec_max'],
-                                n0=model_cfg['n0'], 
-                                deltap=model_cfg['deltap'],
-                                Ebudget=Ebudget,
-                                ) 
-                        if 'cloud' in acc_cfg:
-                            pst.define_cloud(cloud_coord=(
-                                        acc_cfg['cloud']['glon'], 
-                                        acc_cfg['cloud']['glat']),
-                                        )
-                            pst.flux(energies, rcloud=ps.dist_cloud)
-                        else:
-                            pst.flux(energies, rcloud=acc_cfg['distance_cloud_release_point'])
-                        
-                        figures[-1], ax  = proton_spectrum(
-                                                spectrum=ps, 
-                                                fig=figures[-1], ax=ax,
-                                                ls=':')
-                        figures[-1], ax  = proton_spectrum(
-                                                spectrum=pst, 
-                                                fig=figures[-1], ax=ax,
-                                                color=ax.lines[-1].get_color())
+                            # proton spectra for one value of R
+                            flux = (ps.pdf[:,0,0] * N0 * (ps.energy / u.GeV)**(-alpha) /u.GeV * losses *
+                                ps.energy** 2.75 * c / (4 * np.pi * u.sr)).to(u.GeV ** (7 / 4) / (u.cm ** 2 * u.s * u.sr))
 
-                    else:
-                        figures[-1], ax  = proton_spectrum(
-                            spectrum=ps, 
-                            fig=figures[-1], ax=ax)
 
-                    lines += [ax.get_lines()[-1]]
+                            figures[-1], ax  = proton_spectrum(
+                                                    pdf=ps, 
+                                                    flux=flux,
+                                                    fig=figures[-1], ax=ax, label=f'$\delta = {delta}$',
+                                                    ls='-')
+                            ax.legend(loc='lower left')
 
-            legend = plt.legend(
-                [lines[i] for i in range(len(deltas))],
-                [f'$\delta$ = {j}' for j in deltas],
-                loc = 'upper right'
-                )
-            ax.add_artist(legend)
-            ax.text(0.05, 0.95, f'{acc_cfg["name"]} ({age:.0f})',
-                horizontalalignment='left',
-                verticalalignment='top',
-                transform=ax.transAxes)
+                    ax.text(0.05, 0.95, f'{acc_cfg["name"]} ({t:.0f})',
+                        horizontalalignment='left',
+                        verticalalignment='top',
+                        transform=ax.transAxes)
 
-            ax.text(0.05, 0.88, f'$\chi$ = {chi}',
-                horizontalalignment='left',
-                verticalalignment='top',
-                transform=ax.transAxes)
+                    ax.text(0.05, 0.88, f'$\chi$ = {chi}, $n_0$={n0}, Ebudget={eta*ps.E_SN:.1e}',
+                        horizontalalignment='left',
+                        verticalalignment='top',
+                        transform=ax.transAxes)
 
-            ax = add_kcr_src(
-                gamma_src=gam_src,
-                snr=acc, 
-                emin=gam_src_cfg['GeV']['plot_emin'], 
-                emax=gam_src_cfg['GeV']['plot_emax'], 
-                ax=ax, 
-                color=gam_src_cfg['GeV']['color'], 
-                ls='--', lw=2, zorder=0)
-            ax = add_kcr_src(
-                gamma_src=gam_src,
-                snr=acc,
-                emin=gam_src_cfg['TeV']['plot_emin'], 
-                emax=gam_src_cfg['TeV']['plot_emax'], 
-                ax=ax, 
-                color=gam_src_cfg['TeV']['color'],
-                ls='--', lw=2, zorder=0)
 
-            ax = add_kcr(label='', 
-                ax=ax,
-                ls='-.', lw=3, alpha=0.5, zorder=0,
-                color='magenta')
-
-            lines = ax.get_lines()
-            legend = plt.legend(
-                lines[-3:],
-                ['$k_{CR}$ (GeV)', '$k_{CR}$ (TeV)', '$k_{CR}$ (Earth)'],
-                loc='lower left'
-                )
-
-    if timedependent:
-        with PdfPages(output+f'TimeDependentProtonSpectra_{gam_src.name}_{acc.name}.pdf') as pdf:
-            for fig in figures:
-                pdf.savefig(fig, bbox_inches='tight')
-    else: 
-        with PdfPages(output+f'ProtonSpectra_{gam_src.name}_{acc.name}.pdf') as pdf:
-            for fig in figures:
-                pdf.savefig(fig, bbox_inches='tight')
+    with PdfPages(output+f'ProtonSpectra_{acc.name}.pdf') as pdf:
+        for fig in figures:
+            pdf.savefig(fig, bbox_inches='tight')
 
 
 if __name__ == '__main__':

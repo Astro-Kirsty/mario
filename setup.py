@@ -38,12 +38,12 @@ setup(
     entry_points={
         'console_scripts': [
             'mario_plot_proton_spectrum = mario.scripts.plot_proton_spectrum:main',
-            'mario_plot_electron_spectrum = mario.scripts.plot_electron_spectrum:main',
+            'mario_create_pdf_cube = mario.scripts.create_pdf_cube:main',
             'mario_create_proton_cube = mario.scripts.create_proton_cube:main',
-            'mario_create_electron_cube = mario.scripts.create_electron_cube:main',
             'mario_create_gamma_cube = mario.scripts.create_gamma_cube:main',
+            'mario_plot_gamma_fluxes = mario.scripts.plot_gamma_fluxes:main',
+            'mario_plot_gamma_CTA = mario.scripts.plot_gamma_CTA:main',
             'mario_plot_integrated_flux = mario.scripts.plot_integrated_flux:main',
-            'mario_plot_residuals = mario.scripts.plot_residuals:main',
             'mario_plot_spectral_flux = mario.scripts.plot_spectral_flux:main',
             'mario_plot_counts = mario.scripts.plot_counts:main',
         ],

@@ -1,4 +1,4 @@
-from . import protonspectrum
+from . import hadronic_models, utilities
 
-__all__ = ['protonspectrum']
+__all__ = ['hadronic_models', 'utilities']
 

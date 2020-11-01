@@ -1,9 +1,13 @@
 G8_Plot:
   name: 'SNR G8.7-0.1'
 
-  emin: 1
+  Emin: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: TeV}
 
-  emax: 100
+  Emax: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: TeV}
 
   fit_type: 'PL'
 
@@ -28,9 +32,13 @@ G8_Plot:
 PJ_Plot:
   name: 'Progenitor SNR of PSR J1803-2137'
 
-  emin: 1
+  Emin: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: TeV}
 
-  emax: 100
+  Emax: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: TeV}
 
   fit_type: 'PL'
 

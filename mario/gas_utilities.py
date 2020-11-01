@@ -4,7 +4,6 @@ from spectral_cube import SpectralCube
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
 from astropy.wcs import WCS
-from mario.utils.model_utils import calc_dist_CR_release_point, escape_time
 
 
 class TotalColumnDensity:
@@ -99,6 +98,7 @@ class TotalColumnDensity:
         hdu.header['AUTHOR'] = author
         hdu.writeto(filename, overwrite=True)
 
+
         return
 
 
@@ -127,7 +127,9 @@ class GasParameters:
         """
         self.snr = snr
 
-        file = fits.open(gas_map_path)
+        self.gas_map_path = gas_map_path
+
+        file = fits.open(self.gas_map_path)
         self.total_col_dens = file[0].data * u.cm ** (-2)
 
         if len(np.shape(self.total_col_dens)) == 3:

@@ -99,19 +99,45 @@ def add_gamma_src(src_fits, con_levels, ax, **kwargs):
     return ax
 
 
-def proton_spectrum(spectrum, label=None, age_label=False, diff_label=False, time_dep_label=False, 
+def set_limits(ax, header, l=[7.5, 9.5], b=[-0.5, 0.5]):
+    """
+    Set the limits for the galactic plots
+
+    Parameters
+    ----------
+    ax : str
+        Set the axis for the figure
+    header : str
+        The header of the fits file
+    l : array
+        The galactic longitude to plot (default is l=[7.5, 9.5])
+    b : array
+        The galactic latitude to plot (default is b=[-0.5, 0.5])
+    """
+    c1 = coord.SkyCoord(l=l[0] * u.deg, b=b[0] * u.deg, frame='galactic').to_pixel(WCS(header))
+    c2 = coord.SkyCoord(l=l[1] * u.deg, b=b[1] * u.deg, frame='galactic').to_pixel(WCS(header))
+    ax.set_xlim(c2[0], c1[0])
+    ax.set_ylim(c2[1], c1[1])
+    ax.invert_yaxis()
+
+    return ax
+
+
+def proton_spectrum(pdf, flux, label=None, age_label=False, dif_label=False, initial_label=False,
                     fig=None, ax=None, **kwargs):
     """
     Plot the proton spectrum
 
     Parameters
     ----------
-    spectrum : array
-        The proton spectra you want to plot
+    pdf : array
+        The pdf you want to plot
     age_label : bool
         Plot the age label (default is False)
-    diff_label : bool
+    dif_label : bool
         Plot the diffusion label (default is False)
+    initial_label : bool
+        Plot the initial spectral parameters (default is False)
     fig : str
         Set the figure for the plot
     ax : str
@@ -121,10 +147,9 @@ def proton_spectrum(spectrum, label=None, age_label=False, diff_label=False, tim
 
     Examples
     ----------------------
-    >>> from plotting.plotting import proton_spectrum
-	>>> Ep = np.logspace(0, 6, 50)*u.GeV
-    >>> ps.flux(Ep, rcloud=ps.dist_cloud)
-    >>> fig, ax  = proton_spectrum(spectrum=ps, diff_label=True)
+    >>> Ep = np.logspace(0, 6, 50)*u.GeV
+    >>> ps.calc_pdf(E=Ep, R=[30]*u.pc, t=t)
+    >>> fig, ax  = proton_spectrum(pdf=ps, flux=flux, diff_label=True)
 
     """
     if fig is None:
@@ -133,17 +158,21 @@ def proton_spectrum(spectrum, label=None, age_label=False, diff_label=False, tim
     if ax is None:
         ax = plt.gca()
 
-    energy = spectrum.energies[:, 0, 0]
-    flux = (spectrum.fluxes[:, 0, 0] * energy ** 2.75 * c / (4 * np.pi * u.sr))
-
     if label is None:
-        label = f'{spectrum.time:1.0f}'
-    ax.plot(energy, (flux.to(u.GeV ** (7 / 4) / (u.cm ** 2 * u.s * u.sr))).value,
+        label = f'{pdf.t:1.0f}'
+    ax.plot(pdf.energy, (flux.to(u.GeV ** (7 / 4) / (u.cm ** 2 * u.s * u.sr))).value,
             label=label,
             **kwargs)
 
-    if diff_label:
-        ax.text(0.03, 0.93, f'$\chi$={spectrum.diff_chi},   $\delta$={spectrum.diff_delta}',
+    if dif_label:
+        ax.text(0.03, 0.93, f'$\chi$={pdf.dif_chi},   $\delta$={pdf.dif_delta}',
+                horizontalalignment='left',
+                transform=ax.transAxes,
+                fontsize=15, color='black')
+        
+    if initial_label:
+        ax.text(0.03, 0.83, f'$\delta_p$={pdf.deltap:.2f}, $n_0$={pdf.n0.value}'+
+                     ' cm$^{-3}$, E$_{esc}$='+f'{pdf.Eesc:.1f}',
                 horizontalalignment='left',
                 transform=ax.transAxes,
                 fontsize=15, color='black')
@@ -151,8 +180,7 @@ def proton_spectrum(spectrum, label=None, age_label=False, diff_label=False, tim
     ax.set_xscale('log')
     ax.set_yscale('log')
 
-    ax.set_xlim(7e1, 1e5)
-    ax.set_ylim(1e-3, 1e4)
+    ax.set_ylim(1e-10, 1e5)
 
     ax.set_xlabel('Energy (GeV)')
     ax.set_ylabel('JE$^{2.75}$ (GeV$^{1.75}$cm$^{-2}$s$^{-1}$ sr$^{-1}$)')
@@ -163,76 +191,11 @@ def proton_spectrum(spectrum, label=None, age_label=False, diff_label=False, tim
                   ncol=1,
                   labelspacing=0.3)
 
-    if time_dep_label:
-        spectrum.escape_energy()
-        ax.set_title(f'$\delta_p$={spectrum.deltap}, $n_0$={spectrum.n0.value}'+
-                     ' cm$^{-3}$, E$_{\gamma}$='+f'{spectrum.Eg_esc:.1f}')
 
     return fig, ax
 
 
-def electron_spectrum(spectrum, age_label=False, diff_label=False,
-                    fig=None, ax=None, **kwargs):
-    """
-    Plot the electron spectrum
 
-    Parameters
-    ----------
-    spectrum : array
-        The proton spectra you want to plot
-    age_label : bool
-        Plot the age label (default is False)
-    diff_label : bool
-        Plot the diffusion label (default is False)
-    fig : str
-        Set the figure for the plot
-    ax : str
-        Set the axis for the figure
-    **kwargs : keywords
-        Initialisation keywords
-
-    Examples
-    ----------------------
-    >>> from plotting.plotting import electron_spectrum
-    >>> Ee = np.logspace(-3, 6, 50)*u.GeV
-    >>> es.flux(Ee, rcloud=10*u.pc)
-    >>> fig, ax  = electron_spectrum(spectrum=es, diff_label=True)
-
-    """
-    if fig is None:
-        fig = plt.figure(figsize=(8, 6))
-
-    if ax is None:
-        ax = plt.gca()
-
-    energy = spectrum.energies[:, 0, 0]
-    flux = spectrum.fluxes[:, 0, 0] 
-
-    ax.plot(energy, (flux.to(u.cm**(-3))).value,
-            label=f'{spectrum.snr.age:1.0f}',
-            **kwargs)
-
-    if diff_label:
-        ax.text(0.03, 0.93, f'$\chi$={spectrum.diff_chi},   $\delta$={spectrum.diff_delta}',
-                horizontalalignment='left',
-                transform=ax.transAxes,
-                fontsize=15, color='black')
-
-    ax.set_xscale('log')
-    ax.set_yscale('log')
-
-    ax.set_xlim(1e-3, 1e4)
-    ax.set_ylim(2e-20, 1e-16)
-
-    ax.set_xlabel('Energy (GeV)')
-    ax.set_ylabel('J$_e$ (cm$^{-3}$)')
-
-    if age_label:
-        ax.legend(title='Age of SNR',
-                  loc='lower right',
-                  ncol=1,
-                  labelspacing=0.3)
-    return fig, ax
 
 
 
@@ -303,27 +266,5 @@ def add_kcr_src(gamma_src, snr, emin, emax, ax=None, label='', **kwargs):
     return ax
 
 
-def set_limits(ax, header, l=[7.5, 9.5], b=[-0.5, 0.5]):
-    """
-    Set the limits for the galactic plots
-
-    Parameters
-    ----------
-    ax : str
-        Set the axis for the figure
-    header : str
-        The header of the fits file
-    l : array
-        The galactic longitude to plot (default is l=[7.5, 9.5])
-    b : array
-        The galactic latitude to plot (default is b=[-0.5, 0.5])
-    """
-    c1 = coord.SkyCoord(l=l[0] * u.deg, b=b[0] * u.deg, frame='galactic').to_pixel(WCS(header))
-    c2 = coord.SkyCoord(l=l[1] * u.deg, b=b[1] * u.deg, frame='galactic').to_pixel(WCS(header))
-    ax.set_xlim(c2[0], c1[0])
-    ax.set_ylim(c2[1], c1[1])
-    ax.invert_yaxis()
-
-    return ax
 
 

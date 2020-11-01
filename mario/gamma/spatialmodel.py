@@ -5,7 +5,8 @@ from astropy.coordinates import SkyCoord
 from astropy import coordinates as coord
 from scipy.optimize import curve_fit
 from scipy import integrate
-from gammapy.spectrum import SpectrumDataset
+from gammapy.spectrum import SpectrumDataset        # gammapy 0.16
+#from gammapy.datasets import SpectrumDataset         # gammapy 0.17
 from gammapy.modeling.models import (PowerLawSpectralModel, LogParabolaSpectralModel,
                                      ExpCutoffPowerLawSpectralModel, SkyModel)
 from photutils import SkyCircularAperture
@@ -63,12 +64,12 @@ def oversample(data, header, grid_size=0.005 * u.deg, radius=0.06 * u.deg, diff_
     hdu.header['CDELT2'] = grid_size.value
 
     if diff_vals:
-        hdu.header['GDELTA'] = header['GDELTA']
-        hdu.header['GCHI'] = header['GCHI']
-        hdu.header['GEBUDGET'] = header['GEBUDGET']
+        hdu.header['HDELTA'] = header['HDELTA']
+        hdu.header['HCHI'] = header['HCHI']
+        hdu.header['HEB_ERG'] = header['HEB_ERG']
 
-        hdu.header['GAGE'] = header['GAGE']
-        hdu.header['GMODEL'] = header['GMODEL']
+        hdu.header['HT_KYR'] = header['HT_KYR']
+        hdu.header['HNAME'] = header['HNAME']
 
     return hdu.header, data_oversample
 
@@ -116,8 +117,6 @@ class SpectralModel:
         self.energies = energies
         self.fluxes = fluxes
 
-        self.counts = None
-
     def fit(self, fit='PL'):
         """
         Fit the spectral model
@@ -134,7 +133,7 @@ class SpectralModel:
         if fit == 'PL':
             popt, pcov = curve_fit(PL_log, log_energies, log_fluxes, p0=[-16, 3])
             fit_data = PL_log(log_energies, popt[0], popt[1])
-        if fit == 'LP':
+        elif fit == 'LP':
             popt, pcov = curve_fit(LP_log, log_energies, log_fluxes, p0=[log_fluxes[0], 3, 0])
             fit_data = LP_log(log_energies, popt[0], popt[1], popt[2])
 
@@ -161,7 +160,7 @@ class SpectralModel:
         if ax is None:
             ax = fig.add_subplot(111)
 
-        ax.plot(self.energies, self.fluxes, 'ro', **kwargs)
+        ax.plot(self.energies, self.fluxes, **kwargs)
 
         ax.set_xlabel('Energy (TeV)')
         ax.set_ylabel('$\gamma$-ray flux (TeV$^{-1}$cm$^{-2}$s$^{-1}$)')
@@ -203,49 +202,6 @@ class SpectralModel:
         ax.legend()
 
         return fig, ax
-
-
-    def fake(self, aeff, edisp, livetime, fit_params, fit='PL'):
-        """
-        Calculates the simulated excess counts map
-
-        Parameters
-        ----------------------
-        aeff : str
-            The effective area from the instrument response function
-        edisp : str
-            The energy dispersion from the instrument response function
-        livetime : float
-            The livetime of telescope observations
-        fit_params : array
-            The fit parameters
-        fit : str
-            The fit for the data (default is 'PL')
-
-        """
-        if fit == 'PL':
-            if len(fit_params) != 2:
-                print('This fit requires 2 fit parameters: index and amplitude')
-
-            spectral_model = PowerLawSpectralModel(
-                index=fit_params[0],
-                amplitude=fit_params[1] * u.Unit('cm-2 s-1 TeV-1'),
-                reference=1 * u.TeV)
-        if fit == 'LP':
-            if len(fit_params) != 2:
-                print('This fit requires 3 fit parameters: alpha, beta and amplitude')
-
-            spectral_model = LogParabolaSpectralModel(
-                alpha=fit_params[0],
-                beta=fit_params[1],
-                amplitude=fit_params[2] * u.Unit('cm-2 s-1 TeV-1'),
-                reference=1 * u.TeV)
-
-        sky_model = SkyModel(spectral_model=spectral_model)
-        dataset = SpectrumDataset(aeff=aeff, edisp=edisp, models=sky_model, livetime=livetime)
-        counts = dataset.npred().data
-
-        self.counts = counts
 
 
 class SpatialModel:
@@ -316,12 +272,12 @@ class SpatialModel:
         ax.set_ylim([0, ylim])
 
         if diff_label:
-            chi = self.header['GCHI']
-            delta = self.header['GDELTA']
-            ebudget, ebudget_unit = self.header['GEBUDGET'].split()
+            chi = self.header['HCHI']
+            delta = self.header['HDELTA']
+            Ebudget = self.header['HEB_ERG']
 
             ax.text(0.03, 0.9, 
-                    f'$\chi$={chi}, $\delta$={delta}, '+'E$_{budget}$='+f'{float(ebudget):.1e}{ebudget_unit}',
+                    f'$\chi$={chi}, $\delta$={delta}, '+'E$_{budget}$='+f'{float(Ebudget):.1e}erg',
                     horizontalalignment='left',
                     transform=ax.transAxes,
                     fontsize=15, color='black')
@@ -383,12 +339,12 @@ class SpatialModel:
         hdu.header['CRPIX2'] = 0.0
         hdu.header['CDELT2'] = self.header['CDELT2']
 
-        hdu.header['GDELTA'] = self.header['GDELTA']
-        hdu.header['GCHI'] = self.header['GCHI']
-        hdu.header['GEBUDGET'] = self.header['GEBUDGET']
+        hdu.header['HDELTA'] = self.header['HDELTA']
+        hdu.header['HCHI'] = self.header['HCHI']
+        hdu.header['HEB_ERG'] = self.header['HEB_ERG']
 
-        hdu.header['GAGE'] = self.header['GAGE']
-        hdu.header['GMODEL'] = self.header['GMODEL']
+        hdu.header['HT_KYR'] = self.header['HT_KYR']
+        hdu.header['HNAME'] = self.header['HNAME']
 
         return hdu.header, residuals
 
@@ -412,7 +368,7 @@ class SpatialModel3D(SpatialModel):
         ----------------------
         >>> sm = SpatialModel3D(data, header)
         >>> sm.fit('PL')
-        >>> integral = sm.integrate_PL(1, 100)
+        >>> integral = sm.integrate_PL(1*u.TeV, 100*u.TeV)
 
         """
         self.energies = np.logspace(self.header['CRVAL3'],
@@ -576,39 +532,33 @@ class SpatialModel3D(SpatialModel):
         self.counts = counts
 
 
-    def integrate_PL(self, emin, emax):
+    def integrate_PL(self, Emin=1*u.TeV, Emax=100*u.TeV):
         """
-        Integrate the PowerLaw model from emin to emax
+        Integrate the PowerLaw model from Emin to Emax
 
         Parameters
         ----------------------
-        emin : float
+        Emin : float
             The minimum energy for the integral
-        emax : float
+        Emax : float
             The maximum energy for the integral
-
         """
-
-        func_min = self.amplitude_PL / (1 - self.index_PL) * emin ** (1 - self.index_PL)
-        func_max = self.amplitude_PL / (1 - self.index_PL) * emax ** (1 - self.index_PL)
-
-        integral = func_max - func_min
-
+        int_min = self.amplitude_PL * (Emin/u.TeV) ** (1 - self.index_PL) / (1 - self.index_PL) 
+        int_max = self.amplitude_PL * (Emax/u.TeV) ** (1 - self.index_PL) / (1 - self.index_PL)
+        integral = (int_max - int_min)
         return integral
 
-    def integrate_LP(self, emin, emax):
+    def integrate_LP(self, Emin=1*u.TeV, Emax=100*u.TeV):
         """
-        Integrate the LogParabola model from emin to emax
+        Integrate the LogParabola model from Emin to Emax
 
         Parameters
         ----------------------
-        emin : float
+        Emin : float
             The minimum energy for the integral
-        emax : float
+        Emax : float
             The maximum energy for the integral
-
         """
-
         Esize, xsize, ysize = self.data.shape
         E = self.energies
 
@@ -617,36 +567,33 @@ class SpatialModel3D(SpatialModel):
             for iy in range(ysize):
                 LP_linear = lambda E: (self.amplitude_LP[ix, iy] * 
                                        E ** (- self.alpha_LP[ix, iy] - self.beta_LP[ix, iy]*np.log10(E)))
-                integral[ix, iy] = integrate.quad(LP_linear, emin, emax)[0]
+                integral[ix, iy] = integrate.quad(LP_linear, Emin/u.TeV, Emax/u.TeV)[0]
 
         return integral
 
 
-    def integrate(self, emin, emax, fit='best'):
+    def integrate(self, Emin=1*u.TeV, Emax=100*u.TeV, fit='best'):
         """
         Use the fit_type to determine which integral function to use
 
         Parameters
         ----------------------
-        emin : float
+        Emin : float
             The minimum energy for the integral
-        emax : float
+        Emax : float
             The maximum energy for the integral
         fit : str (options 'best', 'PL', 'LP')
             The fit for the data
-
         """
         if (fit == 'PL'):
-            integral = self.integrate_PL(emin, emax)
+            integral = self.integrate_PL(Emin, Emax)
         if (fit == 'LP'):
-            integral = self.integrate_LP(emin, emax)
-
+            integral = self.integrate_LP(Emin, Emax)
 
         if (fit == 'best') | (fit == 'PL'):
-            integral = self.integrate_PL(emin, emax)
-
+            integral = self.integrate_PL(Emin, Emax)
         elif (fit == 'best') | (fit == 'PL'):
-            integral = self.integrate_PL(emin, emax)
+            integral = self.integrate_PL(Emin, Emax)
 
         return integral
     
@@ -662,23 +609,18 @@ class SpatialModel3D(SpatialModel):
         radius : float
             The radius of the summing region
         """
-
         wcs = WCS(self.header, naxis=2)
         position = SkyCoord(l=coords[0], b=coords[1], frame='galactic')
         aperture = SkyCircularAperture(position, radius).to_pixel(wcs)
 
         mask = aperture.to_mask(method='center')
-
         fluxes = np.empty((self.data.shape[0]))
 
         for i in range(self.data.shape[0]):
             fluxes[i] = np.sum(mask.multiply(self.data[i, :, :]))
 
-        energies = np.logspace(self.header['CRVAL3'],
-                               self.header['CRVAL3'] + (self.header['NAXIS3'] - 1) * self.header['CDELT3'],
-                               self.header['NAXIS3'])
 
-        return energies, fluxes
+        return self.energies, fluxes
 
 
     def pixel(self, coords):
@@ -695,8 +637,5 @@ class SpatialModel3D(SpatialModel):
         lpixel, bpixel = wcs.world_to_pixel(coord)
 
         fluxes = self.data[:, int(bpixel), int(lpixel)]
-        energies = np.logspace(self.header['CRVAL3'],
-                               self.header['CRVAL3'] + (self.header['NAXIS3'] - 1) * self.header['CDELT3'],
-                               self.header['NAXIS3'])
 
-        return energies, fluxes
+        return self.energies, fluxes

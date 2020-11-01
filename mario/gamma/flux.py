@@ -1,31 +1,50 @@
 import numpy as np
 from astropy import units as u
 from astropy.constants import c
-from spectral_cube import SpectralCube
 from astropy.io import fits
-from astropy.wcs import WCS
-from mario.utils.model_utils import calc_dist_CR_release_point, escape_time
-
 
 class GammaFlux:
-    """
-    A class to calculate the predicted gamma-ray flux
-
-    """
 
     @u.quantity_input(nH2_cell=u.cm ** (-3))
-    def __init__(self, snr, proton_cube_path, gp):
+    def __init__(self, snr, pdf_cube_path, gp, alpha=2, eta=0.1):
+        """
+        A class to calculate the predicted gamma-ray flux
 
+        """
         self.snr = snr
         
-        file = fits.open(proton_cube_path)
+        self.pdf_cube_path = pdf_cube_path
+        file = fits.open(self.pdf_cube_path)
         self.header = file[0].header
-        self.Jp = (file[0].data) * u.Unit(self.header['BUNIT'])
+        self.pdf = (file[0].data) * u.Unit(self.header['BUNIT'])
+        
+        self.alpha = alpha
+        self.eta = eta
+        self.Ebudget = self.eta * self.header['HESN_ERG']*u.erg
+        
+        Emin = 1 * u.GeV
+        Emax = 1 * u.PeV
+        if self.alpha == 2:
+            N0 = (self.Ebudget / ((np.log(Emax/u.GeV) - np.log(Emin/u.GeV))*u.GeV)).decompose()
+        else:
+            N0 = (self.Ebudget * (2-alpha) / 
+                  (((Emax/u.GeV)**(2-self.alpha) - (Emin/u.GeV)**(2-self.alpha))*u.GeV)).decompose()
+        self.N0 = N0
         
         self.Ep = np.logspace(self.header['CRVAL3'],
                               self.header['CRVAL3'] + (self.header['NAXIS3'] - 1) * self.header['CDELT3'],
                               self.header['NAXIS3'])* u.Unit(self.header['CUNIT3'])
         
+        cool_time = (6e7 * (self.header['HN_CM3'] * u.cm**-3 / u.cm**-3) ** (-1) * u.yr)
+        losses = np.exp(- ((self.alpha - 1) * self.header['HT_KYR']*u.kyr  / cool_time)) 
+
+        Esize, xsize, ysize = self.pdf.shape
+        Jp = np.empty((Esize, xsize, ysize))
+        for i in range(len(self.Ep)):
+            Jp[i, :,:] = (self.pdf[i,:,:] * losses * N0 * (self.Ep[i] / u.GeV)**(-self.alpha) /u.GeV).to(u.cm**(-3)/u.GeV)
+
+        self.Jp = Jp *  u.cm**(-3)/u.GeV
+            
         self.gp = gp
         self.nH2_cell = self.gp.nH2_cell()       
         
@@ -85,29 +104,20 @@ class GammaFlux:
         self.energies = energies
         self.fluxes = Gfluxes * unit
 
-        return Gfluxes * unit
-    
-    def save_cube(self, author='', filename='Gflux_cube.fits'):
+        return
+
+    def save_header(self, author=''):
         """
-        Save the gamma-ray flux to a fits cube
-
-        Parameters
-        ----------------------
-        author : str, optional
-            Author of the fits file (default 'Kirsty Feijen')
-        filename : str, optional
-            The name to save your fits to (default 'Gflux_cube.fits')
-
+        Save the hadronic gamma ray header
         """
-        step = np.diff(np.log10(self.energies.value))[0]
 
-        # Value of the first energy in the energy array
-        E0 = np.log10(self.energies[0].value)
+        step = np.diff(np.log10(self.energies[:].to(u.TeV).value))[0]
 
-        # Set header based on template file
+        E0 = np.log10(self.energies[0].to(u.TeV).value)
+
         hdr = fits.PrimaryHDU(data=self.fluxes.value)
         hdr.header['BUNIT'] = f'{self.fluxes.unit}'
-        
+
         hdr.header['CTYPE1'] = self.gp.header['CTYPE1']
         hdr.header['CRVAL1'] = self.gp.header['CRVAL1']
         hdr.header['CRPIX1'] = self.gp.header['CRPIX1']
@@ -123,16 +133,80 @@ class GammaFlux:
         hdr.header['CRVAL3'] = E0
         hdr.header['CRPIX3'] = 1.
         hdr.header['CDELT3'] = step
-        
-        hdr.header['GDELTA'] = self.header['GDELTA']
-        hdr.header['GCHI']   = self.header['GCHI']
-        hdr.header['GEBUDGET'] = self.header['GEBUDGET']
 
-        hdr.header['GAGE'] = self.header['GAGE']
+        hdr.header['HNAME'] = self.header['HNAME']
+        hdr.header['HT_KYR'] = self.header['HT_KYR']
+        hdr.header['HCHI'] = self.header['HCHI']
+        hdr.header['HDELTA'] = self.header['HDELTA']
+        hdr.header['HD0_CM2S'] = self.header['HD0_CM2S']
+        hdr.header['HN_CM3'] = self.header['HN_CM3']
+        hdr.header['HN0_CM3'] = self.header['HN0_CM3']
+        hdr.header['HESN_ERG'] = self.header['HESN_ERG']
+        hdr.header['HEM100_P'] = self.header['HEM100_P']
+        hdr.header['HEMT_TEV'] = self.header['HEMT_TEV']
+        hdr.header['HTST_KYR'] = self.header['HTST_KYR']
+        hdr.header['HDELTAP'] = self.header['HDELTAP']
+        hdr.header['HEB_ERG'] = self.Ebudget.to(u.erg).value
+        hdr.header['HETA'] = self.eta
+        hdr.header['HALPHA'] = self.alpha
 
-        hdr.header['GMODEL'] = self.header['GMODEL']
-
-#         hdr.header['COMMENT']  = self.header['COMMENT']
+        hdr.header['HGASPATH'] = self.gp.gas_map_path
 
         hdr.header['AUTHOR'] = author
-        hdr.writeto(filename, overwrite=True)
+
+        return hdr.header
+    
+    def save(self, author='', basename='HadronicFlux'):
+        """
+        Save the hadronic gamma ray flux to a fits file
+        """
+        try:
+            basepdf = self.pdf_cube_path.split('HadronicPDF_')[1]
+            filename = f'{basename}_{basepdf}'
+
+            step = np.diff(np.log10(self.energies[:].to(u.TeV).value))[0]
+
+            E0 = np.log10(self.energies[0].to(u.TeV).value)
+
+            hdr = fits.PrimaryHDU(data=self.fluxes.value)
+            hdr.header['BUNIT'] = f'{self.fluxes.unit}'
+
+            hdr.header['CTYPE1'] = self.gp.header['CTYPE1']
+            hdr.header['CRVAL1'] = self.gp.header['CRVAL1']
+            hdr.header['CRPIX1'] = self.gp.header['CRPIX1']
+            hdr.header['CDELT1'] = self.gp.header['CDELT1']
+
+            hdr.header['CTYPE2'] = self.gp.header['CTYPE2']
+            hdr.header['CRVAL2'] = self.gp.header['CRVAL2']
+            hdr.header['CRPIX2'] = self.gp.header['CRPIX2']
+            hdr.header['CDELT2'] = self.gp.header['CDELT2']
+
+            hdr.header['CTYPE3'] = 'log ENERGY'
+            hdr.header['CUNIT3'] = 'TeV'
+            hdr.header['CRVAL3'] = E0
+            hdr.header['CRPIX3'] = 1.
+            hdr.header['CDELT3'] = step
+
+            hdr.header['HNAME'] = self.header['HNAME']
+            hdr.header['HT_KYR'] = self.header['HT_KYR']
+            hdr.header['HCHI'] = self.header['HCHI']
+            hdr.header['HDELTA'] = self.header['HDELTA']
+            hdr.header['HD0_CM2S'] = self.header['HD0_CM2S']
+            hdr.header['HN_CM3'] = self.header['HN_CM3']
+            hdr.header['HN0_CM3'] = self.header['HN0_CM3']
+            hdr.header['HESN_ERG'] = self.header['HESN_ERG']
+            hdr.header['HEM100_P'] = self.header['HEM100_P']
+            hdr.header['HEMT_TEV'] = self.header['HEMT_TEV']
+            hdr.header['HTST_KYR'] = self.header['HTST_KYR']
+            hdr.header['HDELTAP'] = self.header['HDELTAP']
+            hdr.header['HEB_ERG'] = self.Ebudget.to(u.erg).value
+            hdr.header['HETA'] = self.eta
+            hdr.header['HALPHA'] = self.alpha
+
+            hdr.header['HGASPATH'] = self.gp.gas_map_path
+
+            hdr.header['AUTHOR'] = author
+
+            hdr.writeto(filename, overwrite=True)
+        except:
+            print('Please calculate the flux first')

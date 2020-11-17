@@ -45,8 +45,13 @@ class GammaFlux:
 
         self.Jp = Jp *  u.cm**(-3)/u.GeV
             
+        Resc = self.header['HRESC_PC']*u.pc
+        n0 = self.header['HN0_CM3'] * u.cm**(-3)
         self.gp = gp
-        self.nH2_cell = self.gp.nH2_cell()       
+        Rs = gp.dist_cell()
+        self.nH2_cell = gp.nH2_cell().to(u.cm**(-3)).value
+        self.nH2_cell[Rs < Resc] = n0
+        self.nH2_cell = self.nH2_cell * u.cm**(-3)      
         
         if type(self.Ep.value) == np.ndarray:
             self.Ep = self.Ep[:, None, None]
@@ -150,6 +155,9 @@ class GammaFlux:
         hdr.header['HETA'] = self.eta
         hdr.header['HALPHA'] = self.alpha
 
+        hdr.header['HEES_TEV'] = self.header['HEES_TEV']
+        hdr.header['HRESC_PC'] = self.header['HRESC_PC']
+
         hdr.header['HGASPATH'] = self.gp.gas_map_path
 
         hdr.header['AUTHOR'] = author
@@ -202,6 +210,9 @@ class GammaFlux:
             hdr.header['HEB_ERG'] = self.Ebudget.to(u.erg).value
             hdr.header['HETA'] = self.eta
             hdr.header['HALPHA'] = self.alpha
+
+            hdr.header['HEES_TEV'] = self.header['HEES_TEV']
+            hdr.header['HRESC_PC'] = self.header['HRESC_PC']
 
             hdr.header['HGASPATH'] = self.gp.gas_map_path
 

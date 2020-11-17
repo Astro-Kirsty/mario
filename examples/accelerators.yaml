@@ -18,10 +18,10 @@ G8:
   age: 
     - !astropy.units.Quantity
       unit: &id001 !astropy.units.Unit {unit: kyr}
+      value: 15
+    - !astropy.units.Quantity
+      unit: *id001
       value: 28
-#    - !astropy.units.Quantity
-#      unit: *id001
-#      value: 28
   cloud:
     glon: !astropy.units.Quantity
       value: 8.575

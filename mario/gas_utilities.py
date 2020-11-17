@@ -160,8 +160,8 @@ class GasParameters:
             The number density of each pixel
 
         """
-        # Calculation of box depth
-        depth = self.snr.distance.to(u.cm) * np.tan(0.45 * u.deg)
+        # Box depth
+        depth = 35*u.pc
 
         # Calculation of volume
         area = (self.snr.distance.to(u.cm) * np.tan(self.theta_pixel)) ** 2

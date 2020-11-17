@@ -5,7 +5,7 @@ import click
 from astropy.io.misc import yaml
 
 from mario.sources import Accelerator
-from mario.models.hadronic_models import HadronicImpulsiveTimePDF, HadronicImpulsiveTimeExtentPDF
+from mario.models.hadronic_models import HadronicImpulsiveTimePDF
 from mario.gas_utilities import GasParameters
 
 

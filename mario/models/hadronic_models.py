@@ -45,6 +45,7 @@ class BaseHadronicImpulsivePDF(BasePDF):
         self.D0 = D0
         self.dif_chi = dif_chi
         self.dif_delta = dif_delta
+
         self.t_ST = t_ST
         self.Emax_t_ST = Emax_t_ST
         self.Emax_100yr = Emax_100yr
@@ -163,6 +164,9 @@ class BaseHadronicImpulsivePDF(BasePDF):
             hdr.header['HEMT_TEV'] = self.Emax_t_ST.to(u.TeV).value
             hdr.header['HTST_KYR'] = self.t_ST.to(u.kyr).value
             hdr.header['HDELTAP'] = self.deltap.value
+
+            hdr.header['HEES_TEV'] = self.Eesc.to(u.TeV).value
+            hdr.header['HRESC_PC'] = self.Resc[0,0,0].to(u.pc).value
 
             hdr.header['AUTHOR'] = author
 

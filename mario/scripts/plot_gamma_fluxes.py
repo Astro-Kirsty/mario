@@ -87,8 +87,8 @@ def main(gamma_source, accelerator, plot_type, hess_spectra, obs_path, gamma_cub
         writer.writerow(['Model', 'Age', 'Chi', 'Delta', 'D0 (cm-2 s-1)', 'n (cm-3)', 'n0 (cm-3)', 'ESN (erg)',
                          'Emax_100 (PeV)', 'Emax_t_ST (TeV)', 't_ST (kyr)', 'Deltap', 'Alpha', 'Eta', 
                          'Ebudget (erg)',
-                         'Amplitude (cm-2 s-1 TeV-1)', 'Index', 'Integrated flux', 'Residual sum (spectral)' ,
-                         'Residual sum (Integrated)'])
+                         'Amplitude (cm-2 s-1 TeV-1)', 'Index', 'Lambda', 'Alpha_spec', 
+                         'Integrated flux', 'Goodness of fit (spectral)', 'Residual sum (Integrated)'])
     
     #------------------------------------ Model data ------------------------------------
     for f in files:
@@ -109,22 +109,24 @@ def main(gamma_source, accelerator, plot_type, hess_spectra, obs_path, gamma_cub
 
         #-------------------------------- Integrated flux --------------------------------
         sm3D = SpatialModel3D(data=data, header=header)
-        sm3D.fit(fit=fit_type)
+        sm3D.fit(fit='ECO')
         energy, flux = sm3D.sum_region(coords=[gamsrc_glon, gamsrc_glat], radius=gamsrc_radius)
         sm = SpectralModel(energy, flux)
-        amplitude, index = sm.fit(fit=fit_type)
+        amplitude, index, _lambda, alpha_spec = sm.fit(fit='ECO')
         mask2 = sm.energies > Emin.value
         j = int(np.argwhere(mask2)[0])
         integrated_flux_val = np.nansum(sm.fluxes[j:-1] * np.diff(sm.energies[mask2]))
 
-        mask = sm3D.energies>Emin.value
-        i = int(np.argwhere(mask)[0])
-        dEnergies = np.diff(sm3D.energies[mask])
-        Esize, xsize, ysize = data.shape
-        integrated = np.empty((xsize, ysize))
-        for ix in range(xsize):
-            for iy in range(ysize):
-                integrated[ix, iy] = np.nansum(data[i:-1, ix, iy] * dEnergies)
+#        mask = sm3D.energies>Emin.value
+#        i = int(np.argwhere(mask)[0])
+#        dEnergies = np.diff(sm3D.energies[mask])
+#        Esize, xsize, ysize = data.shape
+#        integrated = np.empty((xsize, ysize))
+#        for ix in range(xsize):
+#            for iy in range(ysize):
+#                integrated[ix, iy] = np.nansum(data[i:-1, ix, iy] * dEnergies)
+
+        integrated = sm3D.integrate(Emin=1*u.TeV, Emax=100*u.TeV, fit='ECO')
 
         hdu = fits.PrimaryHDU(data=integrated)
         hdu.header['BUNIT'] = header['BUNIT']
@@ -157,13 +159,15 @@ def main(gamma_source, accelerator, plot_type, hess_spectra, obs_path, gamma_cub
 
         smI = SpatialModel(data=oversampled_data, header=oversampled_header)
         
-        #--------------------------------------- Residuals --------------------------------------
+        #------------------------------------- Goodness of fit ----------------------------------
+        # rsd = np.sum((obs - fit) ** 2 / obs)
         res_spec = []
         for i in range(len(E_HESS)):
-            res_spec = Flux_HESS.value - (flux[np.argmin(abs(energy*u.TeV - E_HESS[i]))])
-        res_sum_spec = np.nansum(np.absolute(res_spec))
+            res_spec = (Flux_HESS.value - (sm.fit_data[np.argmin(abs(sm.energies*u.TeV - E_HESS[i]))]))**2 / Flux_HESS.value
+        rsd = np.nansum(np.absolute(res_spec))
 
-        # Observational data
+        #--------------------------------------- Residual ---------------------------------------
+        # Integrated flux observational data
         obs_file = fits.open(obs_path)
         obs_data = obs_file[0].data
         obs_header = obs_file[0].header
@@ -184,7 +188,8 @@ def main(gamma_source, accelerator, plot_type, hess_spectra, obs_path, gamma_cub
                   + [header['HEM100_P']] + [header['HEMT_TEV']] + [header['HTST_KYR']] \
                   + [header['HDELTAP']] + [header['HALPHA']] + [header['HETA']] \
                   + [header['HEB_ERG']] \
-                  + [10**amplitude] + [index] + [integrated_flux_val] + [res_sum_spec] + [res_sum]
+                  + [amplitude] + [index] + [_lambda] + [alpha_spec] \
+                  + [integrated_flux_val] + [rsd] + [res_sum]
             writer.writerow(out)
             
         base = os.path.splitext(f)[0]
@@ -203,8 +208,10 @@ def main(gamma_source, accelerator, plot_type, hess_spectra, obs_path, gamma_cub
         plt.close()
         
         figures.append(plt.figure(figsize=(8, 4)))
+#        ax = figures[-1].add_subplot(111, projection=WCS(hdu.header))
         ax = figures[-1].add_subplot(111, projection=WCS(oversampled_header))
-        figures[-1], ax = smI.plot(oversampled_data, cmap=plt.cm.hot_r, ax=ax, fig=figures[-1], 
+#        figures[-1], ax = smI.plot(integrated, cmap=plt.cm.hot_r, ax=ax, fig=figures[-1],
+        figures[-1], ax = smI.plot(oversampled_data, cmap=plt.cm.hot_r, ax=ax, fig=figures[-1],
                  colorbar_label=f'Integrated flux (>{Emin:.0f})'+' cm$^{-2}$ s$^{-1}$', 
                           diff_label=False)
         add_gamma_src(src_fits, con_levels, ax, colors='black')
@@ -216,9 +223,12 @@ def main(gamma_source, accelerator, plot_type, hess_spectra, obs_path, gamma_cub
             ax.add_patch(snr_region)
         else:
             add_SNR(acc, ax, facecolor='None', edgecolor='blue', ls='--', lw=2)
+            Resc = np.arctan(((calc_shock_radius(t=header['HT_KYR']*u.kyr, n0=header['HN0_CM3']*u.cm**(-3))) / acc.distance))
+            snr_region = Circle((acc.glon.value, acc.glat.value), Resc.to(u.deg).value,
+                        transform=ax.get_transform('galactic'), facecolor='None', edgecolor='#00CED1')
+            ax.add_patch(snr_region)
 
-
-
+#        set_limits(ax, hdu.header, l=glon_limit, b=glat_limit)
         set_limits(ax, oversampled_header, l=glon_limit, b=glat_limit)
         #smI.save_fits(data=oversampled_data, filename=f'IntegralFlux_{fit_type}_E{Emin:.0f}-{Emax:.0f}_'+newfilename+'.fits')
         plt.close()
@@ -240,15 +250,15 @@ def main(gamma_source, accelerator, plot_type, hess_spectra, obs_path, gamma_cub
                              \nEmax_100={header["HEM100_P"]}PeV\nEmax_t={header["HEMT_TEV"]}TeV \
                              \nT_st={header["HTST_KYR"]}kyr\nDeltap={header["HDELTAP"]} \
                              \nalpha={header["HALPHA"]}\neta={header["HETA"]}\nEbudget={header["HEB_ERG"]}erg', fontsize=15)
-        ax.text(0.6, 0.9, 'Flux parameters', fontweight='bold', fontsize=17)
-        ax.text(0.6, 0.65, f'Amplitude={10**amplitude:.4e}\nIndex={index} \
-                           \nIntegrated flux val={integrated_flux_val}\nResidual sum (spectral)={res_sum_spec} \
+        ax.text(0.7, 0.9, 'Flux parameters', fontweight='bold', fontsize=17)
+        ax.text(0.7, 0.5, f'Amplitude={amplitude:.4e}\nIndex={index}\nLambda={_lambda},\nAlpha={alpha_spec} \
+                           \nIntegrated flux val={integrated_flux_val}\nGoodness of fit (spectral)={rsd} \
                            \nResidual sum (integrated)={res_sum}', 
                            fontsize=15)
         ax.set_axis_off()
         plt.close()
                        
-        with PdfPages('Plot_'+newfilename+'.pdf') as pdf:
+        with PdfPages('PlotOversample_'+newfilename+'.pdf') as pdf:
             for fig in figures:
                 pdf.savefig(fig, bbox_inches='tight')
         

@@ -65,22 +65,24 @@ def main(gamma_source, accelerator, plot_type, total_column_density, obs_path, p
     
     Emin = plot_cfg['Emin']
     Emax = plot_cfg['Emax']
-    fit_type = plot_cfg['fit_type']
     
     cube_header = gf.save_header()
     data = gf.fluxes.value
     sm3D = SpatialModel3D(data, cube_header)
 
-    mask = sm3D.energies>Emin.value
+    mask = sm3D.energies > 1
     i = int(np.argwhere(mask)[0])
     dEnergies = np.diff(sm3D.energies[mask])
     Esize, xsize, ysize = data.shape
-    int3 = np.empty((xsize, ysize))
+    integrated = np.empty((xsize, ysize))
     for ix in range(xsize):
         for iy in range(ysize):
-            int3[ix, iy] = np.nansum(data[i:-1, ix, iy] * dEnergies)
+            integrated[ix, iy] = np.nansum(data[i:-1, ix, iy] * dEnergies)
+
+    #sm3D.fit(fit='PL')
+    #integrated = sm3D.integrate(Emin=1*u.TeV, Emax=100*u.TeV, fit='PL')
     
-    hdu = fits.PrimaryHDU(data=int3)
+    hdu = fits.PrimaryHDU(data=integrated)
     hdu.header['BUNIT'] = cube_header['BUNIT']
     hdu.header['CTYPE1'] = cube_header['CTYPE1']
     hdu.header['CRVAL1'] = cube_header['CRVAL1']
@@ -111,7 +113,7 @@ def main(gamma_source, accelerator, plot_type, total_column_density, obs_path, p
     
     grid_size = plot_cfg['grid_size']
     radius = plot_cfg['radius']
-    header3, oversample3 = oversample(int3, hdu.header, grid_size=grid_size, radius=radius)
+    header3, oversample3 = oversample(integrated, hdu.header, grid_size=grid_size, radius=radius)
     sm = SpatialModel(oversample3, header3)
     
     file = fits.open(obs_path)

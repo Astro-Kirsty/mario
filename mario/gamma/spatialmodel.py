@@ -13,9 +13,7 @@ from photutils import SkyCircularAperture
 from astropy.wcs import WCS
 import matplotlib.pyplot as plt
 
-
-
-def oversample(data, header, grid_size=0.005 * u.deg, radius=0.06 * u.deg, diff_vals=True):
+def oversample(data, header, grid_size=0.005 * u.deg, radius=0.06 * u.deg, model_vals=True):
     """
     Oversample a map
 
@@ -63,7 +61,7 @@ def oversample(data, header, grid_size=0.005 * u.deg, radius=0.06 * u.deg, diff_
     hdu.header['CRPIX2'] = data_oversample.shape[0] / 2
     hdu.header['CDELT2'] = grid_size.value
 
-    if diff_vals:
+    if model_vals:
         hdu.header['HDELTA'] = header['HDELTA']
         hdu.header['HCHI'] = header['HCHI']
         hdu.header['HEB_ERG'] = header['HEB_ERG']
@@ -91,7 +89,6 @@ def PL_log(E, amplitude, index):
     """
     return amplitude - index * E
 
-
 def LP_log(E, amplitude, alpha, beta):
     """
     Log parabola fit for the gamma-ray flux array
@@ -111,6 +108,26 @@ def LP_log(E, amplitude, alpha, beta):
     """
     return amplitude - alpha * E - beta * E * E
 
+def ECO(E, amplitude, index, _lambda, alpha):
+    """
+    Exponential cut-off fit for the gamma-ray flux array
+    y = a * E^(-index) * exp(- (lambda * E)^alpha)
+
+    Parameters
+    ----------------------
+    E : array
+        The array of energies to fit your data to
+    amplitude : float
+        The amplitude of the powerlaw fit
+    index : float
+        The index of the powerlaw fit
+    _lambda : float
+        Parameter of the exponential
+    alpha : 
+        The index of the exponential
+    """
+    return amplitude * E **(-index) * np.exp(-(_lambda * E)**alpha)
+
 
 class SpectralModel:
     def __init__(self, energies, fluxes):
@@ -129,13 +146,21 @@ class SpectralModel:
 
         log_fluxes = np.log10(self.fluxes)
         log_energies = np.log10(self.energies)
+        i_1TeV = np.argmin(abs(self.energies - 1))
+        i_01TeV = np.argmin(abs(self.energies - 0.1))
 
         if fit == 'PL':
-            popt, pcov = curve_fit(PL_log, log_energies, log_fluxes, p0=[-16, 3])
+            popt, pcov = curve_fit(PL_log, log_energies, log_fluxes, p0=[log_fluxes[i_1TeV], 3], maxfev=5000)
             fit_data = PL_log(log_energies, popt[0], popt[1])
         elif fit == 'LP':
-            popt, pcov = curve_fit(LP_log, log_energies, log_fluxes, p0=[log_fluxes[0], 3, 0])
+            popt, pcov = curve_fit(LP_log, log_energies, log_fluxes, p0=[log_fluxes[i_1TeV], 3, 0], maxfev=5000)
             fit_data = LP_log(log_energies, popt[0], popt[1], popt[2])
+        elif fit=='ECO':
+            index_guess = - np.log(10 * self.fluxes[i_01TeV]) / (np.log(self.fluxes[i_1TeV]))
+            popt, pcov = curve_fit(ECO, self.energies, self.fluxes, 
+                                   p0=[self.fluxes[i_1TeV], index_guess, 0.1, 1], maxfev=5000,
+                                   sigma=np.sqrt(self.fluxes))
+            fit_data = ECO(self.energies, popt[0], popt[1], popt[2], popt[3])
 
         self.fit_data = fit_data
 
@@ -407,6 +432,9 @@ class SpatialModel3D(SpatialModel):
         if fit == 'LP':
             self._fitLP()
             self.fit_type = 'LP'
+        if fit == 'ECO':
+            self._fitECO()
+            self.fit_type = 'ECO'
 
     def _fitPL(self):
         """ Fit the data with a simple powerlaw """
@@ -417,6 +445,7 @@ class SpatialModel3D(SpatialModel):
 
         log_energies = np.log10(self.energies)
         data = self.data
+        i_1TeV = np.argmin(abs(self.energies - 1))
 
         for ix in range(xsize):
             for iy in range(ysize):
@@ -425,7 +454,7 @@ class SpatialModel3D(SpatialModel):
                 if np.isfinite(log_fluxes).all():
                     popt, pcov = curve_fit(PL_log,
                                            log_energies, log_fluxes,
-                                           p0=[log_fluxes[0], 3])
+                                           p0=[log_fluxes[i_1TeV], 3], maxfev=5000)
                     amplitude_PL[ix, iy] = 10 ** popt[0]
                     index_PL[ix, iy] = popt[1]
                     rsd_dof_PL[ix, iy] = self._rsd_dof(fluxes, 10 ** PL_log(log_energies, *popt), len(popt))
@@ -448,15 +477,16 @@ class SpatialModel3D(SpatialModel):
 
         log_energies = np.log10(self.energies)
         data = self.data
+        i_1TeV = np.argmin(abs(self.energies - 1))
 
         for ix in range(xsize):
             for iy in range(ysize):
                 fluxes = data[:, ix, iy]
                 log_fluxes = np.log10(fluxes)
-                if np.isfinite(log_fluxes).any():
+                if np.isfinite(log_fluxes).all():
                     popt, pcov = curve_fit(LP_log,
                                            log_energies, log_fluxes,
-                                           p0=[log_fluxes[0], 3, 0])
+                                           p0=[log_fluxes[i_1TeV], 3, 0], maxfev=5000)
                     amplitude_LP[ix, iy] = 10 ** popt[0]
                     alpha_LP[ix, iy] = popt[1]
                     beta_LP[ix, iy] = popt[2]
@@ -471,6 +501,47 @@ class SpatialModel3D(SpatialModel):
         self.alpha_LP = alpha_LP
         self.beta_LP = beta_LP
         self.rsd_dof_LP = rsd_dof_LP
+
+    def _fitECO(self):
+        """ Fit the data with an exponential cutoff """
+        Esize, xsize, ysize = self.data.shape
+        amplitude = np.empty((xsize, ysize))
+        index = np.empty((xsize, ysize))
+        _lambda = np.empty((xsize, ysize))
+        alpha = np.empty((xsize, ysize))
+        rsd_dof_ECO = np.empty((xsize, ysize))
+
+        data = self.data
+        i_1TeV = np.argmin(abs(self.energies - 1))
+        i_01TeV = np.argmin(abs(self.energies - 0.1))
+
+        for ix in range(xsize):
+            for iy in range(ysize):
+                fluxes = data[:, ix, iy]
+                if np.isfinite(fluxes).all():
+                    index_guess = - np.log(10 * fluxes[i_01TeV]) / (np.log(fluxes[i_1TeV]))
+                    popt, pcov = curve_fit(ECO,
+                                           self.energies, fluxes,
+                                           p0=[fluxes[i_1TeV], index_guess, 0.1, 1], maxfev=5000,
+                                           sigma=np.sqrt(fluxes))
+                    amplitude[ix, iy] = popt[0]
+                    index[ix, iy] = popt[1]
+                    _lambda[ix, iy] = popt[2]
+                    alpha[ix, iy] = popt[3]
+                    rsd_dof_ECO[ix, iy] = self._rsd_dof(fluxes, ECO(self.energies, *popt), len(popt))
+                else:
+                    amplitude[ix, iy] = 0
+                    index[ix, iy] = 100
+                    _lambda[ix, iy] = 100
+                    alpha[ix, iy] = 100
+                    rsd_dof_ECO[ix, iy] = 1000
+
+        self.amplitude = amplitude
+        self.index = index
+        self._lambda = _lambda
+        self.alpha = alpha
+        self.rsd_dof_ECO = rsd_dof_ECO
+
 
     def _rsd_dof(self, obs, fit, dof):
         """
@@ -532,7 +603,7 @@ class SpatialModel3D(SpatialModel):
         self.counts = counts
 
 
-    def integrate_PL(self, Emin=1*u.TeV, Emax=100*u.TeV):
+    def _integrate_PL(self, Emin=1*u.TeV, Emax=100*u.TeV):
         """
         Integrate the PowerLaw model from Emin to Emax
 
@@ -548,7 +619,7 @@ class SpatialModel3D(SpatialModel):
         integral = (int_max - int_min)
         return integral
 
-    def integrate_LP(self, Emin=1*u.TeV, Emax=100*u.TeV):
+    def _integrate_LP(self, Emin=1*u.TeV, Emax=100*u.TeV):
         """
         Integrate the LogParabola model from Emin to Emax
 
@@ -571,6 +642,28 @@ class SpatialModel3D(SpatialModel):
 
         return integral
 
+    def _integrate_ECO(self, Emin=1*u.TeV, Emax=100*u.TeV):
+        """
+        Integrate the Exponential Cutoff model from Emin to Emax
+
+        Parameters
+        ----------------------
+        Emin : float
+            The minimum energy for the integral
+        Emax : float
+            The maximum energy for the integral
+        """
+        Esize, xsize, ysize = self.data.shape
+        E = self.energies
+
+        integral = np.empty((xsize, ysize))
+        for ix in range(xsize):
+            for iy in range(ysize):
+                ECO_linear = lambda E: (self.amplitude[ix, iy] * E **(-self.index[ix, iy]) * 
+                                        np.exp(-(self._lambda[ix, iy] * E)**self.alpha[ix, iy]))
+                integral[ix, iy] = integrate.quad(ECO_linear, Emin/u.TeV, Emax/u.TeV)[0]
+
+        return integral
 
     def integrate(self, Emin=1*u.TeV, Emax=100*u.TeV, fit='best'):
         """
@@ -582,18 +675,22 @@ class SpatialModel3D(SpatialModel):
             The minimum energy for the integral
         Emax : float
             The maximum energy for the integral
-        fit : str (options 'best', 'PL', 'LP')
+        fit : str (options 'best', 'PL', 'LP', 'ECO')
             The fit for the data
         """
         if (fit == 'PL'):
-            integral = self.integrate_PL(Emin, Emax)
+            integral = self._integrate_PL(Emin, Emax)
         if (fit == 'LP'):
-            integral = self.integrate_LP(Emin, Emax)
+            integral = self._integrate_LP(Emin, Emax)
+        if (fit == 'ECO'):
+            integral = self._integrate_ECO(Emin, Emax)
 
         if (fit == 'best') | (fit == 'PL'):
-            integral = self.integrate_PL(Emin, Emax)
-        elif (fit == 'best') | (fit == 'PL'):
-            integral = self.integrate_PL(Emin, Emax)
+            integral = self._integrate_PL(Emin, Emax)
+        elif (fit == 'best') | (fit == 'LP'):
+            integral = self._integrate_LP(Emin, Emax)
+        elif (fit == 'best') | (fit == 'ECO'):
+            integral = self._integrate_ECO(Emin, Emax)
 
         return integral
     
@@ -635,6 +732,9 @@ class SpatialModel3D(SpatialModel):
         wcs = WCS(self.header, naxis=2)
         coord = SkyCoord(l=coords[0], b=coords[1], frame='galactic')
         lpixel, bpixel = wcs.world_to_pixel(coord)
+
+        self.lpixel = lpixel
+        self.bpixel = bpixel
 
         fluxes = self.data[:, int(bpixel), int(lpixel)]
 

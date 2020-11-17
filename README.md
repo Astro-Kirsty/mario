@@ -18,7 +18,7 @@ pip install mario
 
 ## Examples
 
-Examples of how to use `mario` can be found in the examples folder at https://github.com/Astro-Kirsty/mario/examples
+Examples of how to use `mario` can be found in the examples folder at https://github.com/Astro-Kirsty/mario/tree/master/examples
 
 
 ## Dependencies

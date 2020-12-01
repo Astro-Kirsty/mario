@@ -18,7 +18,7 @@ import csv
 from mario.sources import GammaSource, Accelerator
 from mario.gamma.spatialmodel import SpectralModel, SpatialModel3D, SpatialModel
 from mario.gamma.spatialmodel import oversample, PL_log
-from mario.plotting import add_SNR, add_SNR_centre, add_gamma_src, set_limits
+from mario.plotting import add_SNR, add_gamma_src, set_limits
 
 @click.command()
 @click.argument('gamma_source')
@@ -62,7 +62,6 @@ def main(gamma_source, accelerator, plot_type, hess_spectra, obs_path, gamma_cub
     con_levels = plot_cfg['con_levels']
     glon_limit = plot_cfg['glon_limit']
     glat_limit = plot_cfg['glat_limit']
-    snr_centre = plot_cfg['snr_centre']
 
     # HESS source 
     hess = np.loadtxt(hess_spectra, delimiter=' ', comments='#')
@@ -86,9 +85,10 @@ def main(gamma_source, accelerator, plot_type, hess_spectra, obs_path, gamma_cub
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerow(['Model', 'Age', 'Chi', 'Delta', 'D0 (cm-2 s-1)', 'n (cm-3)', 'n0 (cm-3)', 'ESN (erg)',
                          'Emax_100 (PeV)', 'Emax_t_ST (TeV)', 't_ST (kyr)', 'Deltap', 'Alpha', 'Eta', 
-                         'Ebudget (erg)',
+                         'Ebudget (erg)', 'Resc (pc)', 'Eesc (TeV)',
                          'Amplitude (cm-2 s-1 TeV-1)', 'Index', 'Lambda', 'Alpha_spec', 
-                         'Integrated flux', 'Goodness of fit (spectral)', 'Residual sum (Integrated)'])
+                         'Integrated flux', 'Residual sum (Integrated)',
+                         'Chi2 (uncertainty)', 'Chi2 (actual value)', 'Residual sum (spectral)'])
     
     #------------------------------------ Model data ------------------------------------
     for f in files:
@@ -112,7 +112,8 @@ def main(gamma_source, accelerator, plot_type, hess_spectra, obs_path, gamma_cub
         sm3D.fit(fit='ECO')
         energy, flux = sm3D.sum_region(coords=[gamsrc_glon, gamsrc_glat], radius=gamsrc_radius)
         sm = SpectralModel(energy, flux)
-        amplitude, index, _lambda, alpha_spec = sm.fit(fit='ECO')
+        sm.fit(fit='ECO')
+        amplitude, index, _lambda, alpha_spec = sm.popt
         mask2 = sm.energies > Emin.value
         j = int(np.argwhere(mask2)[0])
         integrated_flux_val = np.nansum(sm.fluxes[j:-1] * np.diff(sm.energies[mask2]))
@@ -160,11 +161,18 @@ def main(gamma_source, accelerator, plot_type, hess_spectra, obs_path, gamma_cub
         smI = SpatialModel(data=oversampled_data, header=oversampled_header)
         
         #------------------------------------- Goodness of fit ----------------------------------
-        # rsd = np.sum((obs - fit) ** 2 / obs)
-        res_spec = []
-        for i in range(len(E_HESS)):
-            res_spec = (Flux_HESS.value - (sm.fit_data[np.argmin(abs(sm.energies*u.TeV - E_HESS[i]))]))**2 / Flux_HESS.value
-        rsd = np.nansum(np.absolute(res_spec))
+        # chi2_unc = np.sum((obs - fit) ** 2 / unc**2)
+        # chi2_actual = np.sum((obs - fit) ** 2 / obs)
+        amplitude = sm.popt[0]
+        index = sm.popt[1]
+        _lambda = sm.popt[2]
+        alpha = sm.popt[3]
+        fit_data = amplitude * E_HESS.value **(-index) * np.exp(-(_lambda * E_HESS.value)**alpha)
+        residual = Flux_HESS.value - fit_data
+        residual = np.array(residual)
+        res_sum_spec = np.nansum(residual)
+        chi2_unc = np.nansum( residual**2 / (yerr_high.value**2))
+        chi2_act = np.nansum( residual**2 / Flux_HESS.value)
 
         #--------------------------------------- Residual ---------------------------------------
         # Integrated flux observational data
@@ -172,7 +180,6 @@ def main(gamma_source, accelerator, plot_type, hess_spectra, obs_path, gamma_cub
         obs_data = obs_file[0].data
         obs_header = obs_file[0].header
         sm_obs = SpatialModel(data=obs_data, header=obs_header)
-
         residual_header, residual = smI.calc_residual(obs_data=obs_data, obs_header=obs_header, 
                                                      gamsrc_glon=gamsrc_glon, gamsrc_glat=gamsrc_glat, 
                                                      gamsrc_radius=gamsrc_radius)
@@ -187,9 +194,10 @@ def main(gamma_source, accelerator, plot_type, hess_spectra, obs_path, gamma_cub
                   + [header['HN0_CM3']] + [header['HESN_ERG']] \
                   + [header['HEM100_P']] + [header['HEMT_TEV']] + [header['HTST_KYR']] \
                   + [header['HDELTAP']] + [header['HALPHA']] + [header['HETA']] \
-                  + [header['HEB_ERG']] \
+                  + [header['HEB_ERG']] + [header['HRESC_PC']] + [header['HEES_TEV']] \
                   + [amplitude] + [index] + [_lambda] + [alpha_spec] \
-                  + [integrated_flux_val] + [rsd] + [res_sum]
+                  + [integrated_flux_val] + [res_sum] \
+                  + [res_sum_spec] + [chi2_unc] + [chi2_act]
             writer.writerow(out)
             
         base = os.path.splitext(f)[0]
@@ -215,18 +223,11 @@ def main(gamma_source, accelerator, plot_type, hess_spectra, obs_path, gamma_cub
                  colorbar_label=f'Integrated flux (>{Emin:.0f})'+' cm$^{-2}$ s$^{-1}$', 
                           diff_label=False)
         add_gamma_src(src_fits, con_levels, ax, colors='black')
-        if snr_centre: 
-            add_SNR_centre(acc, ax, facecolor='#00CED1')        
-            Resc = np.arctan(((calc_shock_radius(t=header['HT_KYR']*u.kyr, n0=header['HN0_CM3']*u.cm**(-3))) / acc.distance))
-            snr_region = Circle((acc.glon.value, acc.glat.value), Resc.to(u.deg).value,
+        add_SNR(acc, ax, facecolor='None', edgecolor='blue', ls='--', lw=2)
+        Resc = np.arctan(header['HRESC_PC']*u.pc / acc.distance)
+        snr_region = Circle((acc.glon.value, acc.glat.value), Resc.to(u.deg).value,
                         transform=ax.get_transform('galactic'), facecolor='None', edgecolor='#00CED1')
-            ax.add_patch(snr_region)
-        else:
-            add_SNR(acc, ax, facecolor='None', edgecolor='blue', ls='--', lw=2)
-            Resc = np.arctan(((calc_shock_radius(t=header['HT_KYR']*u.kyr, n0=header['HN0_CM3']*u.cm**(-3))) / acc.distance))
-            snr_region = Circle((acc.glon.value, acc.glat.value), Resc.to(u.deg).value,
-                        transform=ax.get_transform('galactic'), facecolor='None', edgecolor='#00CED1')
-            ax.add_patch(snr_region)
+        ax.add_patch(snr_region)
 
 #        set_limits(ax, hdu.header, l=glon_limit, b=glat_limit)
         set_limits(ax, oversampled_header, l=glon_limit, b=glat_limit)
@@ -244,16 +245,18 @@ def main(gamma_source, accelerator, plot_type, hess_spectra, obs_path, gamma_cub
         figures.append(plt.figure(figsize=(8,6)))
         ax = figures[-1].add_subplot(111)
         ax.text(0.02, 0.9, 'Model parameters', fontweight='bold', fontsize=17)
-        ax.text(0.02, 0.15, f'Age={header["HT_KYR"]}kyr\nChi={header["HCHI"]}\nDelta={header["HDELTA"]} \
+        ax.text(0.02, 0.02, f'Age={header["HT_KYR"]}kyr\nChi={header["HCHI"]}\nDelta={header["HDELTA"]} \
                              \nD0={header["HD0_CM2S"]}cm$^2$s'+'$^{-1}'+f'$\nn={header["HN_CM3"]}cm'+'$^{-3}$' \
                              + f'\nn0={header["HN0_CM3"]}cm'+'$^{-3}$'+f'\nESNR={header["HESN_ERG"]}erg \
                              \nEmax_100={header["HEM100_P"]}PeV\nEmax_t={header["HEMT_TEV"]}TeV \
                              \nT_st={header["HTST_KYR"]}kyr\nDeltap={header["HDELTAP"]} \
-                             \nalpha={header["HALPHA"]}\neta={header["HETA"]}\nEbudget={header["HEB_ERG"]}erg', fontsize=15)
+                             \nalpha={header["HALPHA"]}\neta={header["HETA"]}\nEbudget={header["HEB_ERG"]}erg\n \
+                             \nResc={Resc.to(u.deg)}\nEesc={header["HEES_TEV"]}TeV', fontsize=15)
         ax.text(0.7, 0.9, 'Flux parameters', fontweight='bold', fontsize=17)
-        ax.text(0.7, 0.5, f'Amplitude={amplitude:.4e}\nIndex={index}\nLambda={_lambda},\nAlpha={alpha_spec} \
-                           \nIntegrated flux val={integrated_flux_val}\nGoodness of fit (spectral)={rsd} \
-                           \nResidual sum (integrated)={res_sum}', 
+        ax.text(0.7, 0.4, f'Amplitude={amplitude:.4e}\nIndex={index}\nLambda={_lambda},\nAlpha={alpha_spec} \
+                           \nIntegrated flux val={integrated_flux_val}\nResidual sum (integrated)={res_sum} \
+                           \nResidual sum (spectra)={res_sum_spec}\nChi2 (uncertainty)={chi2_unc} \
+                           \nChi2 (actual value)={chi2_act}', 
                            fontsize=15)
         ax.set_axis_off()
         plt.close()

@@ -163,8 +163,9 @@ class SpectralModel:
             fit_data = ECO(self.energies, popt[0], popt[1], popt[2], popt[3])
 
         self.fit_data = fit_data
+        self.popt = popt
 
-        return popt
+        return
 
     def plot(self, fig=None, ax=None, **kwargs):
         """
@@ -557,7 +558,7 @@ class SpatialModel3D(SpatialModel):
             The number of degrees of freedom in the fit
 
         """
-        rsd = np.sum((obs - fit) ** 2 / obs)
+        rsd = np.nansum((obs - fit) ** 2 / obs)
         return rsd / dof
 
     def fake(self, aeff, edisp, livetime, fit='best'):
@@ -714,7 +715,7 @@ class SpatialModel3D(SpatialModel):
         fluxes = np.empty((self.data.shape[0]))
 
         for i in range(self.data.shape[0]):
-            fluxes[i] = np.sum(mask.multiply(self.data[i, :, :]))
+            fluxes[i] = np.nansum(mask.multiply(self.data[i, :, :]))
 
 
         return self.energies, fluxes

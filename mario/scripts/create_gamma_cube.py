@@ -58,8 +58,10 @@ def main(gamma_source, accelerator, plot_type, total_column_density, obs_path, p
 
     Eg = np.logspace(np.log10(0.1), np.log10(100), 100)*u.TeV
 
+    alpha = 1.8
+
     gp = GasParameters(snr=acc, gas_map_path=total_column_density)
-    gf = GammaFlux(snr=acc, pdf_cube_path=pdf_cube, gp=gp, alpha=2, eta=1)
+    gf = GammaFlux(snr=acc, pdf_cube_path=pdf_cube, gp=gp, alpha=alpha, eta=1)
 
     gf.flux(Eg)
     
@@ -150,7 +152,7 @@ def main(gamma_source, accelerator, plot_type, total_column_density, obs_path, p
         residual += [np.nansum(np.abs(obs_aperture - f * model_aperture))]
     eta = factor[np.argmin(residual)] 
     
-    gf2 = GammaFlux(snr=acc, pdf_cube_path=pdf_cube, gp=gp, alpha=2, eta=eta)
+    gf2 = GammaFlux(snr=acc, pdf_cube_path=pdf_cube, gp=gp, alpha=alpha, eta=eta)
     gf2.flux(Eg)
     gf2.save(author='Kirsty')
 

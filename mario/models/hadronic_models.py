@@ -104,7 +104,7 @@ class BaseHadronicImpulsivePDF(BasePDF):
         
         pdf = np.zeros(np.shape(R)) / u.cm**3
         
-        # Particles with energies less tha Ecrit have not escaped and are trapped
+        # Particles with energies less than Ecrit have not escaped and are trapped
         pdf[(E < Ecrit) & (R < Rcrit)] = (1 / (4/3 * np.pi * Rcrit**3))[(E < Ecrit) & (R < Rcrit)]
         
         # Ensure the integral over the distribution function is 1
@@ -275,46 +275,4 @@ class HadronicImpulsiveTimeExtentPDF(BaseHadronicImpulsivePDF):
         return Rcrit
 
 
-class HadronicImpulsiveLossesTimeExtentPDF(BaseHadronicImpulsivePDF):
 
-    def __init__(self, n=100/u.cm**3, n0=0.3/u.cm**3,
-                 D0=3e27*u.cm**2/u.s, dif_chi=0.01, dif_delta=0.5, 
-                 t_ST=50*u.kyr, Emax_t_ST=30*u.TeV,  Emax_100yr=1*u.PeV, E_SN=1e51*u.erg):
-        
-        super(HadronicImpulsiveLossesTimeExtentPDF, self).__init__(n, n0,
-            D0, dif_chi, dif_delta, 
-            t_ST, Emax_t_ST, Emax_100yr, E_SN)
-        
-        self.name = 'HadronicImpulsiveLossesTimeExtent'
-        
-        # Cooling time of protons
-        cool_time = (6e7 * (self.n / u.cm**-3) ** (-1) * u.yr)
-        self.cool_time = cool_time
-                
-    @u.quantity_input(E=u.GeV, t=u.kyr)
-    def dif_l(self, E, t):
-# Added cooling term to diffusion
-        self.B = calc_Bmag(self.n)
-        dif_coeff = self.dif_chi * self.D0 * (E / u.GeV / (self.B / (3*u.uG))) ** self.dif_delta
-        losses = ((np.exp(self.dif_time(E,t) * self.dif_delta / self.cool_time) - 1)
-                / (self.dif_time(E,t)  * self.dif_delta / self.cool_time))
-        dif_l = 2 * np.sqrt(dif_coeff * self.dif_time(E,t) * losses)
-        shock_extent = 0.0875 * self.Resc # theoretical assumption
-        return dif_l + shock_extent
-        
-    @u.quantity_input(E=u.GeV, t=u.kyr)
-    def dif_time(self, E, t):
-        tesc = calc_escape_time(E, deltap=self.deltap, Emax_100yr=self.Emax_100yr)
-        t = t * np.ones(np.shape(tesc))
-        return t - tesc
-    
-    @u.quantity_input(E=u.GeV, t=u.kyr)
-    def Rsh(self, E, t):
-        tesc = calc_escape_time(E, deltap=self.deltap, Emax_100yr=self.Emax_100yr)
-        Rsh = calc_shock_radius(t=tesc, E_SN=self.E_SN, n0=self.n0)
-        return Rsh
-    
-    @u.quantity_input(t=u.kyr)
-    def Rcrit(self, t):
-        Rcrit = calc_shock_radius(t=t, E_SN=self.E_SN, n0=self.n0)
-        return Rcrit

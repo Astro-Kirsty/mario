@@ -42,6 +42,7 @@ setup(
             'mario_create_proton_cube = mario.scripts.create_proton_cube:main',
             'mario_create_gamma_cube = mario.scripts.create_gamma_cube:main',
             'mario_plot_gamma_fluxes = mario.scripts.plot_gamma_fluxes:main',
+            'mario_plot_gamma_fluxes_orig = mario.scripts.plot_gamma_fluxes_orig:main',
             'mario_plot_gamma_CTA = mario.scripts.plot_gamma_CTA:main',
             'mario_plot_integrated_flux = mario.scripts.plot_integrated_flux:main',
             'mario_plot_spectral_flux = mario.scripts.plot_spectral_flux:main',

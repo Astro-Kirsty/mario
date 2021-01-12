@@ -52,8 +52,8 @@ def calc_shock_radius(t, E_SN=1e51*u.erg, n0=1*u.cm**-3):
 
     return R.to(u.pc)
 
-@u.quantity_input(Emax_100yr=u.TeV, Emax_t=u.TeV, t=u.yr)
-def calc_energy_evolution(t=50*u.kyr, Emax_t=1*u.GeV, Emax_100yr=1*u.PeV):
+@u.quantity_input(Emax_t_ST0=u.TeV, Emax_t=u.TeV, t=u.yr, t_ST0=u.yr)
+def calc_energy_evolution(t=50*u.kyr, t_ST0=100*u.yr, Emax_t=1*u.GeV, Emax_t_ST0=1*u.PeV):
     """
     Calculates the energy evolution.
     This parameter is used to calculate the time after supernova explosion
@@ -63,10 +63,12 @@ def calc_energy_evolution(t=50*u.kyr, Emax_t=1*u.GeV, Emax_100yr=1*u.PeV):
     t : float
         Time after supernova explosion at which particles 
         of maximum energy Emax_t are accelerated
+    t_ST0 : float
+    	Start of Sedov-Taylor phase
     Emax_t : float
         Maximum energy of particles at time t after supernova explosion
-    Emax_100yr : float
-        Maximum energy of particles at 100yr after supernova explosion
+    Emax_t_ST0 : float
+        Maximum energy of particles at 100 yr (default) after supernova explosion
         (corresponds to start of Sedov-Taylor phase)
     Returns
     ----------------------
@@ -74,11 +76,10 @@ def calc_energy_evolution(t=50*u.kyr, Emax_t=1*u.GeV, Emax_100yr=1*u.PeV):
         The energy evolution parameter 
         (often referred to as 'deltap')
     """
+    return np.log(Emax_t / Emax_t_ST0) / np.log(t_ST0 / t)
 
-    return np.log(Emax_t / Emax_100yr) / np.log(100*u.yr / t)
-
-@u.quantity_input(E=u.TeV, Emax_100yr=u.TeV)
-def calc_escape_time(E, deltap, Emax_100yr=1*u.PeV):
+@u.quantity_input(E=u.TeV, Emax_t_ST0=u.TeV, t_ST0=100*u.yr)
+def calc_escape_time(E, deltap, Emax_t_ST0=1*u.PeV, t_ST0=100*u.yr):
     """
     Calculates the time after supernova explosion at which CRs
     with energy E are released in the ISM   (eg Gabici et al. 2009)
@@ -88,19 +89,21 @@ def calc_escape_time(E, deltap, Emax_100yr=1*u.PeV):
         The energy of CRs that are released in the ISM
     deltap : float
         Energy evolution parameter
-    Emax_100yr : float
-        Maximum energy of particles at 100yr after supernova explosion
+    Emax_t_ST0 : float
+        Maximum energy of particles at t_ST0 after supernova explosion
         (corresponds to start of Sedov-Taylor phase)
+    t_ST0 : float
+    	Start of the Sedov-Taylor phase
     Returns
     ----------------------
     float
         The time after supernova explosion at which CRs are released
     """
-    tesc = 100*u.yr * (E / Emax_100yr) ** (- 1 / deltap)
+    tesc = t_ST0 * (E / Emax_t_ST0) ** (- 1 / deltap)
     return tesc.to(u.kyr)
 
-@u.quantity_input(t=u.yr, Emax_100yr=u.TeV)
-def calc_escape_energy(t, deltap, Emax_100yr=1*u.PeV):
+@u.quantity_input(t=u.yr, Emax_t_ST0=u.TeV, t_ST0=u.yr)
+def calc_escape_energy(t, deltap, Emax_t_ST0=1*u.PeV, t_ST0=100*u.yr):
     """
     Calculates the minimum energy at which CRs
     are released in the ISM at time t   (eg Gabici et al. 2009)
@@ -110,15 +113,17 @@ def calc_escape_energy(t, deltap, Emax_100yr=1*u.PeV):
         The time at which CRs are released in the ISM
     deltap : float
         Energy evolution parameter
-    Emax_100yr : float
-        Maximum energy of particles at 100yr after supernova explosion
+    Emax_t_ST0 : float
+        Maximum energy of particles at t_ST0 after supernova explosion
         (corresponds to start of Sedov-Taylor phase)
+    t_ST0 : float
+    	Start of the Sedov-Taylor phase
     Returns
     ----------------------
     float
         The minimum energy of a CR that is released in the ISM at time t
     """
-    Eesc = Emax_100yr * (100*u.yr / t) ** deltap
+    Eesc = Emax_t_ST0 * (t_ST0 / t) ** deltap
     return Eesc.to(u.TeV)
 
 def calc_Ebudget(integral_data, integral_header, int_flux_max_obs):

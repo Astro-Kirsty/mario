@@ -5,8 +5,7 @@ from astropy.coordinates import SkyCoord
 from astropy import coordinates as coord
 from scipy.optimize import curve_fit
 from scipy import integrate
-from gammapy.spectrum import SpectrumDataset        # gammapy 0.16
-#from gammapy.datasets import SpectrumDataset         # gammapy 0.17
+from gammapy.spectrum import SpectrumDataset
 from gammapy.modeling.models import (PowerLawSpectralModel, LogParabolaSpectralModel,
                                      ExpCutoffPowerLawSpectralModel, SkyModel)
 from photutils import SkyCircularAperture
@@ -27,7 +26,7 @@ def oversample(data, header, grid_size=0.005 * u.deg, radius=0.06 * u.deg, model
         Size of grid pixels (default is 0.005deg)
     radius : float, optional
         Size of aperture you want to smooth (default is 0.06deg)
-	diff_vals : bool, optional
+	model_vals : bool, optional
 		If the fits file header contains the diffusion parameters (default is True)
 
     """
@@ -134,14 +133,14 @@ class SpectralModel:
         self.energies = energies
         self.fluxes = fluxes
 
-    def fit(self, fit='PL'):
+    def fit(self, fit='ECO'):
         """
         Fit the spectral model
 
         Parameters
         ----------------------
         fit : str
-            Choose which function to fit (default is 'PL')
+            Choose which function to fit (default is 'ECO')
         """
 
         log_fluxes = np.log10(self.fluxes)
@@ -208,6 +207,10 @@ class SpectralModel:
             Set the figure for the plot
         ax : str
             Set the axis for the figure
+        yerr : float
+        	Error for the y-axis
+        xerr : float
+        	Error for the x-axis        	
         kwargs : keywords
             Initialisation keywords
         """
@@ -393,8 +396,8 @@ class SpatialModel3D(SpatialModel):
         Examples
         ----------------------
         >>> sm = SpatialModel3D(data, header)
-        >>> sm.fit('PL')
-        >>> integral = sm.integrate_PL(1*u.TeV, 100*u.TeV)
+        >>> sm.fit('ECO')
+        >>> integral = sm.integrate(Emin=1*u.TeV, Emax=100*u.TeV, fit='ECO')
 
         """
         self.energies = np.logspace(self.header['CRVAL3'],
@@ -412,13 +415,13 @@ class SpatialModel3D(SpatialModel):
 
         self.best_fit = None
 
-    def fit(self, fit='best'):
+    def fit(self, fit='ECO'):
         """ 
         Choosing the fit for the data 
 
         Parameters
         ----------------------
-        fit : str (options 'best', 'PL', 'LP')
+        fit : str (options 'best', 'PL', 'LP', 'ECO')
             The fit for the data
         """
 
@@ -666,7 +669,7 @@ class SpatialModel3D(SpatialModel):
 
         return integral
 
-    def integrate(self, Emin=1*u.TeV, Emax=100*u.TeV, fit='best'):
+    def integrate(self, Emin=1*u.TeV, Emax=100*u.TeV, fit='ECO'):
         """
         Use the fit_type to determine which integral function to use
 

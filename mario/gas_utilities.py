@@ -29,10 +29,10 @@ class TotalColumnDensity:
             The first velocity for integration
         v2 : float
             The second velocity for integration
-        X_CO : float
-            The X-factor for CO
-        X_HI : float
-            The X-factor for HI
+        X_CO : float, optional
+            The X-factor for CO (default is 1.8 x 10^20 s / K km cm2)
+        X_HI : float, optional 
+            The X-factor for HI (default is 1.823 x 10^18 s / K km cm2)
         Examples
         ----------------------
         >>> HI = 'Documents/Fits_Files/HI_cube.fits'
@@ -108,9 +108,7 @@ class GasParameters:
 
     """
 
-    def __init__(self, snr, gas_map_path, 
-                 tsedov=100 * u.yr, Ec=150 * u.TeV, Ec_max=500 * u.TeV, 
-                 deltap=0.5, n0= 1 * u.cm ** (-3)):
+    def __init__(self, snr, gas_map_path):
         """
         Parameters
         ----------------------
@@ -140,15 +138,6 @@ class GasParameters:
         # Width of pixel
         self.theta_pixel = (self.header['CDELT2']) * u.deg
         
-
-        self.tsedov = tsedov
-        self.Ec = Ec
-        self.Ec_max = Ec_max
-        self.deltap = deltap
-        self.n0 = n0
-
-        self.E51 = 1
-        self.u1 = 1.4 * u.kg
 
     def nH2_cell(self):
         """

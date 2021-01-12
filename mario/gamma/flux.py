@@ -147,9 +147,9 @@ class GammaFlux:
         hdr.header['HN_CM3'] = self.header['HN_CM3']
         hdr.header['HN0_CM3'] = self.header['HN0_CM3']
         hdr.header['HESN_ERG'] = self.header['HESN_ERG']
-        hdr.header['HEM100_P'] = self.header['HEM100_P']
         hdr.header['HEMT_TEV'] = self.header['HEMT_TEV']
-        hdr.header['HTST_KYR'] = self.header['HTST_KYR']
+        hdr.header['HEMT0_P'] = self.header['HEMT0_P']
+        hdr.header['HTST0_YR'] = self.header['HTST0_YR']
         hdr.header['HDELTAP'] = self.header['HDELTAP']
         hdr.header['HEB_ERG'] = self.Ebudget.to(u.erg).value
         hdr.header['HETA'] = self.eta
@@ -203,9 +203,9 @@ class GammaFlux:
             hdr.header['HN_CM3'] = self.header['HN_CM3']
             hdr.header['HN0_CM3'] = self.header['HN0_CM3']
             hdr.header['HESN_ERG'] = self.header['HESN_ERG']
-            hdr.header['HEM100_P'] = self.header['HEM100_P']
             hdr.header['HEMT_TEV'] = self.header['HEMT_TEV']
-            hdr.header['HTST_KYR'] = self.header['HTST_KYR']
+            hdr.header['HEMT0_P'] = self.header['HEMT0_P']
+            hdr.header['HTST0_YR'] = self.header['HTST0_YR']
             hdr.header['HDELTAP'] = self.header['HDELTAP']
             hdr.header['HEB_ERG'] = self.Ebudget.to(u.erg).value
             hdr.header['HETA'] = self.eta

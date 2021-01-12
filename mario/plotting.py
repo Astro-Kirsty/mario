@@ -109,9 +109,9 @@ def set_limits(ax, header, l=[7.5, 9.5], b=[-0.5, 0.5]):
         Set the axis for the figure
     header : str
         The header of the fits file
-    l : array
+    l : array, optional
         The galactic longitude to plot (default is l=[7.5, 9.5])
-    b : array
+    b : array, optional
         The galactic latitude to plot (default is b=[-0.5, 0.5])
     """
     c1 = coord.SkyCoord(l=l[0] * u.deg, b=b[0] * u.deg, frame='galactic').to_pixel(WCS(header))
@@ -132,6 +132,8 @@ def proton_spectrum(pdf, flux, label=None, age_label=False, dif_label=False, ini
     ----------
     pdf : array
         The pdf you want to plot
+    flux : array
+        The flux you want to plot
     age_label : bool
         Plot the age label (default is False)
     dif_label : bool
@@ -207,7 +209,7 @@ def add_kcr(ax=None, label='CR Flux at Earth', **kwargs):
     ----------
     ax : str
         Set the axis for the figure
-    label : bool
+    label : bool, optional
         Set the label of the line (default is 'CR Flux at Earth')
     **kwargs : keywords
         Initialisation keywords

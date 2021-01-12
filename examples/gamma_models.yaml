@@ -1,5 +1,8 @@
-generic:
-  eta: 0.001
+generic1:
+  alpha: 2.0
 
-  alpha: 2
-
+generic2:
+  alpha: 2.2
+  
+generic3:
+  alpha: 2.4

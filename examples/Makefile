@@ -12,17 +12,17 @@ config_plot = ./plot.yaml
 
 
 cube_pdf: $(config_acc) $(config_model)
-	mario_create_pdf_cube 'G8' 'generic_G8' ${data_dir)/total_col_dens_26_56.fits
-	mario_create_pdf_cube 'PJ' 'generic_PJ' ${data_dir)/total_col_dens_8_26.fits
-
-cube_proton: $(config_model)
-	mario_create_proton_cube '' 'generic'
+	mario_create_pdf_cube 'G8_15' 's1_G8_15' ${data_dir)/total_col_dens_26_56.fits
+	mario_create_pdf_cube 'G8_28' 's1_G8_28' ${data_dir)/total_col_dens_26_56.fits
+	mario_create_pdf_cube 'PJ_16' 's1_PJ_16' ${data_dir)/total_col_dens_8_26.fits
 
 cube_gamma: $(config_gamma_model)
-	mario_create_gamma_cube 'HESSJ1804' 'G8' 'G8_Plot' ${data_dir)/total_col_dens_26_56.fits ${data_dir}/hgps_map_flux_0.1deg_v1_crop.fits ${data_dir)/HadronicPDF.fits
+	mario_create_gamma_cube 'HESSJ1804' 'generic1' 'G8_15' 'G8_Plot' ${data_dir)/total_col_dens_26_56.fits ${data_dir}/hgps_map_flux_0.1deg_v1_crop.fits ${data_dir)/HadronicPDF.fits
+
 
 plot_gamma: $(config_gamma_model)
-	mario_plot_gamma_fluxes 'HESSJ1804' 'PJ' 'PJ_Plot' ../../data/HESS_data.txt ../../data/hgps_map_flux_0.1deg_v1_crop.fits '/home/kirsty/Documents/PhD/Fits_Files/Models/Protons/Gamma_cubes/PJ_16kyr/HadronicFlux_AharonianImpulsiveTime_chi0.*'
+	mario_plot_gamma_fluxes 'HESSJ1804' 'PJ_16' 'PJ_Plot' ../../data/HESS_data.txt ../../data/hgps_map_flux_0.1deg_v1_crop.fits '/home/kirsty/Documents/PhD/Fits_Files/Models/Protons/Gamma_cubes/PJ_16kyr/HadronicFlux_AharonianImpulsiveTime_chi0.*'
+
 
 clean:
 	rm -rf $(build_dir)

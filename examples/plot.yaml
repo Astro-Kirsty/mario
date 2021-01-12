@@ -27,7 +27,7 @@ G8_Plot:
 
   glat_limit: [-0.47, 0.5]
 
-#  snr_centre: False
+  snr_centre: False
 
 PJ_Plot:
   name: 'Progenitor SNR of PSR J1803-2137'
@@ -58,6 +58,6 @@ PJ_Plot:
 
   glat_limit: [-0.47,0.47]
 
-#  snr_centre: True
+  snr_centre: True
 
 

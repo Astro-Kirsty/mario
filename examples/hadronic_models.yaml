@@ -1,4 +1,4 @@
-generic_G8:
+specific_G8_15:
   dif_chi:
     - 0.1
     - 0.01
@@ -18,26 +18,66 @@ generic_G8:
   n0s: 
     - !astropy.units.Quantity
       unit: &id001 !astropy.units.Unit {unit: cm**(-3)}
+      value: 0.03
+  
+  deltaps:
+    - 0.3
+    - 0.75
+    - 1.2
+
+  Emax_obs: !astropy.units.Quantity
+    value: 60
+    unit: !astropy.units.Unit {unit: TeV}
+
+  Emax_t_ST0: !astropy.units.Quantity
+    value: 1
+#    value: 5
+    unit: !astropy.units.Unit {unit: PeV}
+      
+  t_ST0: !astropy.units.Quantity
+#    value: 100
+    value: 1500
+    unit: !astropy.units.Unit {unit: yr}
+    
+specific_G8_28:
+  dif_chi:
+    - 0.1
+    - 0.01
+    - 0.001
+
+  dif_delta:
+    - 0.3
+    - 0.4
+    - 0.5
+    - 0.6
+    - 0.7
+
+  n: !astropy.units.Quantity
+    value: 160
+    unit: !astropy.units.Unit {unit: cm**(-3)}
+
+  n0s: 
+    - !astropy.units.Quantity
+      unit: &id002 !astropy.units.Unit {unit: cm**(-3)}
       value: 0.1
-    - !astropy.units.Quantity
-      unit: *id001
-      value: 1
-    - !astropy.units.Quantity
-      unit: *id001
-      value: 10
+  
+  deltaps:
+    - 0.3
+    - 0.64
+    - 0.96
 
-  Emax_t_STs: 
-    - !astropy.units.Quantity
-      unit: &id002 !astropy.units.Unit {unit: TeV}
-      value: 65
-    - !astropy.units.Quantity
-      unit: *id002
-      value: 150
+  Emax_obs: !astropy.units.Quantity
+    value: 60
+    unit: !astropy.units.Unit {unit: TeV}
 
+  Emax_t_ST0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: PeV}
+      
+  t_ST0: !astropy.units.Quantity
+    value: 1500
+    unit: !astropy.units.Unit {unit: yr}
 
-  R: !astropy.units.Quantity
-    value: 50
-    unit: !astropy.units.Unit {unit: pc}
 
 generic_PJ:
   dif_chi:
@@ -67,16 +107,19 @@ generic_PJ:
       unit: *id003
       value: 10
 
-  Emax_t_STs: 
-    - !astropy.units.Quantity
-      unit: &id004 !astropy.units.Unit {unit: TeV}
-      value: 65
-    - !astropy.units.Quantity
-      unit: *id004
-      value: 150
+  deltaps:
+    - 1.86
 
+  Emax_obs: !astropy.units.Quantity
+    value: 60
+    unit: !astropy.units.Unit {unit: TeV}
 
-  R: !astropy.units.Quantity
-    value: 50
-    unit: !astropy.units.Unit {unit: pc}
+  Emax_t_ST0: !astropy.units.Quantity
+    value: 5
+    unit: !astropy.units.Unit {unit: PeV}
+      
+  t_ST0: !astropy.units.Quantity
+    value: 1500
+    unit: !astropy.units.Unit {unit: yr}
+
 

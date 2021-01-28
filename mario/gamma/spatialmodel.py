@@ -40,7 +40,7 @@ def oversample(data, header, grid_size=0.005 * u.deg, radius=0.06 * u.deg, model
     l, b = np.meshgrid(full_glon, full_glat)
     position = SkyCoord(l=l, b=b, frame='galactic').flatten()
     aperture = SkyCircularAperture(position, radius).to_pixel(wcs)
-    mask = aperture.to_mask(method='center')
+    mask = aperture.to_mask(method='exact')
 
     data_oversample = []
     for m in range(len(mask)):
@@ -347,7 +347,7 @@ class SpatialModel:
 
         position = SkyCoord(l=gamsrc_glon, b=gamsrc_glat, frame='galactic')
         aperture = SkyCircularAperture(position, gamsrc_radius).to_pixel(model_wcs)
-        mask = aperture.to_mask(method='center')
+        mask = aperture.to_mask(method='exact')
 
         obs_aperture = mask.multiply(obs_crop)
         model_aperture = mask.multiply(self.data)
@@ -714,7 +714,7 @@ class SpatialModel3D(SpatialModel):
         position = SkyCoord(l=coords[0], b=coords[1], frame='galactic')
         aperture = SkyCircularAperture(position, radius).to_pixel(wcs)
 
-        mask = aperture.to_mask(method='center')
+        mask = aperture.to_mask(method='exact')
         fluxes = np.empty((self.data.shape[0]))
 
         for i in range(self.data.shape[0]):

@@ -252,8 +252,7 @@ class HadronicImpulsiveTimeExtentPDF(BaseHadronicImpulsivePDF):
         
         super(HadronicImpulsiveTimeExtentPDF, self).__init__(n, n0,
             D0, dif_chi, dif_delta, deltap, 
-            Emax_obs, 
-            t_ST, Mej, Emax_t_ST0, E_SN)
+            Mej, Emax_t_ST0, E_SN)
         
         self.name = 'AharonianImpulsiveTimeExtent'
         

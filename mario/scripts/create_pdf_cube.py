@@ -5,7 +5,7 @@ import click
 from astropy.io.misc import yaml
 
 from mario.sources import Accelerator
-from mario.models.hadronic_models import HadronicImpulsiveTimePDF
+from mario.models.hadronic_models import HadronicImpulsiveTimePDF, HadronicImpulsiveTimeExtentPDF
 from mario.gas_utilities import GasParameters
 
 
@@ -59,7 +59,7 @@ def main(accelerator, model, total_column_density, output, accelerator_config_pa
         for delta in deltas:
             for n0 in n0s:
                 for deltap in deltaps:
-                    ps = HadronicImpulsiveTimePDF(n=model_cfg['n'],
+                    ps = HadronicImpulsiveTimeExtentPDF(n=model_cfg['n'],
                                                   n0=n0,
                                                   dif_chi=chi,
                                                   dif_delta=delta,

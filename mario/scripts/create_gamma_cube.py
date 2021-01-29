@@ -149,7 +149,7 @@ def main(gamma_source, gamma_model, accelerator, plot_type, total_column_density
 
     position = SkyCoord(l=gamsrc_glon, b=gamsrc_glat, frame='galactic')
     aperture = SkyCircularAperture(position, gamsrc_radius).to_pixel(model_wcs)
-    mask = aperture.to_mask(method='center')
+    mask = aperture.to_mask(method='exact')
 
     obs_aperture = mask.multiply(obs_crop)
     model_aperture = mask.multiply(sm.data)

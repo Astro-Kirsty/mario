@@ -44,8 +44,10 @@ def oversample(data, header, grid_size=0.005 * u.deg, radius=0.06 * u.deg, model
 
     data_oversample = []
     for m in range(len(mask)):
+        area_non_nan = len(mask[m].multiply(data)[np.logical_not(np.isnan(mask[m].multiply(data)))])
+        mask[m].multiply(data)[np.isnan(mask[m].multiply(data))] = np.nansum(mask[m].multiply(data)) / area_non_nan
         data_oversample += [np.sum(mask[m].multiply(data))]
-    data_oversample = np.array(data_oversample).reshape((len(full_glat), len(full_glon)))
+    data_oversample = np.array(data_oversample).reshape((len(full_glat), len(full_glon)))   
 
     hdu = fits.PrimaryHDU(data=data_oversample)
     hdu.header['NAXIS1'] = data_oversample.shape[1]

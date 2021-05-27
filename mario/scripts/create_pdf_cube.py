@@ -4,30 +4,38 @@ import numpy as np
 import click
 from astropy.io.misc import yaml
 
-from mario.sources import Accelerator
+from mario.sources import Accelerator, GammaSource
 from mario.models.hadronic_models import HadronicImpulsiveTimePDF, HadronicImpulsiveTimeExtentPDF
-from mario.gas_utilities import GasParameters
+from mario.gas_utilities import GasParameters, calc_average_number_density
 
 
 @click.command()
 @click.argument('accelerator')
+@click.argument('gamma_source')
 @click.argument('model')
 @click.argument('total_column_density')
 @click.option('--accelerator_config_path', 
-                default='accelerators.yaml',
+                default='/home/kirsty/Documents/PhD/GitHub/mario/examples/accelerators.yaml',
+                type=click.Path(exists=True, dir_okay=False))
+@click.option('--gamma_source_config_path', 
+                default='/home/kirsty/Documents/PhD/GitHub/mario/examples/gamma_sources.yaml',
                 type=click.Path(exists=True, dir_okay=False))
 @click.option('--model_config_path', 
-                default='hadronic_models.yaml',
+                default='/home/kirsty/Documents/PhD/GitHub/mario/examples/hadronic_models.yaml',
                 type=click.Path(exists=True, dir_okay=False))
 
 @click.option('-o', '--output', 
                 help='Output path', default='./')
 
 
-def main(accelerator, model, total_column_density, output, accelerator_config_path, model_config_path):
+def main(accelerator, gamma_source, model, total_column_density, output, 
+         accelerator_config_path, gamma_source_config_path, model_config_path):
 
     with open(accelerator_config_path) as file:
         acc_cfg = yaml.load(file)[accelerator]
+        
+    with open(gamma_source_config_path) as file:
+        gam_cfg = yaml.load(file)[gamma_source]
 
     with open(model_config_path) as file:
         model_cfg = yaml.load(file)[model]
@@ -36,44 +44,52 @@ def main(accelerator, model, total_column_density, output, accelerator_config_pa
     deltas = model_cfg['dif_delta']
     n0s = model_cfg['n0s']
     deltaps = model_cfg['deltaps']
-    Emax_obs = model_cfg['Emax_obs']
-    Emax_t_ST0 = model_cfg['Emax_t_ST0']
-    Mej = model_cfg['Mej']
-    t = acc_cfg['age']
     
-    Ep = np.logspace(0, 6, 1000)*u.GeV
+    Emax_t_ST0 = model_cfg['Emax_t_ST0']
+    
+    Ep = np.logspace(0, np.log10(Emax_t_ST0.to(u.GeV).value), 1000)*u.GeV
+    
+    gam_src = GammaSource(name=gam_cfg['TeV']['name'], 
+                          spectral_index=gam_cfg['TeV']['spectral_index'], 
+                          glon=gam_cfg['TeV']['glon'], glat=gam_cfg['TeV']['glat'], 
+                          radius=gam_cfg['TeV']['radius'],
+                          flux_GeV=gam_cfg['GeV']['integral_flux'],
+                          flux_E_GeV=gam_cfg['GeV']['integral_lower_energy'],
+                          flux_TeV=gam_cfg['TeV']['integral_flux'],
+                          flux_E_TeV=gam_cfg['TeV']['integral_lower_energy'])
 
     acc = Accelerator(
             name=acc_cfg['name'],
             glon=acc_cfg['glon'], 
             glat=acc_cfg['glat'], 
             radius=acc_cfg['radius'],
-            age=t,
+            age=acc_cfg['age'],
             distance=acc_cfg['distance'],
             gas_mass=acc_cfg['gas_mass']
             )
     gp = GasParameters(snr=acc, gas_map_path=total_column_density)
     R_vals = gp.dist_cell()
+    
+    n = calc_average_number_density(total_column_density, gam_src, acc)
 
     for chi in chis:
         for delta in deltas:
             for n0 in n0s:
                 for deltap in deltaps:
-                    ps = HadronicImpulsiveTimeExtentPDF(n=model_cfg['n'],
+                    ps = HadronicImpulsiveTimeExtentPDF(n=n,
                                                   n0=n0,
                                                   dif_chi=chi,
                                                   dif_delta=delta,
                                                   deltap=deltap,
                                                   Emax_t_ST0=Emax_t_ST0,
-                                                  Mej=Mej)
+                                                  Mej=model_cfg['Mej'],
+                                                  E_SN=model_cfg['E_SN'])
 
-                    Emax_t = (Emax_t_ST0 * ((t / ps.t_ST0).decompose()) ** (-deltap)).to(u.TeV)
-
-                    if Emax_t < Emax_obs.to(u.TeV):
-                        print('Deltap value is not valid for the observations')
-                    else:        	
-                        ps.calc_pdf(E=Ep, R=R_vals, t=t)
-                        ps.save(author='Kirsty Feijen')
+                    ps.calc_pdf(E=Ep, R=R_vals, t=acc.age)
+                    extra_comments = {'HGAM_SRC':gam_src.name,
+					     			  'HACC':acc.name,
+								      'HGASPATH':total_column_density}
+                    ps.save(author='Kirsty Feijen', extra_comments=extra_comments)
                                           
 
 

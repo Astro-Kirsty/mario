@@ -38,10 +38,10 @@ HESSJ1804:
       unit: !astropy.units.Unit {unit: TeV}
     color: 'green'
     glon: !astropy.units.Quantity
-      value: 8.38
+      value: 8.4
       unit: !astropy.units.Unit {unit: deg}
     glat: !astropy.units.Quantity
-      value: -0.09
+      value: -0.03
       unit: !astropy.units.Unit {unit: deg}
     radius: !astropy.units.Quantity
       value: 0.367

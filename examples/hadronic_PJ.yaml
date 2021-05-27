@@ -11,37 +11,36 @@ s1_PJ_16:
     - 0.6
     - 0.7
 
-  n: !astropy.units.Quantity
-    value: 325
-    unit: !astropy.units.Unit {unit: cm**(-3)}
-
   n0s: 
     - !astropy.units.Quantity
-      unit: &id003 !astropy.units.Unit {unit: cm**(-3)}
+      unit: &id001 !astropy.units.Unit {unit: cm**(-3)}
       value: 0.1
     - !astropy.units.Quantity
-      unit: *id003
+      unit: *id001
       value: 1
     - !astropy.units.Quantity
-      unit: *id003
+      unit: *id001
       value: 10
+    - !astropy.units.Quantity
+      unit: *id001
+      value: 20
   
   deltaps:
     - 0.2
-    - 0.43
-    - 0.66
-
-  Emax_obs: !astropy.units.Quantity
-    value: 60
-    unit: !astropy.units.Unit {unit: TeV}
+    - 1.4
+    - 2.5
 
   Emax_t_ST0: !astropy.units.Quantity
     value: 1
     unit: !astropy.units.Unit {unit: PeV}
       
   Mej: !astropy.units.Quantity
-    value: 1
+    value: 10
     unit: !astropy.units.Unit {unit: solMass}
+    
+  E_SN: !astropy.units.Quantity
+    value: 1e51
+    unit: !astropy.units.Unit {unit: erg}
     
 
 s2_PJ_16:
@@ -57,37 +56,36 @@ s2_PJ_16:
     - 0.6
     - 0.7
 
-  n: !astropy.units.Quantity
-    value: 325
-    unit: !astropy.units.Unit {unit: cm**(-3)}
-
   n0s: 
     - !astropy.units.Quantity
-      unit: &id003 !astropy.units.Unit {unit: cm**(-3)}
+      unit: &id002 !astropy.units.Unit {unit: cm**(-3)}
       value: 0.1
     - !astropy.units.Quantity
-      unit: *id003
+      unit: *id002
       value: 1
     - !astropy.units.Quantity
-      unit: *id003
+      unit: *id002
       value: 10
+    - !astropy.units.Quantity
+      unit: *id002
+      value: 20
   
   deltaps:
     - 0.2
-    - 0.62
-    - 1.04
-
-  Emax_obs: !astropy.units.Quantity
-    value: 60
-    unit: !astropy.units.Unit {unit: TeV}
+    - 1.4
+    - 2.5
 
   Emax_t_ST0: !astropy.units.Quantity
     value: 5
     unit: !astropy.units.Unit {unit: PeV}
       
   Mej: !astropy.units.Quantity
-    value: 1
+    value: 10
     unit: !astropy.units.Unit {unit: solMass}
+    
+  E_SN: !astropy.units.Quantity
+    value: 1e51
+    unit: !astropy.units.Unit {unit: erg}
     
 
 s3_PJ_16:
@@ -103,10 +101,6 @@ s3_PJ_16:
     - 0.6
     - 0.7
 
-  n: !astropy.units.Quantity
-    value: 325
-    unit: !astropy.units.Unit {unit: cm**(-3)}
-
   n0s: 
     - !astropy.units.Quantity
       unit: &id003 !astropy.units.Unit {unit: cm**(-3)}
@@ -117,15 +111,14 @@ s3_PJ_16:
     - !astropy.units.Quantity
       unit: *id003
       value: 10
+    - !astropy.units.Quantity
+      unit: *id003
+      value: 20
   
   deltaps:
     - 0.2
-    - 0.71
-    - 1.22
-
-  Emax_obs: !astropy.units.Quantity
-    value: 60
-    unit: !astropy.units.Unit {unit: TeV}
+    - 1.4
+    - 2.5
 
   Emax_t_ST0: !astropy.units.Quantity
     value: 1
@@ -135,6 +128,10 @@ s3_PJ_16:
     value: 10
     unit: !astropy.units.Unit {unit: solMass}
     
+  E_SN: !astropy.units.Quantity
+    value: 1e52
+    unit: !astropy.units.Unit {unit: erg}
+
 
 s4_PJ_16:
   dif_chi:
@@ -149,29 +146,24 @@ s4_PJ_16:
     - 0.6
     - 0.7
 
-  n: !astropy.units.Quantity
-    value: 325
-    unit: !astropy.units.Unit {unit: cm**(-3)}
-
   n0s: 
     - !astropy.units.Quantity
-      unit: &id003 !astropy.units.Unit {unit: cm**(-3)}
+      unit: &id004 !astropy.units.Unit {unit: cm**(-3)}
       value: 0.1
     - !astropy.units.Quantity
-      unit: *id003
+      unit: *id004
       value: 1
     - !astropy.units.Quantity
-      unit: *id003
+      unit: *id004
       value: 10
+    - !astropy.units.Quantity
+      unit: *id004
+      value: 20
   
   deltaps:
     - 0.2
-    - 1.06
-    - 1.92
-
-  Emax_obs: !astropy.units.Quantity
-    value: 60
-    unit: !astropy.units.Unit {unit: TeV}
+    - 1.4
+    - 2.5
 
   Emax_t_ST0: !astropy.units.Quantity
     value: 5
@@ -181,3 +173,95 @@ s4_PJ_16:
     value: 10
     unit: !astropy.units.Unit {unit: solMass}
     
+  E_SN: !astropy.units.Quantity
+    value: 1e52
+    unit: !astropy.units.Unit {unit: erg}
+    
+s5_PJ_16:
+  dif_chi:
+    - 0.1
+    - 0.01
+    - 0.001
+
+  dif_delta:
+    - 0.3
+    - 0.4
+    - 0.5
+    - 0.6
+    - 0.7
+
+  n0s: 
+    - !astropy.units.Quantity
+      unit: &id005 !astropy.units.Unit {unit: cm**(-3)}
+      value: 0.1
+    - !astropy.units.Quantity
+      unit: *id005
+      value: 1
+    - !astropy.units.Quantity
+      unit: *id005
+      value: 10
+    - !astropy.units.Quantity
+      unit: *id005
+      value: 20
+  
+  deltaps:
+    - 0.2
+    - 1.4
+    - 2.5
+
+  Emax_t_ST0: !astropy.units.Quantity
+    value: 1
+    unit: !astropy.units.Unit {unit: PeV}
+      
+  Mej: !astropy.units.Quantity
+    value: 20
+    unit: !astropy.units.Unit {unit: solMass}
+    
+  E_SN: !astropy.units.Quantity
+    value: 1e52
+    unit: !astropy.units.Unit {unit: erg}
+
+
+s6_PJ_16:
+  dif_chi:
+    - 0.1
+    - 0.01
+    - 0.001
+
+  dif_delta:
+    - 0.3
+    - 0.4
+    - 0.5
+    - 0.6
+    - 0.7
+
+  n0s: 
+    - !astropy.units.Quantity
+      unit: &id006 !astropy.units.Unit {unit: cm**(-3)}
+      value: 0.1
+    - !astropy.units.Quantity
+      unit: *id006
+      value: 1
+    - !astropy.units.Quantity
+      unit: *id006
+      value: 10
+    - !astropy.units.Quantity
+      unit: *id006
+      value: 20
+  
+  deltaps:
+    - 0.2
+    - 1.4
+    - 2.5
+
+  Emax_t_ST0: !astropy.units.Quantity
+    value: 5
+    unit: !astropy.units.Unit {unit: PeV}
+      
+  Mej: !astropy.units.Quantity
+    value: 20
+    unit: !astropy.units.Unit {unit: solMass}
+    
+  E_SN: !astropy.units.Quantity
+    value: 1e52
+    unit: !astropy.units.Unit {unit: erg}

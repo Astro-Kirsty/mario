@@ -1,8 +1,27 @@
-generic1:
-  alpha: 2.0
+generic18:
+  alpha: 1.8
+  xsection: 'Kafexhiu'
+  depth: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: pc}
 
-generic2:
+generic20:
+  alpha: 2.0
+  xsection: 'Kafexhiu'
+  depth: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: pc}
+
+generic22:
   alpha: 2.2
+  xsection: 'Kafexhiu'
+  depth: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: pc}
   
-generic3:
+generic24:
   alpha: 2.4
+  xsection: 'Kafexhiu'
+  depth: !astropy.units.Quantity
+    value: 100
+    unit: !astropy.units.Unit {unit: pc}

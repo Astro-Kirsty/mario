@@ -1,4 +1,6 @@
 G8_Plot:
+  type: 'G8_Plot'
+  
   name: 'SNR G8.7-0.1'
 
   Emin: !astropy.units.Quantity
@@ -9,7 +11,7 @@ G8_Plot:
     value: 100
     unit: !astropy.units.Unit {unit: TeV}
 
-  fit_type: 'PL'
+  fit_type: 'BPL'
 
   grid_size: !astropy.units.Quantity
     value: 0.02
@@ -19,17 +21,19 @@ G8_Plot:
     value: 0.1
     unit: !astropy.units.Unit {unit: deg}
 
-  src_fits: '/home/kirsty/Documents/PhD/GitHub/data/HESSJ1804-216_Map.fits'
+  src_fits: '/home/kirsty/Documents/PhD/Fits_Files/Models/HESSJ1804-216_Map.fits'
 
   con_levels: [30,40,50,60]
+  
+  glon_limit: [7.6, 9.1]
 
-  glon_limit: [7.8, 9.3]
-
-  glat_limit: [-0.47, 0.5]
+  glat_limit: [-0.49,0.49]
 
   snr_centre: False
 
 PJ_Plot:
+  type: 'PJ_Plot'
+  
   name: 'Progenitor SNR of PSR J1803-2137'
 
   Emin: !astropy.units.Quantity
@@ -40,7 +44,7 @@ PJ_Plot:
     value: 100
     unit: !astropy.units.Unit {unit: TeV}
 
-  fit_type: 'PL'
+  fit_type: 'BPL'
 
   grid_size: !astropy.units.Quantity
     value: 0.02
@@ -50,14 +54,13 @@ PJ_Plot:
     value: 0.1
     unit: !astropy.units.Unit {unit: deg}
 
-  src_fits: '/home/kirsty/Documents/PhD/GitHub/data/HESSJ1804-216_Map.fits'
+  src_fits: '/home/kirsty/Documents/PhD/Fits_Files/Models/HESSJ1804-216_Map.fits'
 
   con_levels: [30,40,50,60]
 
-  glon_limit: [7.55, 9.1]
+  glon_limit: [7.6, 9.1]
 
-  glat_limit: [-0.47,0.47]
+  glat_limit: [-0.49,0.49]
 
   snr_centre: True
-
 

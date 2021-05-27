@@ -1,47 +1,51 @@
 import numpy as np
-import click
-import glob
-
 from astropy.io.misc import yaml
 from astropy.io import fits
-from astropy.wcs import WCS
-from astropy.coordinates import SkyCoord
 from astropy import units as u
-from astropy import coordinates as coord
-from photutils import SkyCircularAperture
 
 from mario.sources import Accelerator
 from mario.sources import GammaSource
 from mario.gas_utilities import GasParameters
 from mario.gamma.flux import GammaFlux
-from mario.gamma.spatialmodel import SpatialModel, SpatialModel3D
-from mario.gamma.spatialmodel import oversample
+from mario.gamma.spatialmodel import SpatialModel3D
 
-
+import sys
+import click
+import glob
 
 @click.command()
 @click.argument('gamma_source')
 @click.argument('gamma_model')
 @click.argument('accelerator')
 @click.argument('plot_type')
-@click.argument('total_column_density')
-@click.argument('obs_path') # hgps map flux
 @click.argument('pdf_cube')
-@click.option('--accelerator_config_path', 
-                default='accelerators.yaml',
-                type=click.Path(exists=True, dir_okay=False))
+@click.argument('taskid')
+
+@click.option('--hess_spectra_path',
+               default='/home/kirsty/Documents/PhD/GitHub/data/HESS_spectra_data.csv',
+               type=click.Path(exists=True, dir_okay=False))
+@click.option('--fermi_spectra_path',
+               default='/home/kirsty/Documents/PhD/GitHub/data/Fermi_spectra_data.csv',
+               type=click.Path(exists=True, dir_okay=False))
 @click.option('--gamma_source_config_path', 
-                default='gamma_sources.yaml',
+                default='/home/kirsty/Documents/PhD/GitHub/mario/examples/gamma_sources.yaml',
                 type=click.Path(exists=True, dir_okay=False))
 @click.option('--gamma_model_config_path', 
-                default='gamma_models.yaml',
+                default='/home/kirsty/Documents/PhD/GitHub/mario/examples/gamma_models.yaml',
+                type=click.Path(exists=True, dir_okay=False))
+@click.option('--accelerator_config_path', 
+                default='/home/kirsty/Documents/PhD/GitHub/mario/examples/accelerators.yaml',
+                type=click.Path(exists=True, dir_okay=False))
+@click.option('--obs_path', 
+               default='/home/kirsty/Documents/PhD/Fits_Files/Models/hgps_map_flux_0.1deg_v1_crop.fits',
                 type=click.Path(exists=True, dir_okay=False))
 @click.option('--plot_config_path', 
-                default='plot.yaml',
+                default='/home/kirsty/Documents/PhD/GitHub/mario/examples/plot.yaml',
                 type=click.Path(exists=True, dir_okay=False))
 
-def main(gamma_source, gamma_model, accelerator, plot_type, total_column_density, obs_path, pdf_cube, 
-         gamma_source_config_path, gamma_model_config_path, accelerator_config_path, plot_config_path):
+def main(gamma_source, gamma_model, accelerator, plot_type, pdf_cube, taskid, 
+		 hess_spectra_path, fermi_spectra_path,
+         gamma_source_config_path, gamma_model_config_path, accelerator_config_path, obs_path, plot_config_path):
 
     with open(gamma_source_config_path) as file:
         gam_src_cfg = yaml.load(file)[gamma_source] 
@@ -54,7 +58,29 @@ def main(gamma_source, gamma_model, accelerator, plot_type, total_column_density
 
     with open(plot_config_path) as file:
         plot_cfg = yaml.load(file)[plot_type]
-        
+
+    hess_spectra = np.loadtxt(hess_spectra_path, delimiter=',', skiprows=1)
+    E_HESS = hess_spectra[:,0] * u.TeV
+    Flux_HESS = hess_spectra[:,1] * 1/(u.TeV*u.cm**2*u.s)
+
+    fermi_spectra = np.loadtxt(fermi_spectra_path, delimiter=',', skiprows=1)
+    E_Fermi = fermi_spectra[:,0] * u.TeV
+    Flux_Fermi = fermi_spectra[:,1] * 1/(u.TeV*u.cm**2*u.s)
+    
+    gamsrc_glon = gam_src_cfg['TeV']['glon']
+    gamsrc_glat = gam_src_cfg['TeV']['glat']
+    gamsrc_radius = gam_src_cfg['TeV']['radius']
+    
+    alpha = gam_cfg['alpha']
+    xsection = gam_cfg['xsection']
+    depth = gam_cfg['depth']
+
+    files = glob.glob(pdf_cube)
+    files = np.sort(files)
+    cube = fits.open(files[int(taskid)])
+    header = cube[0].header
+    total_column_density = header['HGASPATH']
+
     acc = Accelerator(
                     name=acc_cfg['name'],
                     glon=acc_cfg['glon'], 
@@ -65,105 +91,45 @@ def main(gamma_source, gamma_model, accelerator, plot_type, total_column_density
                     gas_mass=acc_cfg['gas_mass']
                     )
 
-    Eg = np.logspace(np.log10(0.1), np.log10(100), 100)*u.TeV
-
-    alpha = gam_cfg['alpha']
-
+    if (gam_src_cfg['TeV']['name'] != header['HGAM_SRC']) or (acc.name != header['HACC']):
+        print('\nThe gamma-ray sources or accelerators dont match')
+        print('Try to run again. Exiting')
+        sys.exit()
+   
     gp = GasParameters(snr=acc, gas_map_path=total_column_density)
-    
-    
-    gf = GammaFlux(snr=acc, pdf_cube_path=pdf_cube, gp=gp, alpha=alpha, eta=1)
+   
+    E = np.concatenate((E_Fermi.to(u.TeV), E_HESS.to(u.TeV)))
+    F = np.concatenate((Flux_Fermi, Flux_HESS))
+    gf = GammaFlux(acc=acc, pdf_cube_path=files[int(taskid)], gp=gp, alpha=alpha, eta=1, 
+                   xsection=xsection, depth=depth)
 
-    gf.flux(Eg)
-
-    Emin = plot_cfg['Emin']
-    Emax = plot_cfg['Emax']
-
-    cube_header = gf.save_header()
+    gf.flux(np.array(E)*u.TeV)
+    extra_comments = {'HGAM_SRC':header['HGAM_SRC'],
+                      'HACC':header['HACC']}
+    cube_header = gf.save_header(extra_comments=extra_comments)
     data = gf.fluxes.value
-    sm3D = SpatialModel3D(data, cube_header)
-
-    mask = sm3D.energies > 1
-    i = int(np.argwhere(mask)[0])
-    dEnergies = np.diff(sm3D.energies[mask])
-    Esize, xsize, ysize = data.shape
-    integrated = np.empty((xsize, ysize))
-    for ix in range(xsize):
-        for iy in range(ysize):
-            integrated[ix, iy] = np.nansum(data[i:-1, ix, iy] * dEnergies)
-
-
-    hdu = fits.PrimaryHDU(data=integrated)
-    hdu.header['BUNIT'] = cube_header['BUNIT']
-    hdu.header['CTYPE1'] = cube_header['CTYPE1']
-    hdu.header['CRVAL1'] = cube_header['CRVAL1']
-    hdu.header['CRPIX1'] = cube_header['CRPIX1']
-    hdu.header['CDELT1'] = cube_header['CDELT1']
-
-    hdu.header['CTYPE2'] = cube_header['CTYPE2']
-    hdu.header['CRVAL2'] = cube_header['CRVAL2']
-    hdu.header['CRPIX2'] = cube_header['CRPIX2']
-    hdu.header['CDELT2'] = cube_header['CDELT2']
-
-    hdu.header['HNAME'] = cube_header['HNAME']
-    hdu.header['HT_KYR'] = cube_header['HT_KYR']
-    hdu.header['HCHI'] = cube_header['HCHI']
-    hdu.header['HDELTA'] = cube_header['HDELTA']
-    hdu.header['HD0_CM2S'] = cube_header['HD0_CM2S']
-    hdu.header['HN_CM3'] = cube_header['HN_CM3']
-    hdu.header['HN0_CM3'] = cube_header['HN0_CM3']
-    hdu.header['HESN_ERG'] = cube_header['HESN_ERG']
-    hdu.header['HEMT_TEV'] = cube_header['HEMT_TEV']
-    hdu.header['HEMT0_P'] = cube_header['HEMT0_P']
-    hdu.header['HTST0_YR'] = cube_header['HTST0_YR']
-    hdu.header['HDELTAP'] = cube_header['HDELTAP']
-    hdu.header['HEB_ERG'] = cube_header['HEB_ERG']
-    hdu.header['HETA'] = cube_header['HETA']
-    hdu.header['HALPHA'] = cube_header['HALPHA']
-    hdu.header['HGASPATH'] = cube_header['HGASPATH']
-
-    grid_size = plot_cfg['grid_size']
-    radius = plot_cfg['radius']
-    header3, oversample3 = oversample(integrated, hdu.header, grid_size=grid_size, radius=radius)
-    sm = SpatialModel(oversample3, header3)
-
-    file = fits.open(obs_path)
-    obs_data = file[0].data
-    obs_header = file[0].header
-    smH = SpatialModel(obs_data, obs_header)
-
-    model_wcs = WCS(sm.header)
-    glon_last, glat_first = model_wcs.all_pix2world(0, 0, 0)
-    glon_first, glat_last = model_wcs.all_pix2world(sm.data.shape[1], sm.data.shape[0], 0) 
-
-    obs_wcs = WCS(obs_header)
-    last_lon, last_lat = coord.SkyCoord(l=glon_last*u.deg, b=glat_last*u.deg, 
-                                        frame='galactic').to_pixel(obs_wcs)
-    first_lon, first_lat = coord.SkyCoord(l=glon_first*u.deg, b=glat_first*u.deg, 
-                                          frame='galactic').to_pixel(obs_wcs)
-    obs_crop = obs_data[int(first_lat):int(last_lat), int(last_lon):int(first_lon)]
-
-    gamsrc_glon = gam_src_cfg['TeV']['glon']
-    gamsrc_glat = gam_src_cfg['TeV']['glat']
-    gamsrc_radius = gam_src_cfg['TeV']['radius']
-
-    position = SkyCoord(l=gamsrc_glon, b=gamsrc_glat, frame='galactic')
-    aperture = SkyCircularAperture(position, gamsrc_radius).to_pixel(model_wcs)
-    mask = aperture.to_mask(method='exact')
-
-    obs_aperture = mask.multiply(obs_crop)
-    model_aperture = mask.multiply(sm.data)
-
+    
+    sm3D = SpatialModel3D(data, cube_header)   
+    e, F_model = sm3D.sum_region(coords=[gamsrc_glon, gamsrc_glat], radius=gamsrc_radius)
 
     factor = np.linspace(0.0001, 1, 100000)
     residual = []
     for f in factor:
-        residual += [np.nansum(np.abs(obs_aperture - f * model_aperture))]
+        residual += [np.nansum(np.abs(F.value - f * F_model))]
     eta = factor[np.argmin(residual)] 
 
-    gf2 = GammaFlux(snr=acc, pdf_cube_path=pdf_cube, gp=gp, alpha=alpha, eta=eta)
-    gf2.flux(Eg)
-    gf2.save(author='Kirsty')
+    E1 = np.logspace(-2, 0, 100)[:-1]*u.TeV
+    E2 = np.logspace(0, 2, 100)*u.TeV
+    Eg = np.concatenate((E1, E2))
+    gf2 = GammaFlux(acc=acc, pdf_cube_path=files[int(taskid)], gp=gp, alpha=alpha, eta=eta, 
+                    xsection=xsection, depth=depth)
+    gf2.flux(np.array(Eg)*u.TeV)
+    extra_comments = {'HGAM_SRC':header['HGAM_SRC'],
+                      'HACC':header['HACC'],
+                      'HPLTTYPE':plot_cfg['type'],
+                      'HENERGY1':'np.logspace(-2, 0, 100)[:-1]*u.TeV',
+                      'HENERGY2':'np.logspace(0, 2, 100)*u.TeV'}
+    gf2.save(author='Kirsty Feijen', extra_comments=extra_comments)
 
 
 if __name__ == '__main__':

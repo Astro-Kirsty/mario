@@ -5,12 +5,13 @@ class GammaSource:
     """
     A class used to define a gamma-ray source
     """
-
-    @u.quantity_input(flux_GeV=1 / (u.s * u.cm ** 2),
+    @u.quantity_input(glon=u.deg, glat=u.deg, radius=u.deg,
+                      flux_GeV=1 / (u.s * u.cm ** 2),
                       flux_E_GeV=u.TeV,
                       flux_TeV=1 / (u.s * u.cm ** 2),
                       flux_E_TeV=u.TeV)
-    def __init__(self, name, spectral_index, flux_GeV, flux_E_GeV, flux_TeV, flux_E_TeV):
+    def __init__(self, name, spectral_index, glon, glat, radius, 
+                  flux_GeV, flux_E_GeV, flux_TeV, flux_E_TeV):
         """
         Parameters
         ----------------------
@@ -18,6 +19,12 @@ class GammaSource:
             The name of the gamma-ray source
         spectral_index : float
             The spectral index of the gamma-ray source in the TeV regime
+        glon : float
+            The galactic longitude of the gamma-ray source
+        glat : float
+            The galactic latitude of the gamma-ray source
+        radius : float
+            The radius of the gamma-ray source
         flux_GeV : float
             The integral photon flux above a certain energy for the GeV gamma-ray source
         flux_E_GeV : float
@@ -39,6 +46,9 @@ class GammaSource:
         """
         self.name = name
         self.spectral_index = spectral_index
+        self.glon = glon
+        self.glat = glat
+        self.radius = radius
         self.flux_GeV = flux_GeV
         self.flux_E_GeV = flux_E_GeV
         self.flux_TeV = flux_TeV

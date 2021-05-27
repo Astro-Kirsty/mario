@@ -14,7 +14,7 @@ class BaseHadronicImpulsivePDF(BasePDF):
 
     def __init__(self, n=100*u.cm**-3, n0=1*u.cm**-3,  
                  D0=3e27*u.cm**2/u.s, dif_chi=0.01, dif_delta=0.5, deltap=0.3, 
-                 Mej=1.4*u.solMass, Emax_t_ST0=1*u.PeV, 
+                 Mej=1.0*u.solMass, Emax_t_ST0=1*u.PeV, 
                  E_SN=1e51*u.erg):
         """
         Parameters
@@ -49,10 +49,16 @@ class BaseHadronicImpulsivePDF(BasePDF):
         self.dif_chi = dif_chi
         self.dif_delta = dif_delta
         
+        self.E_SN = E_SN
+        
         self.deltap = deltap
         self.rho = 1 * m_p * u.cm**(-3)
-        self.Mej = Mej.to(u.kg)
-        self.t_ST0 = 1.6e3*u.yr * (E_SN / (1e51*u.erg))**(-1/2) * (self.Mej / (10*M_sun))**(5/6) * (self.rho / (m_p * u.cm**(-3)))**(-1/3)
+        self.Mej = Mej
+        if self.Mej < 1.44*u.solMass:
+        	self.SN_type = 'Type Ia'
+        elif self.Mej > 8*u.solMass:
+        	self.SN_type = 'Type II'
+        self.t_ST0 = 1.6e3*u.yr * (self.E_SN / (1e51*u.erg))**(-1/2) * (self.Mej / (10*u.solMass))**(5/6) * (self.rho / (m_p * u.cm**(-3)))**(-1/3)
         
         self.Emax_t_ST0 = Emax_t_ST0
         
@@ -101,7 +107,7 @@ class BaseHadronicImpulsivePDF(BasePDF):
         Rcrit = self.Rcrit(t) * np.ones(np.shape(R))
         self.Resc = Rcrit
         
-        Ecrit = calc_escape_energy(t, deltap=self.deltap, t_ST0=self.t_ST0, Emax_t_ST0=self.Emax_t_ST0)
+        Ecrit = self.Ecrit(t)
         self.Eesc = Ecrit
         
         # Calculation of diffusion length
@@ -126,12 +132,12 @@ class BaseHadronicImpulsivePDF(BasePDF):
         self.pdf = pdf
         
         
-    def save(self, author='', basename='HadronicPDF'):
+    def save(self, author='', basename='HadronicPDF', extra_comments=None):
         """
         Save the hadronic PDF to a fits file
         """
         try:
-            filename = f'{basename}_{self.name}_chi{self.dif_chi}_delta{self.dif_delta}_D0{self.D0.to(u.cm**2/u.s).value}_n{self.n.to(u.cm**-3).value}_n0{self.n0.to(u.cm**-3).value}_ESN{self.E_SN.to(u.erg).value}_EmaxST0{self.Emax_t_ST0.to(u.PeV).value}_tST0{self.t_ST0.to(u.yr).value:.2f}_deltap{self.deltap}.fits'
+            filename = f'{basename}_{self.name}_chi{self.dif_chi}_delta{self.dif_delta}_D0{self.D0.to(u.cm**2/u.s).value}_n{self.n.to(u.cm**-3).value:.0f}_n0{self.n0.to(u.cm**-3).value}_ESN{self.E_SN.to(u.erg).value}_EmaxST0{self.Emax_t_ST0.to(u.PeV).value}_tST0{self.t_ST0.to(u.yr).value:.2f}_deltap{self.deltap}.fits'
 
             step = np.diff(np.log10(self.energy[:].to(u.TeV).value))[0]
 
@@ -170,10 +176,18 @@ class BaseHadronicImpulsivePDF(BasePDF):
             hdr.header['HEMT0_P'] = self.Emax_t_ST0.to(u.PeV).value
             hdr.header['HTST0_YR'] = self.t_ST0.to(u.yr).value
             hdr.header['HDELTAP'] = self.deltap
+            
+            hdr.header['HMEJ_SOL'] = self.Mej.to(u.solMass).value
+            hdr.header['HSN_TYPE'] = self.SN_type
+            
             hdr.header['HEES_TEV'] = self.Eesc.to(u.TeV).value
             hdr.header['HRESC_PC'] = self.Resc[0,0,0].to(u.pc).value
 
             hdr.header['AUTHOR'] = author
+            
+            if extra_comments != None:
+                for key in extra_comments.keys():
+                    hdr.header[key] = extra_comments[key]
 
             hdr.writeto(filename, overwrite=True)
         except:
@@ -210,6 +224,11 @@ class HadronicImpulsivePDF(BaseHadronicImpulsivePDF):
             return calc_shock_radius(t=t, E_SN=self.E_SN, n0=self.n0)
         else:
             return self.Rshock
+
+    @u.quantity_input(t=u.kyr)
+    def Ecrit(self, t):
+        Ecrit = 0*u.TeV
+        return Ecrit       
     
 
 class HadronicImpulsiveTimePDF(BaseHadronicImpulsivePDF):
@@ -241,6 +260,11 @@ class HadronicImpulsiveTimePDF(BaseHadronicImpulsivePDF):
     def Rcrit(self, t):
         Rcrit = calc_shock_radius(t=t, E_SN=self.E_SN, n0=self.n0)
         return Rcrit
+
+    @u.quantity_input(t=u.kyr)
+    def Ecrit(self, t):
+        Ecrit = calc_escape_energy(t, deltap=self.deltap, t_ST0=self.t_ST0, Emax_t_ST0=self.Emax_t_ST0) 
+        return Ecrit
 
 
 class HadronicImpulsiveTimeExtentPDF(BaseHadronicImpulsivePDF):
@@ -282,5 +306,8 @@ class HadronicImpulsiveTimeExtentPDF(BaseHadronicImpulsivePDF):
         Rcrit = calc_shock_radius(t=t, E_SN=self.E_SN, n0=self.n0)
         return Rcrit
 
-
+    @u.quantity_input(t=u.kyr)
+    def Ecrit(self, t):
+        Ecrit = calc_escape_energy(t, deltap=self.deltap, t_ST0=self.t_ST0, Emax_t_ST0=self.Emax_t_ST0) 
+        return Ecrit
 

@@ -1,17 +1,20 @@
 import numpy as np
 from astropy import units as u
-from astropy.constants import c
+from astropy.constants import c, m_p
 from astropy.io import fits
+
+mp = (m_p * c**2).to('MeV')
+mpi0 = 134.976*u.MeV
 
 class GammaFlux:
 
     @u.quantity_input(nH2_cell=u.cm ** (-3))
-    def __init__(self, snr, pdf_cube_path, gp, alpha=2, eta=0.1):
+    def __init__(self, acc, pdf_cube_path, gp, alpha=2, eta=0.1, xsection='Kelner', depth=35*u.pc):
         """
         A class to calculate the predicted gamma-ray flux
 
         """
-        self.snr = snr
+        self.acc = acc
         
         self.pdf_cube_path = pdf_cube_path
         file = fits.open(self.pdf_cube_path)
@@ -22,8 +25,12 @@ class GammaFlux:
         self.eta = eta
         self.Ebudget = self.eta * self.header['HESN_ERG']*u.erg
         
+        self.xsection = xsection
+        
+        self.depth = depth
+        
         Emin = 1 * u.GeV
-        Emax = 1 * u.PeV
+        Emax  = self.header['HEMT0_P']*u.PeV
         if self.alpha == 2:
             N0 = (self.Ebudget / ((np.log(Emax/u.GeV) - np.log(Emin/u.GeV))*u.GeV)).decompose()
         else:
@@ -31,17 +38,27 @@ class GammaFlux:
                   (((Emax/u.GeV)**(2-self.alpha) - (Emin/u.GeV)**(2-self.alpha))*u.GeV)).decompose()
         self.N0 = N0
         
-        self.Ep = np.logspace(self.header['CRVAL3'],
-                              self.header['CRVAL3'] + (self.header['NAXIS3'] - 1) * self.header['CDELT3'],
-                              self.header['NAXIS3'])* u.Unit(self.header['CUNIT3'])
-        
-        cool_time = (6e7 * (self.header['HN_CM3'] * u.cm**-3 / u.cm**-3) ** (-1) * u.yr)
+        Ep = np.logspace(self.header['CRVAL3'],
+                         self.header['CRVAL3'] + (self.header['NAXIS3'] - 1) * self.header['CDELT3'],
+                         self.header['NAXIS3'])* u.Unit(self.header['CUNIT3'])
+        self.Ep = Ep + mp
+                              
+        if self.xsection=='Kelner':
+            L = np.log(self.Ep / u.TeV)
+            s_inel = ((34.3 + 1.88 * L + 0.25 * L ** 2) * u.mbarn).to(u.cm ** 2)
+        elif self.xsection=='Kafexhiu':
+            Ep_th = (2 * mpi0 + mpi0**2 / (2*mp)).to(u.GeV)
+            L = np.log(self.Ep / Ep_th)
+            s_inel = ((30.7 - 0.96 * L + 0.18 * L**2 ) * (1 - (Ep_th / self.Ep)**(1.9))**3  * u.mbarn).to(u.cm ** 2)
+
+        kappa = 0.45
+        cool_time = ((self.header['HN_CM3'] * u.cm**(-3) * c * kappa * s_inel)**(-1)).to(u.kyr)
         losses = np.exp(- ((self.alpha - 1) * self.header['HT_KYR']*u.kyr  / cool_time)) 
 
         Esize, xsize, ysize = self.pdf.shape
         Jp = np.empty((Esize, xsize, ysize))
         for i in range(len(self.Ep)):
-            Jp[i, :,:] = (self.pdf[i,:,:] * losses * N0 * (self.Ep[i] / u.GeV)**(-self.alpha) /u.GeV).to(u.cm**(-3)/u.GeV)
+            Jp[i, :,:] = (self.pdf[i,:,:] * losses[i] * N0 * (self.Ep[i] / u.GeV)**(-self.alpha) /u.GeV).to(u.cm**(-3)/u.GeV)
 
         self.Jp = Jp *  u.cm**(-3)/u.GeV
             
@@ -49,7 +66,7 @@ class GammaFlux:
         n0 = self.header['HN0_CM3'] * u.cm**(-3)
         self.gp = gp
         Rs = gp.dist_cell()
-        self.nH2_cell = gp.nH2_cell().to(u.cm**(-3)).value
+        self.nH2_cell = gp.nH2_cell(depth=self.depth).to(u.cm**(-3)).value
         self.nH2_cell[Rs < Resc] = n0
         self.nH2_cell = self.nH2_cell * u.cm**(-3)      
         
@@ -64,8 +81,14 @@ class GammaFlux:
         Ep = self.Ep[index:]
         
         # Calculation of cross section of pp collisions
-        L = np.log(Ep / u.TeV)
-        s_inel = ((34.3 + 1.88 * L + 0.25 * L ** 2) * u.mbarn).to(u.cm ** 2)
+        if self.xsection=='Kelner':
+            L = np.log(Ep / u.TeV)
+            s_inel = ((34.3 + 1.88 * L + 0.25 * L ** 2) * u.mbarn).to(u.cm ** 2)
+        elif self.xsection=='Kafexhiu':
+            Ep = Ep + mp
+            Ep_th = (2 * mpi0 + mpi0**2 / (2*mp)).to(u.GeV)
+            L = np.log(Ep / Ep_th)
+            s_inel = ((30.7 - 0.96 * L + 0.18 * L**2 ) * (1 - (Ep_th / Ep)**(1.9))**3  * u.mbarn).to(u.cm ** 2)
 
         # Parameters for gamma ray spectrum
         B_g = 1.30 + 0.14 * L + 0.011 * L ** 2
@@ -92,26 +115,23 @@ class GammaFlux:
 
     def flux(self, energies):
 
-        # Calculation of the fixed depth of some box surrounding the source
-        dl = self.snr.distance.to(u.cm) * np.tan(0.45 * u.deg)
-
         # Converting the pixel width from angular size to physical size
-        pixel_width = self.snr.distance.to(u.cm) * np.tan(self.gp.theta_pixel)
-        ster = (pixel_width ** 2 / (self.snr.distance.to(u.cm)) ** 2) * u.sr
+        pixel_width = self.acc.distance.to(u.cm) * np.tan(self.gp.theta_pixel)
+        ster = (pixel_width ** 2 / (self.acc.distance.to(u.cm)) ** 2) * u.sr
 
         Gfluxes = []
 
         for Eg in energies:
-            Gflux = self.calc_phi(Eg) * dl * ster / (4 * np.pi * u.sr)
+            Gflux = self.calc_phi(Eg) * self.depth * ster / (4 * np.pi * u.sr)
             unit = Gflux.unit
             Gfluxes += [Gflux]
 
         self.energies = energies
-        self.fluxes = Gfluxes * unit
+        self.fluxes = (Gfluxes * unit).to(1 / (u.TeV * u.s * u.cm**2))
 
         return
 
-    def save_header(self, author=''):
+    def save_header(self, author='', extra_comments=None):
         """
         Save the hadronic gamma ray header
         """
@@ -154,23 +174,37 @@ class GammaFlux:
         hdr.header['HEB_ERG'] = self.Ebudget.to(u.erg).value
         hdr.header['HETA'] = self.eta
         hdr.header['HALPHA'] = self.alpha
+        hdr.header['HXSEC'] = self.xsection
+        
+        hdr.header['HMEJ_SOL'] = self.header['HMEJ_SOL']
+        hdr.header['HSN_TYPE'] = self.header['HSN_TYPE']
 
         hdr.header['HEES_TEV'] = self.header['HEES_TEV']
         hdr.header['HRESC_PC'] = self.header['HRESC_PC']
 
-        hdr.header['HGASPATH'] = self.gp.gas_map_path
+        hdr.header['HMEJ_SOL'] = self.header['HMEJ_SOL']
+        hdr.header['HSN_TYPE'] = self.header['HSN_TYPE']
+
+        hdr.header['HEES_TEV'] = self.header['HEES_TEV']
+        hdr.header['HRESC_PC'] = self.header['HRESC_PC']
+
+        hdr.header['HGASPATH'] = self.header['HGASPATH']
+
+        if extra_comments != None:
+            for key in extra_comments.keys():
+                hdr.header[key] = extra_comments[key]
 
         hdr.header['AUTHOR'] = author
 
         return hdr.header
     
-    def save(self, author='', basename='HadronicFlux'):
+    def save(self, author='', basename='HadronicFlux', extra_comments=None):
         """
         Save the hadronic gamma ray flux to a fits file
         """
         try:
-            basepdf = self.pdf_cube_path.split('HadronicPDF_')[1]
-            filename = f'{basename}_{basepdf}'
+            basepdf = self.pdf_cube_path.split('HadronicPDF_')[1].split('.fits')[0]
+            filename = f'{basename}_{basepdf}_alpha{self.alpha}.fits'
 
             step = np.diff(np.log10(self.energies[:].to(u.TeV).value))[0]
 
@@ -210,11 +244,19 @@ class GammaFlux:
             hdr.header['HEB_ERG'] = self.Ebudget.to(u.erg).value
             hdr.header['HETA'] = self.eta
             hdr.header['HALPHA'] = self.alpha
+            hdr.header['HXSEC'] = self.xsection
+            
+            hdr.header['HMEJ_SOL'] = self.header['HMEJ_SOL']
+            hdr.header['HSN_TYPE'] = self.header['HSN_TYPE']
 
             hdr.header['HEES_TEV'] = self.header['HEES_TEV']
             hdr.header['HRESC_PC'] = self.header['HRESC_PC']
 
-            hdr.header['HGASPATH'] = self.gp.gas_map_path
+            hdr.header['HGASPATH'] = self.header['HGASPATH']
+
+            if extra_comments != None:
+                for key in extra_comments.keys():
+                    hdr.header[key] = extra_comments[key]
 
             hdr.header['AUTHOR'] = author
 

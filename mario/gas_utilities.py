@@ -1,9 +1,33 @@
 import numpy as np
-from astropy import units as u
 from spectral_cube import SpectralCube
+from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
 from astropy.wcs import WCS
+from astropy.coordinates import SkyCoord
+from photutils import SkyCircularAperture
+
+
+def calc_average_number_density(total_column_path, gam_src, acc):
+
+    file = fits.open(total_column_path)
+    header = file[0].header
+    data = file[0].data * u.Unit(header['BUNIT'])
+    wcs = WCS(header)
+    
+    position = SkyCoord(l=gam_src.glon, b=gam_src.glat, frame='galactic')
+    aperture = SkyCircularAperture(position, gam_src.radius).to_pixel(wcs)
+    mask = aperture.to_mask(method='center')
+    
+    N_H2 = np.median(mask.multiply(data)[mask.multiply(data)>0])
+    
+    r = acc.distance * np.tan(gam_src.radius.to(u.deg))
+    A = np.pi * r**2
+    V = 4/3 * np.pi * r**3
+
+    nH = (N_H2 * A / V).to(u.cm**(-3))
+    
+    return nH
 
 
 class TotalColumnDensity:
@@ -139,7 +163,7 @@ class GasParameters:
         self.theta_pixel = (self.header['CDELT2']) * u.deg
         
 
-    def nH2_cell(self):
+    def nH2_cell(self, depth=35*u.pc):
         """
         Calculates the number density of each pixel in your map
 
@@ -149,9 +173,6 @@ class GasParameters:
             The number density of each pixel
 
         """
-        # Box depth
-        depth = 35*u.pc
-
         # Calculation of volume
         area = (self.snr.distance.to(u.cm) * np.tan(self.theta_pixel)) ** 2
         volume = depth * area
@@ -159,8 +180,10 @@ class GasParameters:
         # Calculation of number density
         nH2 = (self.total_col_dens / volume) * area
         nH2[nH2 < 0] = np.nan
+        
+        self.nH2 = nH2.to(u.cm**(-3))
 
-        return nH2
+        return nH2.to(u.cm**(-3))
 
     def dist_cell(self):
         """

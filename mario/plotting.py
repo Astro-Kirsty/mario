@@ -7,6 +7,30 @@ from astropy.io import fits
 from matplotlib.patches import Circle
 from astropy import coordinates as coord
 
+def add_Resc(snr, Resc_pc, ax, **kwargs):
+    """
+    Plot the escape radius 
+
+    Parameters
+    ----------
+    snr : class
+        Definition for the counterpart supernova remnant
+    Resc_pc : float
+        The escape radius
+    ax : str
+        Set the axis for the figure
+    kwargs : keywords
+        Initialisation keywords
+
+    Examples
+    ----------------------
+    >>> add_Resc(G8, 50*u.pc, ax, facecolor='None', edgecolor='#00CED1')
+    """
+    Resc = np.arctan(Resc_pc / snr.distance)
+    snr_region = Circle((snr.glon.value, snr.glat.value), Resc.to(u.deg).value,
+                         transform=ax.get_transform('galactic'), **kwargs)
+    ax.add_patch(snr_region)
+    return ax
 
 def add_SNR(snr, ax, **kwargs):
     """

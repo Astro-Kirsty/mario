@@ -42,23 +42,23 @@ class GammaFlux:
                          self.header['CRVAL3'] + (self.header['NAXIS3'] - 1) * self.header['CDELT3'],
                          self.header['NAXIS3'])* u.Unit(self.header['CUNIT3'])
         self.Ep = Ep + mp
-                              
-        if self.xsection=='Kelner':
-            L = np.log(self.Ep / u.TeV)
-            s_inel = ((34.3 + 1.88 * L + 0.25 * L ** 2) * u.mbarn).to(u.cm ** 2)
-        elif self.xsection=='Kafexhiu':
-            Ep_th = (2 * mpi0 + mpi0**2 / (2*mp)).to(u.GeV)
-            L = np.log(self.Ep / Ep_th)
-            s_inel = ((30.7 - 0.96 * L + 0.18 * L**2 ) * (1 - (Ep_th / self.Ep)**(1.9))**3  * u.mbarn).to(u.cm ** 2)
 
-        kappa = 0.45
-        cool_time = ((self.header['HN_CM3'] * u.cm**(-3) * c * kappa * s_inel)**(-1)).to(u.kyr)
-        losses = np.exp(- ((self.alpha - 1) * self.header['HT_KYR']*u.kyr  / cool_time)) 
+        #------ Don't include loss term anymore ------
+        #if self.xsection=='Kelner':
+        #    L = np.log(self.Ep / u.TeV)
+        #    s_inel = ((34.3 + 1.88 * L + 0.25 * L ** 2) * u.mbarn).to(u.cm ** 2)
+        #elif self.xsection=='Kafexhiu':
+        #    Ep_th = (2 * mpi0 + mpi0**2 / (2*mp)).to(u.GeV)
+        #    L = np.log(self.Ep / Ep_th)
+        #    s_inel = ((30.7 - 0.96 * L + 0.18 * L**2 ) * (1 - (Ep_th / self.Ep)**(1.9))**3  * u.mbarn).to(u.cm ** 2)
+        #kappa = 0.45
+        #cool_time = ((self.header['HN_CM3'] * u.cm**(-3) * c * kappa * s_inel)**(-1)).to(u.kyr)
+        #losses = np.exp(- ((self.alpha - 1) * self.header['HT_KYR']*u.kyr  / cool_time)) 
 
         Esize, xsize, ysize = self.pdf.shape
         Jp = np.empty((Esize, xsize, ysize))
         for i in range(len(self.Ep)):
-            Jp[i, :,:] = (self.pdf[i,:,:] * losses[i] * N0 * (self.Ep[i] / u.GeV)**(-self.alpha) /u.GeV).to(u.cm**(-3)/u.GeV)
+            Jp[i, :,:] = (self.pdf[i,:,:] * N0 * (self.Ep[i] / u.GeV)**(-self.alpha) /u.GeV).to(u.cm**(-3)/u.GeV)
 
         self.Jp = Jp *  u.cm**(-3)/u.GeV
             

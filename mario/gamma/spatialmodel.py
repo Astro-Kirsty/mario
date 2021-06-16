@@ -47,6 +47,7 @@ def oversample(data, header, grid_size=0.005 * u.deg, radius=0.06 * u.deg, model
     data_oversample = np.array(data_oversample).reshape((len(full_glat), len(full_glon)))   
 
     hdu = fits.PrimaryHDU(data=data_oversample)
+    hdu.header = header
     hdu.header['NAXIS1'] = data_oversample.shape[1]
     hdu.header['NAXIS2'] = data_oversample.shape[0]
     hdu.header['CTYPE1'] = header['CTYPE1']
@@ -58,14 +59,6 @@ def oversample(data, header, grid_size=0.005 * u.deg, radius=0.06 * u.deg, model
     hdu.header['CRVAL2'] = header['CRVAL2']
     hdu.header['CRPIX2'] = data_oversample.shape[0] / 2
     hdu.header['CDELT2'] = grid_size.value
-
-    if model_vals:
-        hdu.header['HDELTA'] = header['HDELTA']
-        hdu.header['HCHI'] = header['HCHI']
-        hdu.header['HEB_ERG'] = header['HEB_ERG']
-
-        hdu.header['HT_KYR'] = header['HT_KYR']
-        hdu.header['HNAME'] = header['HNAME']
 
     return hdu.header, data_oversample
 
@@ -524,6 +517,7 @@ class SpatialModel:
         residuals = obs_aperture - model_aperture
 
         hdu = fits.PrimaryHDU(data=residuals)
+        hdu.header = self.header
         hdu.header['NAXIS1'] = residuals.shape[1]
         hdu.header['NAXIS2'] = residuals.shape[0]
         hdu.header['CTYPE1'] = self.header['CTYPE1']
@@ -535,13 +529,6 @@ class SpatialModel:
         hdu.header['CRVAL2'] = (gamsrc_glat - gamsrc_radius).value
         hdu.header['CRPIX2'] = 0.0
         hdu.header['CDELT2'] = self.header['CDELT2']
-
-        hdu.header['HDELTA'] = self.header['HDELTA']
-        hdu.header['HCHI'] = self.header['HCHI']
-        hdu.header['HEB_ERG'] = self.header['HEB_ERG']
-
-        hdu.header['HT_KYR'] = self.header['HT_KYR']
-        hdu.header['HNAME'] = self.header['HNAME']
 
         return hdu.header, residuals
 

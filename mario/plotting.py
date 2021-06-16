@@ -6,6 +6,7 @@ from astropy.wcs import WCS
 from astropy.io import fits
 from matplotlib.patches import Circle
 from astropy import coordinates as coord
+import scipy.ndimage as ndimage
 
 def add_Resc(snr, Resc_pc, ax, **kwargs):
     """
@@ -92,7 +93,7 @@ def add_SNR_centre(snr, ax, **kwargs):
     return ax
 
 
-def add_gamma_src(src_fits, con_levels, ax, **kwargs):
+def add_gamma_src(ax, src_fits, con_levels, year='2006', sigma=1, **kwargs):
     """
     Plot the contours from your gamma-ray source
 
@@ -112,15 +113,23 @@ def add_gamma_src(src_fits, con_levels, ax, **kwargs):
     >>> add_gamma_src('HESSJ1804.fits', [10,20,30,40], ax, colors='black')
     """
     src = fits.open(src_fits)
-    con_data = src[1].data
-    con_header = src[1].header
-    con_header.remove('CUNIT1')
-    con_header.remove('CUNIT2')
-
-    ax.contour(con_data, transform=ax.get_transform(WCS(con_header)),
-               levels=con_levels, **kwargs)
+    
+    if year=='2006':
+        con_data = src[1].data
+        con_header = src[1].header
+        con_header.remove('CUNIT1')
+        con_header.remove('CUNIT2')
+        ax.contour(con_data, transform=ax.get_transform(WCS(con_header)),
+                   levels=con_levels, **kwargs)
+    elif year=='2018':
+        con_data = src[0].data
+        con_header = src[0].header
+        data_new = ndimage.gaussian_filter(con_data, sigma=sigma)
+        ax.contour(data_new, transform=ax.get_transform(WCS(con_header)),
+                   levels=con_levels, **kwargs)
 
     return ax
+
 
 
 def set_limits(ax, header, l=[7.5, 9.5], b=[-0.5, 0.5]):

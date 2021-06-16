@@ -76,7 +76,7 @@ def main(accelerator, gamma_source, model, total_column_density, output,
         for delta in deltas:
             for n0 in n0s:
                 for deltap in deltaps:
-                    ps = HadronicImpulsiveTimeExtentPDF(n=n,
+                    ps = HadronicImpulsiveTimePDF(n=n,
                                                   n0=n0,
                                                   dif_chi=chi,
                                                   dif_delta=delta,

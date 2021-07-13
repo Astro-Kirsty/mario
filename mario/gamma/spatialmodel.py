@@ -47,7 +47,6 @@ def oversample(data, header, grid_size=0.005 * u.deg, radius=0.06 * u.deg, model
     data_oversample = np.array(data_oversample).reshape((len(full_glat), len(full_glon)))   
 
     hdu = fits.PrimaryHDU(data=data_oversample)
-    hdu.header = header
     hdu.header['NAXIS1'] = data_oversample.shape[1]
     hdu.header['NAXIS2'] = data_oversample.shape[0]
     hdu.header['CTYPE1'] = header['CTYPE1']
@@ -250,7 +249,6 @@ class SpectralModel:
         """ Fit the data with an smooth broken powerlaw """
         i_1TeV = np.argmin(abs(self.energies - 1))        
         log_fluxes = np.log10(self.fluxes)
-        #if np.isfinite(log_fluxes).all():
         popt, pcov = curve_fit(BPL_log, self.energies, log_fluxes,
                            	p0=[self.fluxes[i_1TeV], 2, 2.6, 0.2], 
                            	maxfev=7500)
@@ -314,7 +312,6 @@ class SpectralModel:
 
         ax.set_xscale('log')
         ax.set_yscale('log')
-        ax.grid(linestyle='--')
         ax.legend(loc='lower left', labelspacing=0.3)
 
         return fig, ax
@@ -350,7 +347,6 @@ class SpectralModel:
 
         ax.set_xscale('log')
         ax.set_yscale('log')
-        ax.grid(linestyle='--')
         ax.legend()
 
         return fig, ax  
@@ -517,7 +513,6 @@ class SpatialModel:
         residuals = obs_aperture - model_aperture
 
         hdu = fits.PrimaryHDU(data=residuals)
-        hdu.header = self.header
         hdu.header['NAXIS1'] = residuals.shape[1]
         hdu.header['NAXIS2'] = residuals.shape[0]
         hdu.header['CTYPE1'] = self.header['CTYPE1']

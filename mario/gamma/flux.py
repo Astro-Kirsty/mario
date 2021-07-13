@@ -30,7 +30,7 @@ class GammaFlux:
         self.depth = depth
         
         Emin = 1 * u.GeV
-        Emax  = self.header['HEMT0_P']*u.PeV
+        Emax = self.header['HEMT0_P']*u.PeV
         if self.alpha == 2:
             N0 = (self.Ebudget / ((np.log(Emax/u.GeV) - np.log(Emin/u.GeV))*u.GeV)).decompose()
         else:
@@ -42,18 +42,17 @@ class GammaFlux:
                          self.header['CRVAL3'] + (self.header['NAXIS3'] - 1) * self.header['CDELT3'],
                          self.header['NAXIS3'])* u.Unit(self.header['CUNIT3'])
         self.Ep = Ep + mp
-
-        #------ Don't include loss term anymore ------
-        #if self.xsection=='Kelner':
-        #    L = np.log(self.Ep / u.TeV)
-        #    s_inel = ((34.3 + 1.88 * L + 0.25 * L ** 2) * u.mbarn).to(u.cm ** 2)
-        #elif self.xsection=='Kafexhiu':
-        #    Ep_th = (2 * mpi0 + mpi0**2 / (2*mp)).to(u.GeV)
-        #    L = np.log(self.Ep / Ep_th)
-        #    s_inel = ((30.7 - 0.96 * L + 0.18 * L**2 ) * (1 - (Ep_th / self.Ep)**(1.9))**3  * u.mbarn).to(u.cm ** 2)
-        #kappa = 0.45
-        #cool_time = ((self.header['HN_CM3'] * u.cm**(-3) * c * kappa * s_inel)**(-1)).to(u.kyr)
-        #losses = np.exp(- ((self.alpha - 1) * self.header['HT_KYR']*u.kyr  / cool_time)) 
+        
+        if self.xsection=='Kelner':
+            L = np.log(self.Ep / u.TeV)
+            s_inel = ((34.3 + 1.88 * L + 0.25 * L ** 2) * u.mbarn).to(u.cm ** 2)
+        elif self.xsection=='Kafexhiu':
+            Ep_th = (2 * mpi0 + mpi0**2 / (2*mp)).to(u.GeV)
+            L = np.log(self.Ep / Ep_th)
+            s_inel = ((30.7 - 0.96 * L + 0.18 * L**2 ) * (1 - (Ep_th / self.Ep)**(1.9))**3  * u.mbarn).to(u.cm ** 2)
+        kappa = 0.45
+        cool_time = ((self.header['HN_CM3'] * u.cm**(-3) * c * kappa * s_inel)**(-1)).to(u.kyr)
+        losses = np.exp(- ((self.alpha - 1) * self.header['HT_KYR']*u.kyr  / cool_time)) 
 
         Esize, xsize, ysize = self.pdf.shape
         Jp = np.empty((Esize, xsize, ysize))
@@ -91,7 +90,7 @@ class GammaFlux:
             s_inel = ((30.7 - 0.96 * L + 0.18 * L**2 ) * (1 - (Ep_th / Ep)**(1.9))**3  * u.mbarn).to(u.cm ** 2)
 
         # Parameters for gamma ray spectrum
-        B_g = 1.30 + 0.14 * L + 0.011 * L ** 2
+        B_g = 1.3 + 0.14 * L + 0.011 * L ** 2
         k_g = (0.801 + 0.049 * L + 0.014 * L ** 2) ** (-1)
         beta_g = (1.79 + 0.11 * L + 0.008 * L ** 2) ** (-1)
         
@@ -109,7 +108,6 @@ class GammaFlux:
         phi_g.to(1 / (u.cm ** 3 * u.TeV ** 2 * u.s))
         
         phi = np.sum(phi_g[:-1] * np.diff(Ep, axis=0), axis=0).to(1 / (u.cm ** 3 * u.TeV * u.s))
-
 
         return phi
 

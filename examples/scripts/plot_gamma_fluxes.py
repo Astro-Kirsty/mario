@@ -1,3 +1,11 @@
+"""
+Example script to plot the gamma-ray fluxes in the hadronic scenario. To run:
+python plot_gamma_fluxes.py 'HESSJ1804' 'G8_15' 'G8_Plot' HadronicFlux_AharonianImpulsiveTimeExtent.fits
+
+This example produces figures for the hadronic scenario for gamma-rays. The spectral and spatial morphologies are plotted, along with the model and flux parameters, and a figure for the spatial residuals map. This example also saves a FluxParams.csv file which can be used to test which model is performing the best.
+
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
@@ -32,24 +40,24 @@ from mario.plotting import add_SNR, add_SNR_centre, add_Resc, add_gamma_src, set
 @click.argument('gamma_cubes')
 
 @click.option('--obs_path',
-               default='/home/kirsty/Documents/PhD/Fits_Files/Models/hgps_map_flux_0.1deg_v1_crop.fits',
+               default='../data/hgps_map_flux_0.1deg_v1_crop.fits',
                type=click.Path(exists=True, dir_okay=False))
 
 @click.option('--hess_spectra_path',
-               default='/home/kirsty/Documents/PhD/GitHub/data/HESS_spectra_data.csv',
+               default='../data/HESS_spectra_data.csv',
                type=click.Path(exists=True, dir_okay=False))
 @click.option('--fermi_spectra_path',
-               default='/home/kirsty/Documents/PhD/GitHub/data/Fermi_spectra_data.csv',
+               default='../data/Fermi_spectra_data.csv',
                type=click.Path(exists=True, dir_okay=False))
 
 @click.option('--gamma_source_config_path', 
-                default='/home/kirsty/Documents/PhD/GitHub/mario/examples/gamma_sources.yaml',
+                default='../gamma_sources.yaml',
                 type=click.Path(exists=True, dir_okay=False))
 @click.option('--accelerator_config_path', 
-                default='/home/kirsty/Documents/PhD/GitHub/mario/examples/accelerators.yaml',
+                default='../accelerators.yaml',
                 type=click.Path(exists=True, dir_okay=False))
 @click.option('--plot_config_path', 
-                default='/home/kirsty/Documents/PhD/GitHub/mario/examples/plot.yaml',
+                default='../plot.yaml',
                 type=click.Path(exists=True, dir_okay=False))
 
 def main(gamma_source, accelerator, plot_type, gamma_cubes, obs_path, 
@@ -78,6 +86,7 @@ def main(gamma_source, accelerator, plot_type, gamma_cubes, obs_path,
     radius = plot_cfg['radius']
     src_fits = plot_cfg['src_fits']
     con_levels = plot_cfg['con_levels']
+    year = plot_cfg['year']
     glon_limit = plot_cfg['glon_limit']
     glat_limit = plot_cfg['glat_limit']
     snr_centre = plot_cfg['snr_centre']
@@ -121,6 +130,9 @@ def main(gamma_source, accelerator, plot_type, gamma_cubes, obs_path,
         data = cube[0].data
         header = cube[0].header
         
+        E1 = eval(header['HENERGY1'])
+        E2 = eval(header['HENERGY2'])
+        
         base = os.path.splitext(f)[0]
         filename, newfilename = base.split('HadronicFlux_')    
         plt_filename = 'PlotOversample_'+newfilename+'.pdf'
@@ -144,17 +156,17 @@ def main(gamma_source, accelerator, plot_type, gamma_cubes, obs_path,
         
         try:
             # Integrated flux
-            sm3D = SpatialModel3D(data=data, header=header)
+            sm3D = SpatialModel3D(data=data, header=header, energies=np.concatenate((E1, E2)).value)
             mask = sm3D.energies>Emin.value
-            i = int(np.argwhere(mask)[0])
+            mask_i = int(np.argwhere(mask)[0])
             Esize, xsize, ysize = data.shape
             Energies = sm3D.energies[mask]
             
             integrated = np.empty((xsize, ysize))
             for ix in range(xsize):
                 for iy in range(ysize):
-                    if np.isfinite(data[i:, ix, iy]).all():
-                        integrated[ix, iy] = simps(data[i:, ix, iy], Energies)
+                    if np.isfinite(data[mask_i:, ix, iy]).all():
+                        integrated[ix, iy] = simps(data[mask_i:, ix, iy], Energies)
                     else:
                         integrated[ix, iy] = 0.0
 
@@ -191,10 +203,10 @@ def main(gamma_source, accelerator, plot_type, gamma_cubes, obs_path,
             obs_data = obs_file[0].data
             obs_header = obs_file[0].header
             sm_obs = SpatialModel(data=obs_data, header=obs_header)
-            residual_header, residual = smI.calc_residual(obs_data=obs_data, obs_header=obs_header, 
+            residual_header, residual_data = smI.calc_residual(obs_data=obs_data, obs_header=obs_header, 
                                                          gamsrc_glon=gamsrc_glon, gamsrc_glat=gamsrc_glat, 
                                                          gamsrc_radius=gamsrc_radius)
-            std_spatial = np.nanstd(residual.flatten())
+            std_spatial = np.nanstd(residual_data.flatten())
             all_pixels = np.count_nonzero(~np.isnan(smI.obs_aperture))
             model_aperture = smI.model_aperture[~np.isnan(smI.model_aperture)]
             pixels_nonzero = len(model_aperture[model_aperture>0])
@@ -257,7 +269,7 @@ def main(gamma_source, accelerator, plot_type, gamma_cubes, obs_path,
             figures[-1], ax = smI.plot(oversampled_data, cmap=plt.cm.hot_r, ax=ax, fig=figures[-1],
                      colorbar_label=f'Integrated flux (>{Emin:.0f})'+' cm$^{-2}$ s$^{-1}$', 
                               diff_label=False)
-            add_gamma_src(src_fits, con_levels, ax, colors='black')
+            add_gamma_src(ax, src_fits, con_levels, year, colors='black')
             if snr_centre==True:
                 add_SNR_centre(acc, ax, facecolor='blue')
             else:
@@ -268,10 +280,10 @@ def main(gamma_source, accelerator, plot_type, gamma_cubes, obs_path,
 
             figures.append(plt.figure(figsize=(11, 5.5)))
             ax = figures[-1].add_subplot(111, projection=WCS(residual_header))
-            figures[-1], ax = smI.plot(residual, cmap=plt.cm.RdBu, ax=ax, fig=figures[-1], 
+            figures[-1], ax = smI.plot(residual_data, cmap=plt.cm.RdBu, ax=ax, fig=figures[-1], 
                               colorbar_label=f'Residual map', diff_label=False,
                               vmin=-7e-13, vmax=7e-13)
-            add_gamma_src(src_fits, con_levels, ax, colors='black', alpha=0.5)
+            add_gamma_src(ax, src_fits, con_levels, year, colors='black')
             plt.close()
 
             figures.append(plt.figure(figsize=(4,6)))

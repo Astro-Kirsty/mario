@@ -1,3 +1,13 @@
+"""
+Example script to create a PDF cube in the hadronic scenario. To run:
+python create_pdf_cube.py 'G8_15' 'HESSJ1804' 's1_G8_15' ../data/total_column_density_mock.fits
+
+This example produces the PDF cube for protons in the energy range from 0.1 to Emax GeV.
+The accelerator and gamma-ray source models are defined by the yaml files. You can adjust these to be correct for your own accelerator and gamma-ray source of interest. 
+The hadronic models to run are defined in the hadronic_models yaml (which can be created through the create_hadronic_yaml.py), for Type Ia and Type II SN. 
+"""
+
+
 import astropy.units as u
 import numpy as np
 
@@ -15,13 +25,13 @@ from mario.gas_utilities import GasParameters, calc_average_number_density
 @click.argument('model')
 @click.argument('total_column_density')
 @click.option('--accelerator_config_path', 
-                default='/home/kirsty/Documents/PhD/GitHub/mario/examples/accelerators.yaml',
+                default='../accelerators.yaml',
                 type=click.Path(exists=True, dir_okay=False))
 @click.option('--gamma_source_config_path', 
-                default='/home/kirsty/Documents/PhD/GitHub/mario/examples/gamma_sources.yaml',
+                default='../gamma_sources.yaml',
                 type=click.Path(exists=True, dir_okay=False))
 @click.option('--model_config_path', 
-                default='/home/kirsty/Documents/PhD/GitHub/mario/examples/hadronic_models.yaml',
+                default='../hadronic_models.yaml',
                 type=click.Path(exists=True, dir_okay=False))
 
 @click.option('-o', '--output', 
@@ -44,10 +54,8 @@ def main(accelerator, gamma_source, model, total_column_density, output,
     deltas = model_cfg['dif_delta']
     n0s = model_cfg['n0s']
     deltaps = model_cfg['deltaps']
-    
-    Emax_t_ST0 = model_cfg['Emax_t_ST0']
-    
-    Ep = np.logspace(0, np.log10(Emax_t_ST0.to(u.GeV).value), 1000)*u.GeV
+    Mejs = model_cfg['Mejs']
+    Emax_t_ST0s = model_cfg['Emax_t_ST0s']
     
     gam_src = GammaSource(name=gam_cfg['TeV']['name'], 
                           spectral_index=gam_cfg['TeV']['spectral_index'], 
@@ -67,7 +75,7 @@ def main(accelerator, gamma_source, model, total_column_density, output,
             distance=acc_cfg['distance'],
             gas_mass=acc_cfg['gas_mass']
             )
-    gp = GasParameters(snr=acc, gas_map_path=total_column_density)
+    gp = GasParameters(acc=acc, gas_map_path=total_column_density)
     R_vals = gp.dist_cell()
     
     n = calc_average_number_density(total_column_density, gam_src, acc)
@@ -76,20 +84,22 @@ def main(accelerator, gamma_source, model, total_column_density, output,
         for delta in deltas:
             for n0 in n0s:
                 for deltap in deltaps:
-                    ps = HadronicImpulsiveTimePDF(n=n,
-                                                  n0=n0,
-                                                  dif_chi=chi,
-                                                  dif_delta=delta,
-                                                  deltap=deltap,
-                                                  Emax_t_ST0=Emax_t_ST0,
-                                                  Mej=model_cfg['Mej'],
-                                                  E_SN=model_cfg['E_SN'])
-
-                    ps.calc_pdf(E=Ep, R=R_vals, t=acc.age)
-                    extra_comments = {'HGAM_SRC':gam_src.name,
-					     			  'HACC':acc.name,
-								      'HGASPATH':total_column_density}
-                    ps.save(author='Kirsty Feijen', extra_comments=extra_comments)
+                    for Mej in Mejs:
+                        for Emax_t_ST0 in Emax_t_ST0s:
+                            ps = HadronicImpulsiveTimePDF(n=n,
+                                                          n0=n0,
+                                                          dif_chi=chi,
+                                                          dif_delta=delta,
+                                                          deltap=deltap,
+                                                          Emax_t_ST0=Emax_t_ST0,
+                                                          Mej=Mej,
+                                                          E_SN=model_cfg['E_SN'])
+                            Ep = np.logspace(0, np.log10(Emax_t_ST0.to(u.GeV).value), 1000)*u.GeV
+                            ps.calc_pdf(E=Ep, R=R_vals, t=acc.age)
+                            extra_comments = {'HGAM_SRC':gam_src.name,
+                                              'HACC':acc.name,
+                                              'HGASPATH':total_column_density}
+                            ps.save(author='Kirsty Feijen', extra_comments=extra_comments)
                                           
 
 

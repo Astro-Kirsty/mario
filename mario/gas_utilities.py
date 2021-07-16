@@ -7,9 +7,39 @@ from astropy.wcs import WCS
 from astropy.coordinates import SkyCoord
 from photutils import SkyCircularAperture
 
+def calc_n0(R_acc, t_acc, E_SN):
+    """
+    Calculation of the n0 value given the radius and age of accelerator
+
+    Parameters
+    ----------------------
+    R_acc : float
+        The radius of the accelerator
+    t_acc : float
+        The age of the accelerator
+    E_SN : float
+        Kinetic energy of SN explosion 
+    """
+    if R_acc == 0*u.cm:
+        n0 = [0.1, 1, 10, 20] * u.cm**(-3)
+    else:
+        n0 = ((0.31*u.pc / R_acc.to(u.pc) * (E_SN / (1e51*u.erg))**(1/5) * (t_acc.to(u.yr)).value **(2/5))**5) * u.cm**(-3)
+        
+    return n0
 
 def calc_average_number_density(total_column_path, gam_src, acc):
+    """
+    Calculation of the average number density across the gamma-ray source
 
+    Parameters
+    ----------------------
+    total_column_path : str
+        Path to the gas map in the format of fits
+    gam_src : class
+        The class for the gamma-ray source
+    acc : class
+        The class for the accelerator
+    """
     file = fits.open(total_column_path)
     header = file[0].header
     data = file[0].data * u.Unit(header['BUNIT'])
@@ -132,22 +162,22 @@ class GasParameters:
 
     """
 
-    def __init__(self, snr, gas_map_path):
+    def __init__(self, acc, gas_map_path):
         """
         Parameters
         ----------------------
-        snr : class
-            The class for the supernova remnant counterpart
+        acc : class
+            The class for the accelerator
         gas_map_path : str
             Path to the gas map in the format of fits
 
         Examples
         ----------------------
         >>> gas_map_path = 'Total_26_56.fits'
-        >>> gp = GasParameters(snr=G8, gas_map_path=gas_map_path)
+        >>> gp = GasParameters(acc=G8, gas_map_path=gas_map_path)
 
         """
-        self.snr = snr
+        self.acc = acc
 
         self.gas_map_path = gas_map_path
 
@@ -174,7 +204,7 @@ class GasParameters:
 
         """
         # Calculation of volume
-        area = (self.snr.distance.to(u.cm) * np.tan(self.theta_pixel)) ** 2
+        area = (self.acc.distance.to(u.cm) * np.tan(self.theta_pixel)) ** 2
         volume = depth * area
 
         # Calculation of number density
@@ -197,7 +227,7 @@ class GasParameters:
         """
 
         # Set the coordinates of the counterpart
-        OBJ_coord = SkyCoord(self.snr.glon, self.snr.glat, frame='galactic')
+        OBJ_coord = SkyCoord(self.acc.glon, self.acc.glat, frame='galactic')
 
         # Converting from pixel coords to sky coords
         xvalue, yvalue = self.total_col_dens.shape
@@ -207,6 +237,6 @@ class GasParameters:
 
         # Calculate the distance to each cell
         theta_sep = (OBJ_coord.separation(pixel_coord)).deg * u.deg
-        dist = self.snr.distance.to(u.cm) * np.tan(theta_sep)
+        dist = self.acc.distance.to(u.cm) * np.tan(theta_sep)
         
         return dist

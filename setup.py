@@ -34,12 +34,5 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
     ],
-    zip_safe=False,
-    entry_points={
-        'console_scripts': [
-            'mario_create_pdf_cube = mario.scripts.create_pdf_cube:main',
-            'mario_create_gamma_cube = mario.scripts.create_gamma_cube:main',
-            'mario_plot_gamma_fluxes = mario.scripts.plot_gamma_fluxes:main',
-        ],
-    }          
+    zip_safe=False,     
 )

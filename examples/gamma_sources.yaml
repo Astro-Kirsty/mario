@@ -11,13 +11,15 @@ HESSJ1804:
     integral_higher_energy: !astropy.units.Quantity
       value: 2
       unit: !astropy.units.Unit {unit: TeV}
-    plot_emin: !astropy.units.Quantity
-      value: 60
-      unit: !astropy.units.Unit {unit: GeV}
-    plot_emax: !astropy.units.Quantity
-      value: 630
-      unit: !astropy.units.Unit {unit: GeV}
-    color: 'red'
+    glon: !astropy.units.Quantity
+      value: 8.3974
+      unit: !astropy.units.Unit {unit: deg}
+    glat: !astropy.units.Quantity
+      value: -0.0948
+      unit: !astropy.units.Unit {unit: deg}
+    radius: !astropy.units.Quantity
+      value: 0.378
+      unit: !astropy.units.Unit {unit: deg}
   TeV:
     name: 'HESS J1804-216'
     spectral_index: 2.69
@@ -30,13 +32,6 @@ HESSJ1804:
     integral_higher_energy: !astropy.units.Quantity
       value: 1e8
       unit: !astropy.units.Unit {unit: TeV}
-    plot_emin: !astropy.units.Quantity
-      value: 600
-      unit: !astropy.units.Unit {unit: GeV}
-    plot_emax: !astropy.units.Quantity
-      value: 8
-      unit: !astropy.units.Unit {unit: TeV}
-    color: 'green'
     glon: !astropy.units.Quantity
       value: 8.4
       unit: !astropy.units.Unit {unit: deg}

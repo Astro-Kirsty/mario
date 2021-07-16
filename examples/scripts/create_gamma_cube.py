@@ -1,3 +1,11 @@
+"""
+Example script to create a gamma-ray cube in the hadronic scenario. To run:
+python create_gamma_cube.py 'HESSJ1804' 'generic18' 'G8_15' 'G8_Plot' HadronicPDF_AharonianImpulsiveTimeExtent.fits 
+
+This example produces a gamma-ray cube using the Hadronic PDF cube created in the "create_pdf_cube.py" file. This gamma-ray cube has axes of galactic coordinates and energy along the z-axis. With gamma-ray energies ranging from 0.01 to 100 TeV, to cover both the Fermi and HESS ranges, as well as being within the limits of the model.
+
+"""
+
 import numpy as np
 from astropy.io.misc import yaml
 from astropy.io import fits
@@ -19,31 +27,30 @@ import glob
 @click.argument('accelerator')
 @click.argument('plot_type')
 @click.argument('pdf_cube')
-@click.argument('taskid')
 
 @click.option('--hess_spectra_path',
-               default='/home/kirsty/Documents/PhD/GitHub/data/HESS_spectra_data.csv',
+               default='../data/HESS_spectra_data.csv',
                type=click.Path(exists=True, dir_okay=False))
 @click.option('--fermi_spectra_path',
-               default='/home/kirsty/Documents/PhD/GitHub/data/Fermi_spectra_data.csv',
+               default='../data/Fermi_spectra_data.csv',
                type=click.Path(exists=True, dir_okay=False))
 @click.option('--gamma_source_config_path', 
-                default='/home/kirsty/Documents/PhD/GitHub/mario/examples/gamma_sources.yaml',
+                default='../gamma_sources.yaml',
                 type=click.Path(exists=True, dir_okay=False))
 @click.option('--gamma_model_config_path', 
-                default='/home/kirsty/Documents/PhD/GitHub/mario/examples/gamma_models.yaml',
+                default='../gamma_models.yaml',
                 type=click.Path(exists=True, dir_okay=False))
 @click.option('--accelerator_config_path', 
-                default='/home/kirsty/Documents/PhD/GitHub/mario/examples/accelerators.yaml',
+                default='../accelerators.yaml',
                 type=click.Path(exists=True, dir_okay=False))
 @click.option('--obs_path', 
-               default='/home/kirsty/Documents/PhD/Fits_Files/Models/hgps_map_flux_0.1deg_v1_crop.fits',
+               default='../data/hgps_map_flux_0.1deg_v1_crop.fits',
                 type=click.Path(exists=True, dir_okay=False))
 @click.option('--plot_config_path', 
-                default='/home/kirsty/Documents/PhD/GitHub/mario/examples/plot.yaml',
+                default='../plot.yaml',
                 type=click.Path(exists=True, dir_okay=False))
 
-def main(gamma_source, gamma_model, accelerator, plot_type, pdf_cube, taskid, 
+def main(gamma_source, gamma_model, accelerator, plot_type, pdf_cube, 
 		 hess_spectra_path, fermi_spectra_path,
          gamma_source_config_path, gamma_model_config_path, accelerator_config_path, obs_path, plot_config_path):
 
@@ -75,9 +82,7 @@ def main(gamma_source, gamma_model, accelerator, plot_type, pdf_cube, taskid,
     xsection = gam_cfg['xsection']
     depth = gam_cfg['depth']
 
-    files = glob.glob(pdf_cube)
-    files = np.sort(files)
-    cube = fits.open(files[int(taskid)])
+    cube = fits.open(pdf_cube)
     header = cube[0].header
     total_column_density = header['HGASPATH']
 
@@ -96,11 +101,11 @@ def main(gamma_source, gamma_model, accelerator, plot_type, pdf_cube, taskid,
         print('Try to run again. Exiting')
         sys.exit()
    
-    gp = GasParameters(snr=acc, gas_map_path=total_column_density)
+    gp = GasParameters(acc=acc, gas_map_path=total_column_density)
    
     E = np.concatenate((E_Fermi.to(u.TeV), E_HESS.to(u.TeV)))
     F = np.concatenate((Flux_Fermi, Flux_HESS))
-    gf = GammaFlux(acc=acc, pdf_cube_path=files[int(taskid)], gp=gp, alpha=alpha, eta=1, 
+    gf = GammaFlux(acc=acc, pdf_cube_path=pdf_cube, gp=gp, alpha=alpha, eta=1, 
                    xsection=xsection, depth=depth)
 
     gf.flux(np.array(E)*u.TeV)
@@ -109,7 +114,7 @@ def main(gamma_source, gamma_model, accelerator, plot_type, pdf_cube, taskid,
     cube_header = gf.save_header(extra_comments=extra_comments)
     data = gf.fluxes.value
     
-    sm3D = SpatialModel3D(data, cube_header)   
+    sm3D = SpatialModel3D(data, cube_header, energies=E)   
     e, F_model = sm3D.sum_region(coords=[gamsrc_glon, gamsrc_glat], radius=gamsrc_radius)
 
     factor = np.linspace(0.0001, 1, 100000)
@@ -121,7 +126,7 @@ def main(gamma_source, gamma_model, accelerator, plot_type, pdf_cube, taskid,
     E1 = np.logspace(-2, 0, 100)[:-1]*u.TeV
     E2 = np.logspace(0, 2, 100)*u.TeV
     Eg = np.concatenate((E1, E2))
-    gf2 = GammaFlux(acc=acc, pdf_cube_path=files[int(taskid)], gp=gp, alpha=alpha, eta=eta, 
+    gf2 = GammaFlux(acc=acc, pdf_cube_path=pdf_cube, gp=gp, alpha=alpha, eta=eta, 
                     xsection=xsection, depth=depth)
     gf2.flux(np.array(Eg)*u.TeV)
     extra_comments = {'HGAM_SRC':header['HGAM_SRC'],

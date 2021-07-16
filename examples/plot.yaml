@@ -11,8 +11,6 @@ G8_Plot:
     value: 100
     unit: !astropy.units.Unit {unit: TeV}
 
-  fit_type: 'BPL'
-
   grid_size: !astropy.units.Quantity
     value: 0.02
     unit: !astropy.units.Unit {unit: deg}
@@ -21,9 +19,11 @@ G8_Plot:
     value: 0.1
     unit: !astropy.units.Unit {unit: deg}
 
-  src_fits: '/home/kirsty/Documents/PhD/Fits_Files/Models/HESSJ1804-216_Map.fits'
+  src_fits: '/home/kirsty/Documents/PhD/Fits_Files/Models/hgps_map_flux_0.1deg_v1_crop.fits'
 
-  con_levels: [30,40,50,60]
+  con_levels: [2e-13, 3e-13, 4e-13, 5e-13, 5.8e-13]
+  
+  year: '2018'
   
   glon_limit: [7.6, 9.1]
 
@@ -44,8 +44,6 @@ PJ_Plot:
     value: 100
     unit: !astropy.units.Unit {unit: TeV}
 
-  fit_type: 'BPL'
-
   grid_size: !astropy.units.Quantity
     value: 0.02
     unit: !astropy.units.Unit {unit: deg}
@@ -54,9 +52,11 @@ PJ_Plot:
     value: 0.1
     unit: !astropy.units.Unit {unit: deg}
 
-  src_fits: '/home/kirsty/Documents/PhD/Fits_Files/Models/HESSJ1804-216_Map.fits'
+  src_fits: '/home/kirsty/Documents/PhD/Fits_Files/Models/hgps_map_flux_0.1deg_v1_crop.fits'
 
-  con_levels: [30,40,50,60]
+  con_levels: [2e-13, 3e-13, 4e-13, 5e-13, 5.8e-13]
+  
+  year: '2018'
 
   glon_limit: [7.6, 9.1]
 

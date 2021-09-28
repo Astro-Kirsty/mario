@@ -8,8 +8,7 @@ mpi0 = 134.976*u.MeV
 
 class GammaFlux:
 
-    @u.quantity_input(nH2_cell=u.cm ** (-3))
-    def __init__(self, acc, pdf_cube_path, gp, alpha=2, eta=0.1, xsection='Kelner', depth=35*u.pc):
+    def __init__(self, acc, pdf_cube_path, gp, alpha=2, eta=0.1, xsection='Kelner', factor=1): 
         """
         A class to calculate the predicted gamma-ray flux
 
@@ -21,13 +20,16 @@ class GammaFlux:
         self.header = file[0].header
         self.pdf = (file[0].data) * u.Unit(self.header['BUNIT'])
         
+        Resc = self.header['HRESC_PC']*u.pc
+        n0 = self.header['HN0_CM3'] * u.cm**(-3)
+        
         self.alpha = alpha
         self.eta = eta
         self.Ebudget = self.eta * self.header['HESN_ERG']*u.erg
         
         self.xsection = xsection
         
-        self.depth = depth
+        self.depth = 2 * Resc
         
         Emin = 1 * u.GeV
         Emax = self.header['HEMT0_P']*u.PeV
@@ -42,17 +44,6 @@ class GammaFlux:
                          self.header['CRVAL3'] + (self.header['NAXIS3'] - 1) * self.header['CDELT3'],
                          self.header['NAXIS3'])* u.Unit(self.header['CUNIT3'])
         self.Ep = Ep + mp
-        
-        if self.xsection=='Kelner':
-            L = np.log(self.Ep / u.TeV)
-            s_inel = ((34.3 + 1.88 * L + 0.25 * L ** 2) * u.mbarn).to(u.cm ** 2)
-        elif self.xsection=='Kafexhiu':
-            Ep_th = (2 * mpi0 + mpi0**2 / (2*mp)).to(u.GeV)
-            L = np.log(self.Ep / Ep_th)
-            s_inel = ((30.7 - 0.96 * L + 0.18 * L**2 ) * (1 - (Ep_th / self.Ep)**(1.9))**3  * u.mbarn).to(u.cm ** 2)
-        kappa = 0.45
-        cool_time = ((self.header['HN_CM3'] * u.cm**(-3) * c * kappa * s_inel)**(-1)).to(u.kyr)
-        losses = np.exp(- ((self.alpha - 1) * self.header['HT_KYR']*u.kyr  / cool_time)) 
 
         Esize, xsize, ysize = self.pdf.shape
         Jp = np.empty((Esize, xsize, ysize))
@@ -61,14 +52,16 @@ class GammaFlux:
 
         self.Jp = Jp *  u.cm**(-3)/u.GeV
             
-        Resc = self.header['HRESC_PC']*u.pc
-        n0 = self.header['HN0_CM3'] * u.cm**(-3)
         self.gp = gp
         Rs = gp.dist_cell()
-        self.nH2_cell = gp.nH2_cell(depth=self.depth).to(u.cm**(-3)).value
-        self.nH2_cell[Rs < Resc] = n0
-        self.nH2_cell = self.nH2_cell * u.cm**(-3)      
         
+        self.NH_cell = gp.total_col_dens.to(u.cm**(-2))
+        self.NH_cell = np.float64(self.NH_cell)
+        self.NH_cell[self.NH_cell < 0] = 0
+        
+        # Include potential factor in NH_cell
+        self.NH_cell[Rs < Resc] = (factor * self.NH_cell)[Rs < Resc] 
+
         if type(self.Ep.value) == np.ndarray:
             self.Ep = self.Ep[:, None, None]
 
@@ -104,10 +97,10 @@ class GammaFlux:
                   (4 * k_g * beta_g * x_b * (1 - 2 * x_b)) / (1 + k_g * x_b * (1 - x_b)))
         Fg = coeff1 * coeff2 * coeff3
         
-        phi_g = (c * self.nH2_cell * s_inel * Jp * Fg / Ep)
-        phi_g.to(1 / (u.cm ** 3 * u.TeV ** 2 * u.s))
+        phi_g = (c * s_inel * Jp * Fg / Ep)
+        phi_g.to(1 / (u.TeV ** 2 * u.s))
         
-        phi = np.sum(phi_g[:-1] * np.diff(Ep, axis=0), axis=0).to(1 / (u.cm ** 3 * u.TeV * u.s))
+        phi = np.sum(phi_g[:-1] * np.diff(Ep, axis=0), axis=0).to(1 / (u.TeV * u.s))
 
         return phi
 
@@ -115,12 +108,13 @@ class GammaFlux:
 
         # Converting the pixel width from angular size to physical size
         pixel_width = self.acc.distance.to(u.cm) * np.tan(self.gp.theta_pixel)
-        ster = (pixel_width ** 2 / (self.acc.distance.to(u.cm)) ** 2) * u.sr
+        A = pixel_width ** 2
+        pixel_ster = (A / self.acc.distance ** 2).decompose() * u.sr
 
         Gfluxes = []
 
         for Eg in energies:
-            Gflux = self.calc_phi(Eg) * self.depth * ster / (4 * np.pi * u.sr)
+            Gflux = self.calc_phi(Eg) * self.NH_cell * pixel_ster /  (4 * np.pi * u.sr)
             unit = Gflux.unit
             Gfluxes += [Gflux]
 
@@ -215,7 +209,6 @@ class GammaFlux:
             hdr.header['CRVAL1'] = self.gp.header['CRVAL1']
             hdr.header['CRPIX1'] = self.gp.header['CRPIX1']
             hdr.header['CDELT1'] = self.gp.header['CDELT1']
-
             hdr.header['CTYPE2'] = self.gp.header['CTYPE2']
             hdr.header['CRVAL2'] = self.gp.header['CRVAL2']
             hdr.header['CRPIX2'] = self.gp.header['CRPIX2']
@@ -233,17 +226,19 @@ class GammaFlux:
             hdr.header['HDELTA'] = self.header['HDELTA']
             hdr.header['HD0_CM2S'] = self.header['HD0_CM2S']
             hdr.header['HN_CM3'] = self.header['HN_CM3']
+
             hdr.header['HN0_CM3'] = self.header['HN0_CM3']
             hdr.header['HESN_ERG'] = self.header['HESN_ERG']
             hdr.header['HEMT_TEV'] = self.header['HEMT_TEV']
             hdr.header['HEMT0_P'] = self.header['HEMT0_P']
             hdr.header['HTST0_YR'] = self.header['HTST0_YR']
             hdr.header['HDELTAP'] = self.header['HDELTAP']
+
             hdr.header['HEB_ERG'] = self.Ebudget.to(u.erg).value
             hdr.header['HETA'] = self.eta
             hdr.header['HALPHA'] = self.alpha
             hdr.header['HXSEC'] = self.xsection
-            
+
             hdr.header['HMEJ_SOL'] = self.header['HMEJ_SOL']
             hdr.header['HSN_TYPE'] = self.header['HSN_TYPE']
 

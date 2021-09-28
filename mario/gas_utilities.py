@@ -4,7 +4,6 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
 from astropy.wcs import WCS
-from astropy.coordinates import SkyCoord
 from photutils import SkyCircularAperture
 
 def calc_n0(R_acc, t_acc, E_SN):
@@ -23,11 +22,11 @@ def calc_n0(R_acc, t_acc, E_SN):
     if R_acc == 0*u.cm:
         n0 = [0.1, 1, 10, 20] * u.cm**(-3)
     else:
-        n0 = ((0.31*u.pc / R_acc.to(u.pc) * (E_SN / (1e51*u.erg))**(1/5) * (t_acc.to(u.yr)).value **(2/5))**5) * u.cm**(-3)
+        n0 = [((0.31*u.pc / R_acc.to(u.pc) * (E_SN / (1e51*u.erg))**(1/5) * (t_acc.to(u.yr)).value **(2/5))**5).value] * u.cm**(-3)
         
     return n0
 
-def calc_average_number_density(total_column_path, gam_src, acc):
+def calc_average_number_density(total_column_path, gam_src, acc, depth=200*u.pc):
     """
     Calculation of the average number density across the gamma-ray source
 
@@ -50,12 +49,8 @@ def calc_average_number_density(total_column_path, gam_src, acc):
     mask = aperture.to_mask(method='center')
     
     N_H2 = np.median(mask.multiply(data)[mask.multiply(data)>0])
-    
-    r = acc.distance * np.tan(gam_src.radius.to(u.deg))
-    A = np.pi * r**2
-    V = 4/3 * np.pi * r**3
 
-    nH = (N_H2 * A / V).to(u.cm**(-3))
+    nH = (N_H2 / depth).to(u.cm**(-3))
     
     return nH
 

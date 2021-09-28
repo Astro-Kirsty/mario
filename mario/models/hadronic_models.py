@@ -137,7 +137,7 @@ class BaseHadronicImpulsivePDF(BasePDF):
         Save the hadronic PDF to a fits file
         """
         try:
-            filename = f'{basename}_{self.name}_chi{self.dif_chi}_delta{self.dif_delta}_D0{self.D0.to(u.cm**2/u.s).value}_n{self.n.to(u.cm**-3).value:.0f}_n0{self.n0.to(u.cm**-3).value}_ESN{self.E_SN.to(u.erg).value}_EmaxST0{self.Emax_t_ST0.to(u.PeV).value}_tST0{self.t_ST0.to(u.yr).value:.2f}_deltap{self.deltap}.fits'
+            filename = f'{basename}_{self.name}_chi{self.dif_chi}_delta{self.dif_delta}_D0{self.D0.to(u.cm**2/u.s).value}_n{self.n.to(u.cm**-3).value:.0f}_n0{self.n0.to(u.cm**-3).value:.3f}_ESN{self.E_SN.to(u.erg).value}_Mej{self.Mej.to(u.solMass).value}_EmaxST0{self.Emax_t_ST0.to(u.PeV).value}_tST0{self.t_ST0.to(u.yr).value:.2f}_deltap{self.deltap}.fits'
 
             step = np.diff(np.log10(self.energy[:].to(u.TeV).value))[0]
 

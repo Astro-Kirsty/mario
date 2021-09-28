@@ -316,6 +316,35 @@ class SpectralModel:
 
         return fig, ax
 
+    def plot_E2F(self, yerr=None, xerr=None, fig=None, ax=None, **kwargs):
+        """
+        Plot the spectral model
+
+        Parameters
+        ----------------------
+        fig : str
+            Set the figure for the plot
+        ax : str
+            Set the axis for the figure
+        kwargs : keywords
+            Initialisation keywords
+        """
+        if fig is None:
+            fig = plt.figure(figsize=(6, 4))
+
+        if ax is None:
+            ax = fig.add_subplot(111)
+
+        ax.errorbar(self.energies, self.energies**2 * self.fluxes, yerr, xerr, **kwargs)
+
+        ax.set_xlabel('Energy (TeV)')
+        ax.set_ylabel('$\gamma$-ray energy flux (TeV cm$^{-2}$s$^{-1}$)')
+
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+        ax.legend(loc='lower left', labelspacing=0.3)
+
+        return fig, ax
 
     def plot_errorbar(self, yerr=None, xerr=None, fig=None, ax=None, **kwargs):
         """

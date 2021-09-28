@@ -84,14 +84,16 @@ def main(gamma_source, gamma_model, accelerator, plot_type, pdf_cube,
 
     cube = fits.open(pdf_cube)
     header = cube[0].header
-    total_column_density = header['HGASPATH']
+    #    total_column_density = header['HGASPATH']
+    o, gas_map = header['HGASPATH'].split('/home/kfeijen/mario_code/runs/Data/')
+    total_column_density='/home/kirsty/Documents/PhD/Fits_Files/Models/' + gas_map
 
     acc = Accelerator(
                     name=acc_cfg['name'],
                     glon=acc_cfg['glon'], 
                     glat=acc_cfg['glat'], 
                     radius=acc_cfg['radius'], 
-                    age=1*u.kyr, 
+                    age=acc_cfg['age'], 
                     distance=acc_cfg['distance'],
                     gas_mass=acc_cfg['gas_mass']
                     )
@@ -106,13 +108,21 @@ def main(gamma_source, gamma_model, accelerator, plot_type, pdf_cube,
     E = np.concatenate((E_Fermi.to(u.TeV), E_HESS.to(u.TeV)))
     F = np.concatenate((Flux_Fermi, Flux_HESS))
     gf = GammaFlux(acc=acc, pdf_cube_path=pdf_cube, gp=gp, alpha=alpha, eta=1, 
-                   xsection=xsection, depth=depth)
+                   xsection=xsection)
 
     gf.flux(np.array(E)*u.TeV)
     extra_comments = {'HGAM_SRC':header['HGAM_SRC'],
                       'HACC':header['HACC']}
     cube_header = gf.save_header(extra_comments=extra_comments)
     data = gf.fluxes.value
+    
+        
+    Rs = gp.dist_cell()
+    Rs = Rs * np.ones((data.shape[0], np.shape(Rs)[0], np.shape(Rs)[1]))
+    Resc = header['HRESC_PC']*u.pc
+    Resc = Resc * np.ones(np.shape(Rs))
+    data[Rs < Resc] = (data * 0.25)[Rs < Resc]
+    
     
     sm3D = SpatialModel3D(data, cube_header, energies=E)   
     e, F_model = sm3D.sum_region(coords=[gamsrc_glon, gamsrc_glat], radius=gamsrc_radius)
@@ -127,7 +137,7 @@ def main(gamma_source, gamma_model, accelerator, plot_type, pdf_cube,
     E2 = np.logspace(0, 2, 100)*u.TeV
     Eg = np.concatenate((E1, E2))
     gf2 = GammaFlux(acc=acc, pdf_cube_path=pdf_cube, gp=gp, alpha=alpha, eta=eta, 
-                    xsection=xsection, depth=depth)
+                    xsection=xsection)
     gf2.flux(np.array(Eg)*u.TeV)
     extra_comments = {'HGAM_SRC':header['HGAM_SRC'],
                       'HACC':header['HACC'],

@@ -1,5 +1,5 @@
 from astropy import units as u
-
+import numpy as np
 
 class GammaSource:
     """
@@ -96,3 +96,6 @@ class Accelerator:
         self.age = age
         self.distance = distance
         self.gas_mass = gas_mass
+        
+        self.radius_pc = self.distance * np.tan(self.radius)
+        

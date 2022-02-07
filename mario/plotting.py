@@ -230,10 +230,6 @@ def proton_spectrum(pdf, flux, label=None, age_label=False, dif_label=False, ini
     return fig, ax
 
 
-
-
-
-
 def add_kcr(ax=None, label='CR Flux at Earth', **kwargs):
     """
     Plot the solar neighbour CR flux value

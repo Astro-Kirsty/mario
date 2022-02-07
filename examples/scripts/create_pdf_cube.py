@@ -15,7 +15,7 @@ import click
 from astropy.io.misc import yaml
 
 from mario.sources import Accelerator, GammaSource
-from mario.models.hadronic_models import HadronicImpulsiveTimePDF, HadronicImpulsiveTimeExtentPDF
+from mario.models.hadronic_models import HadronicImpulsiveTime, HadronicImpulsiveTimeExtent
 from mario.gas_utilities import GasParameters, calc_average_number_density
 
 
@@ -55,7 +55,7 @@ def main(accelerator, gamma_source, model, total_column_density, output,
     n0s = model_cfg['n0s']
     deltaps = model_cfg['deltaps']
     Mejs = model_cfg['Mejs']
-    Emax_t_ST0s = model_cfg['Emax_t_ST0s']
+    Epmaxs = model_cfg['Epmaxs']
     
     gam_src = GammaSource(name=gam_cfg['TeV']['name'], 
                           spectral_index=gam_cfg['TeV']['spectral_index'], 
@@ -85,16 +85,16 @@ def main(accelerator, gamma_source, model, total_column_density, output,
             for n0 in n0s:
                 for deltap in deltaps:
                     for Mej in Mejs:
-                        for Emax_t_ST0 in Emax_t_ST0s:
-                            ps = HadronicImpulsiveTimePDF(n=n,
+                        for Epmax in Epmaxs:
+                            ps = HadronicImpulsiveTime(n=n,
                                                           n0=n0,
                                                           dif_chi=chi,
                                                           dif_delta=delta,
                                                           deltap=deltap,
-                                                          Emax_t_ST0=Emax_t_ST0,
+                                                          Epmax=Epmax,
                                                           Mej=Mej,
                                                           E_SN=model_cfg['E_SN'])
-                            Ep = np.logspace(0, np.log10(Emax_t_ST0.to(u.GeV).value), 1000)*u.GeV
+                            Ep = np.logspace(0, np.log10(Epmax.to(u.GeV).value), 1000)*u.GeV
                             ps.calc_pdf(E=Ep, R=R_vals, t=acc.age)
                             extra_comments = {'HGAM_SRC':gam_src.name,
                                               'HACC':acc.name,

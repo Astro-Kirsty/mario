@@ -1,20 +1,22 @@
 import numpy as np
 import astropy.units as u
 from astropy.io import fits
-from astropy.constants import M_sun, m_p
+from astropy.constants import M_sun, m_p, c
+from astropy.wcs import WCS
+import matplotlib.pyplot as plt
 
 from .utilities import BasePDF
 from .utilities import calc_Bmag, calc_shock_radius, calc_energy_evolution
 from .utilities import calc_escape_time, calc_escape_energy
 
-class BaseHadronicImpulsivePDF(BasePDF):
+class BaseHadronicImpulsive(BasePDF):
     """
     A base class that can be used to create hadronic PDFs
     """
 
     def __init__(self, n=100*u.cm**-3, n0=1*u.cm**-3,  
                  D0=3e27*u.cm**2/u.s, dif_chi=0.01, dif_delta=0.5, deltap=0.3, 
-                 Mej=1.0*u.solMass, Emax_t_ST0=1*u.PeV, 
+                 Mej=1.0*u.solMass, Epmin=1*u.GeV, Epmax=1*u.PeV, 
                  E_SN=1e51*u.erg):
         """
         Parameters
@@ -34,14 +36,16 @@ class BaseHadronicImpulsivePDF(BasePDF):
 		Mej : float, optional
 			Mass of the eject (default is 1.4 Solar Mass for Type Ia)
 			For Type II, typically a value of 10 Solar Mass is used
-        Emax_t_ST0 : float, optional
-            Maximum injection energy of cosmic ray protons at t_ST0 (corresponds to start of 
+        Epmin : float, optional
+            Minimum energy of cosmic ray protons at t (default is 1 GeV)
+        Epmax : float, optional
+            Maximum injection energy of cosmic ray protons at t_sedov (corresponds to start of 
             Sedov-Taylor phase) (default is 1 PeV)
         E_SN : float, optional
             Kinetic energy of SN explosion (default is 10^51 erg)
 
         """
-        super(BaseHadronicImpulsivePDF, self).__init__(E_SN)
+        super(BaseHadronicImpulsive, self).__init__(E_SN)
         
         self.n = n
         self.n0 = n0
@@ -58,9 +62,10 @@ class BaseHadronicImpulsivePDF(BasePDF):
         	self.SN_type = 'Type Ia'
         elif self.Mej > 8*u.solMass:
         	self.SN_type = 'Type II'
-        self.t_ST0 = 1.6e3*u.yr * (self.E_SN / (1e51*u.erg))**(-1/2) * (self.Mej / (10*u.solMass))**(5/6) * (self.rho / (m_p * u.cm**(-3)))**(-1/3)
-        
-        self.Emax_t_ST0 = Emax_t_ST0
+        self.t_sedov = 1.6e3*u.yr * (self.E_SN / (1e51*u.erg))**(-1/2) * (self.Mej / (10*u.solMass))**(5/6) * (self.rho / (m_p * u.cm**(-3)))**(-1/3)
+
+        self.Epmin = Epmin        
+        self.Epmax = Epmax
         
         
     @u.quantity_input(E=u.GeV, t=u.kyr)
@@ -125,7 +130,7 @@ class BaseHadronicImpulsivePDF(BasePDF):
         coeff = 1. / (np.pi ** (3 / 2) * dif_length ** 3)
         pdf[(E >= Ecrit) & (R >= Rcrit)] = (coeff * np.exp(- (R - Rsh)**2 / dif_length**2 ) / norm)[(E > Ecrit) & (R > Rcrit)]
         
-        self.Emax_t = (self.Emax_t_ST0 * ((t / self.t_ST0).decompose()) ** (-self.deltap)).to(u.TeV)
+        self.Emax_t = (self.Epmax * ((t / self.t_sedov).decompose()) ** (-self.deltap)).to(u.TeV)
         self.R = R
         self.t = t
         self.energy = E[:,0,0]
@@ -137,10 +142,10 @@ class BaseHadronicImpulsivePDF(BasePDF):
         Save the hadronic PDF to a fits file
         """
         try:
-            filename = f'{basename}_{self.name}_chi{self.dif_chi}_delta{self.dif_delta}_D0{self.D0.to(u.cm**2/u.s).value}_n{self.n.to(u.cm**-3).value:.0f}_n0{self.n0.to(u.cm**-3).value:.3f}_ESN{self.E_SN.to(u.erg).value}_Mej{self.Mej.to(u.solMass).value}_EmaxST0{self.Emax_t_ST0.to(u.PeV).value}_tST0{self.t_ST0.to(u.yr).value:.2f}_deltap{self.deltap}.fits'
+            filename = f'{basename}_{self.name}_chi{self.dif_chi}_delta{self.dif_delta}_D0{self.D0.to(u.cm**2/u.s).value}_n{self.n.to(u.cm**-3).value:.0f}_n0{float(self.n0.to(u.cm**-3).value):.3f}_ESN{self.E_SN.to(u.erg).value}_Mej{self.Mej.to(u.solMass).value}_Epmax{self.Epmax.to(u.PeV).value}t_sedov{self.t_sedov.to(u.yr).value:.2f}_deltap{self.deltap}.fits'
 
             step = np.diff(np.log10(self.energy[:].to(u.TeV).value))[0]
-
+            
             E0 = np.log10(self.energy[0].to(u.TeV).value)
 
             hdr = fits.PrimaryHDU(data=self.pdf.value)
@@ -170,11 +175,11 @@ class BaseHadronicImpulsivePDF(BasePDF):
             hdr.header['HDELTA'] = self.dif_delta
             hdr.header['HD0_CM2S'] = self.D0.to(u.cm**2/u.s).value
             hdr.header['HN_CM3'] = self.n.to(u.cm**-3).value
-            hdr.header['HN0_CM3'] = self.n0.to(u.cm**-3).value
+            hdr.header['HN0_CM3'] = float(self.n0.to(u.cm**-3).value)
             hdr.header['HESN_ERG'] = self.E_SN.to(u.erg).value
             hdr.header['HEMT_TEV'] = self.Emax_t.to(u.TeV).value
-            hdr.header['HEMT0_P'] = self.Emax_t_ST0.to(u.PeV).value
-            hdr.header['HTST0_YR'] = self.t_ST0.to(u.yr).value
+            hdr.header['HEMAX_P'] = self.Epmax.to(u.PeV).value
+            hdr.header['HTSED_YR'] = self.t_sedov.to(u.yr).value
             hdr.header['HDELTAP'] = self.deltap
             
             hdr.header['HMEJ_SOL'] = self.Mej.to(u.solMass).value
@@ -194,21 +199,65 @@ class BaseHadronicImpulsivePDF(BasePDF):
             print('Please calculate the pdf first')
  
 
-class HadronicImpulsivePDF(BaseHadronicImpulsivePDF):
+class AharonianImpulsive(BaseHadronicImpulsive):
 
     def __init__(self, n=100/u.cm**3, n0=1/u.cm**3,
                  D0=3e27*u.cm**2/u.s, dif_chi=0.01, dif_delta=0.5, deltap=0.3,
-                 Mej=1.4*u.solMass, Emax_t_ST0=1*u.PeV, 
+                 Mej=1.4*u.solMass, Epmin=1*u.GeV, Epmax=1*u.PeV, 
+                 E_SN=1e51*u.erg,
+                 Rshock=None, D10=1e26*u.cm**2/u.s):
+        
+        super(AharonianImpulsive, self).__init__(n, n0,
+            D0, dif_chi, dif_delta, deltap,
+            Mej, Epmin, Epmax, E_SN)
+        
+        self.Rshock = Rshock
+        self.D10 = D10
+        
+        self.name = 'AharonianImpulsive'
+
+    @u.quantity_input(E=u.GeV, t=u.kyr)
+    def dif_l(self, E, t):
+        dif_coeff = self.D10 * (E / (10*u.GeV)) ** self.dif_delta
+        dif_l = 2 * np.sqrt(dif_coeff * self.dif_time(E,t))
+        return dif_l
+
+    @u.quantity_input(E=u.GeV, t=u.kyr)
+    def dif_time(self, E, t):
+        return t * np.ones(np.shape(E))
+    
+    @u.quantity_input(E=u.GeV, t=u.kyr)
+    def Rsh(self, E, t):
+        return self.Rcrit(t=t)
+    
+    @u.quantity_input(t=u.kyr)
+    def Rcrit(self, t):
+        if self.Rshock == None:
+            return calc_shock_radius(t=t, E_SN=self.E_SN, n0=self.n0)
+        else:
+            return self.Rshock
+
+    @u.quantity_input(t=u.kyr)
+    def Ecrit(self, t):
+        Ecrit = 0*u.TeV
+        return Ecrit       
+
+
+class HadronicImpulsive(BaseHadronicImpulsive):
+
+    def __init__(self, n=100/u.cm**3, n0=1/u.cm**3,
+                 D0=3e27*u.cm**2/u.s, dif_chi=0.01, dif_delta=0.5, deltap=0.3,
+                 Mej=1.4*u.solMass, Epmin=1*u.GeV, Epmax=1*u.PeV,
                  E_SN=1e51*u.erg,
                  Rshock=None):
         
-        super(HadronicImpulsivePDF, self).__init__(n, n0,
+        super(HadronicImpulsive, self).__init__(n, n0,
             D0, dif_chi, dif_delta, deltap,
-            Mej, Emax_t_ST0, E_SN)
+            Mej, Epmin, Epmax, E_SN)
         
         self.Rshock = Rshock
         
-        self.name = 'AharonianImpulsive'
+        self.name = 'HadronicImpulsive'
         
     @u.quantity_input(E=u.GeV, t=u.kyr)
     def dif_time(self, E, t):
@@ -231,73 +280,40 @@ class HadronicImpulsivePDF(BaseHadronicImpulsivePDF):
         return Ecrit       
     
 
-class HadronicImpulsiveTimePDF(BaseHadronicImpulsivePDF):
+class HadronicImpulsiveTime(BaseHadronicImpulsive):
 
     def __init__(self, n=100/u.cm**3, n0=0.3/u.cm**3,
                  D0=3e27*u.cm**2/u.s, dif_chi=0.01, dif_delta=0.5, deltap=0.3, 
-                 Mej=1.4*u.solMass, Emax_t_ST0=1*u.PeV, 
+                 Mej=1.4*u.solMass, Epmin=1*u.GeV, Epmax=1*u.PeV,
                  E_SN=1e51*u.erg):
         
-        super(HadronicImpulsiveTimePDF, self).__init__(n, n0,
+        super(HadronicImpulsiveTime, self).__init__(n, n0,
                                                        D0, dif_chi, dif_delta, deltap,
-                                                       Mej, Emax_t_ST0, E_SN)
+                                                       Mej, Epmin, Epmax, E_SN)
         
-        self.name = 'AharonianImpulsiveTime'
-        
-    @u.quantity_input(E=u.GeV, t=u.kyr)
-    def dif_time(self, E, t):
-        tesc = calc_escape_time(E, deltap=self.deltap, t_ST0=self.t_ST0, Emax_t_ST0=self.Emax_t_ST0)
-        t = t * np.ones(np.shape(tesc))
-        return t - tesc
-    
-    @u.quantity_input(E=u.GeV, t=u.kyr)
-    def Rsh(self, E, t):
-        tesc = calc_escape_time(E, deltap=self.deltap, t_ST0=self.t_ST0, Emax_t_ST0=self.Emax_t_ST0)
-        Rsh = calc_shock_radius(t=tesc, E_SN=self.E_SN, n0=self.n0)
-        return Rsh
-    
-    @u.quantity_input(t=u.kyr)
-    def Rcrit(self, t):
-        Rcrit = calc_shock_radius(t=t, E_SN=self.E_SN, n0=self.n0)
-        return Rcrit
-
-    @u.quantity_input(t=u.kyr)
-    def Ecrit(self, t):
-        Ecrit = calc_escape_energy(t, deltap=self.deltap, t_ST0=self.t_ST0, Emax_t_ST0=self.Emax_t_ST0) 
-        return Ecrit
-
-
-class HadronicImpulsiveTimeExtentPDF(BaseHadronicImpulsivePDF):
-
-    def __init__(self, n=100/u.cm**3, n0=0.3/u.cm**3,
-                 D0=3e27*u.cm**2/u.s, dif_chi=0.01, dif_delta=0.5, deltap=0.3, 
-	             Mej=1.4*u.solMass, Emax_t_ST0=1*u.PeV, 
-                 E_SN=1e51*u.erg):
-        
-        super(HadronicImpulsiveTimeExtentPDF, self).__init__(n, n0,
-            D0, dif_chi, dif_delta, deltap, 
-            Mej, Emax_t_ST0, E_SN)
-        
-        self.name = 'AharonianImpulsiveTimeExtent'
+        self.name = 'HadronicImpulsiveTime'
         
     @u.quantity_input(E=u.GeV, t=u.kyr)
-    def dif_l(self, E, t):
+    def dif_l(self, E, t, extent=False):
         self.B = calc_Bmag(self.n)
         dif_coeff = self.dif_chi * self.D0 * (E / u.GeV / (self.B / (3*u.uG))) ** self.dif_delta
         dif_l = 2 * np.sqrt(dif_coeff * self.dif_time(E,t))
-        #shock_extent = 0.909 * self.Resc # analytical solution
-        shock_extent = 0.0875 * self.Resc # theoretical assumption
+        if extent==True:
+            #shock_extent = 0.909 * self.Resc # analytical solution
+            shock_extent = 0.0875 * self.Resc # theoretical assumption
+        else:
+            shock_extent = 0
         return dif_l + shock_extent
         
     @u.quantity_input(E=u.GeV, t=u.kyr)
     def dif_time(self, E, t):
-        tesc = calc_escape_time(E, deltap=self.deltap, t_ST0=self.t_ST0, Emax_t_ST0=self.Emax_t_ST0)
+        tesc = calc_escape_time(E, deltap=self.deltap, t_sedov=self.t_sedov, Epmax=self.Epmax)
         t = t * np.ones(np.shape(tesc))
         return t - tesc
     
     @u.quantity_input(E=u.GeV, t=u.kyr)
     def Rsh(self, E, t):
-        tesc = calc_escape_time(E, deltap=self.deltap, t_ST0=self.t_ST0, Emax_t_ST0=self.Emax_t_ST0)
+        tesc = calc_escape_time(E, deltap=self.deltap, t_sedov=self.t_sedov, Epmax=self.Epmax)
         Rsh = calc_shock_radius(t=tesc, E_SN=self.E_SN, n0=self.n0)
         return Rsh
     
@@ -308,6 +324,99 @@ class HadronicImpulsiveTimeExtentPDF(BaseHadronicImpulsivePDF):
 
     @u.quantity_input(t=u.kyr)
     def Ecrit(self, t):
-        Ecrit = calc_escape_energy(t, deltap=self.deltap, t_ST0=self.t_ST0, Emax_t_ST0=self.Emax_t_ST0) 
+        Ecrit = calc_escape_energy(t, deltap=self.deltap, t_sedov=self.t_sedov, Epmax=self.Epmax) 
         return Ecrit
 
+
+class HadronicImpulsiveMaker:
+
+    def __init__(self, ps, acc, gp, eta, alpha):
+
+        """
+        Parameters
+        ----------------------
+        ps : class
+            The class for the hadronic impulsive PDF
+        acc : class
+            The class for the accelerator
+        gp : class
+            The class for the gas parameters
+        eta : float
+            The scaling value for the energy budget
+        alpha : float
+            The spectra index
+
+        """
+        
+        self.ps = ps
+        self.acc = acc
+        self.gp = gp
+        
+        self.eta = eta
+        self.alpha = alpha
+        
+        self.Ebudget = self.eta * self.ps.E_SN    
+        
+        if alpha==2:
+            N0 = (self.Ebudget / ((np.log(self.ps.Epmax/u.GeV) - np.log(self.ps.Epmin/u.GeV))*u.GeV)).decompose()
+        else:
+            N0 = (self.Ebudget * (2-alpha) / 
+                  (((self.ps.Epmax/u.GeV)**(2-alpha) - (self.ps.Epmin/u.GeV)**(2-alpha))*u.GeV)).decompose()
+        
+        self.N0 = N0
+
+    def calc_proton_spectra(self, energies, radius):
+
+        self.ps.calc_pdf(E=energies, R=radius, t=self.acc.age)
+
+        cool_time = (6e7 * (self.ps.n/ u.cm**-3) ** (-1) * u.yr)
+        losses = np.exp(- ((self.alpha - 1) * self.ps.t  / cool_time))
+
+        J = (self.ps.pdf[:,0,0] * losses * self.N0 * (self.ps.energy / u.GeV)**(-self.alpha) /u.GeV * 
+            self.ps.energy** 2.75 * c / (4 * np.pi * u.sr)).to(u.GeV ** (7 / 4) / (u.cm ** 2 * u.s * u.sr))
+
+        return J
+    
+    def plot_proton_spectra(self, energies, radius):
+        
+        J = self.calc_proton_spectra(energies=energies, radius=radius)
+        
+        fig = plt.figure(figsize=(7, 5))
+        ax = plt.gca()
+
+        ax.plot(energies, J)
+
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+
+        ax.set_xlabel('Energy (GeV)')
+        ax.set_ylabel('JE$^{2.75}$ (GeV$^{1.75}$cm$^{-2}$s$^{-1}$ sr$^{-1}$)')
+
+        return ax
+    
+    def calc_proton_flux(self, energy):
+    
+        Ep = [energy.value]*energy.unit
+        self.ps.calc_pdf(E=Ep, R=self.gp.dist_cell(), t=self.acc.age)
+
+        Jp = (self.ps.pdf[0,:,:] * self.N0 * (self.ps.energy[0] / u.GeV)**(-self.alpha) /u.GeV * c / (4 * np.pi * u.sr)).to(1 / (u.TeV * u.cm ** 2 * u.s * u.sr))
+        return Jp
+    
+    def plot_proton_flux(self, energy, cmap='Greys'):
+    
+        Jps = self.calc_proton_flux(energy=energy)
+
+        fig = plt.figure(figsize=(10, 5))
+        ax = fig.add_subplot(111, projection=WCS(self.gp.header))
+        img = ax.imshow(Jps.value, cmap=cmap)
+        cb = fig.colorbar(img, pad=0.02)
+        cb.set_label(label=f'Proton flux @ {energy.value:.0f} TeV ({Jps.unit})', rotation=270, labelpad=15)
+        lon = ax.coords['glon']
+        lat = ax.coords['glat']
+        lon.set_axislabel('Galactic Longitude')
+        lat.set_axislabel('Galactic Latitude')
+        lat.set_major_formatter('d.d')
+        lon.set_major_formatter('d.d')
+        lon.set_ticklabel_position('b')
+
+        return ax

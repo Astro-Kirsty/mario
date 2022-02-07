@@ -16,7 +16,7 @@ s1_G8_15:
     - 1.4
     - 2.5
 
-  Emax_t_ST0s: 
+  Epmaxs: 
     - !astropy.units.Quantity
       unit: &ide1 !astropy.units.Unit {unit: PeV}
       value: 1
@@ -60,7 +60,7 @@ s2_G8_15:
     - 1.4
     - 2.5
 
-  Emax_t_ST0s: 
+  Epmaxs: 
     - !astropy.units.Quantity
       unit: &ide2 !astropy.units.Unit {unit: PeV}
       value: 1
